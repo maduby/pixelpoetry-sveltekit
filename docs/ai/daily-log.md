@@ -4,6 +4,45 @@
 
 ---
 
+## 2026-05-20 — Longevity essay first build
+
+**Goal:** Build the full 10-chapter Longevity scrollytelling essay from the structure doc.
+
+**What got done**
+- Created `src/lib/explainers/longevity/sources.ts` — 13 sources including OLP 2026, Landmark Twins Study, UK Biobank, Scott & Ellison $37T paper, Buettner Blue Zones, ONS HLE, WHO GBD, Walker, Muir Gray.
+- Created `src/lib/explainers/longevity/terms.ts` — 9 inline term definitions: healthspan, exposome, fitness-gap, smeds, blue-zones, hallmarks-of-ageing, telomeres, epigenetics, mismatch-disease.
+- Created `src/lib/explainers/longevity/image-manifest.ts` — empty stub (images to be added separately).
+- Created `src/lib/explainers/longevity/chapters.ts` — all 10 chapters with 4–5 steps each, mixing narrative, stat reveals, quotes, and viz:
+  - Ch1 (red): The 80% Claim — donut (80/20 split), stat, quotes from Ball and critics
+  - Ch2 (amber): Three Eras of Medicine — donut (75/25 genetics), stat (500k Biobank), Noble quote
+  - Ch3 (ink): The Six Diseases — obs-bar (UK causes of death), mismatch-disease framing
+  - Ch4 (forest): The Fitness Gap — obs-timeline (best-possible vs UK average, age 30–100), 19-year stat
+  - Ch5 (amber): S-MEDs Framework — sleep stat, Kenny quote, exercise PNAS stat, mindset/diet/stress narrative
+  - Ch6 (forest): Blue Zones — obs-bar (centenarians per 100k), honest caveats on record-keeping
+  - Ch7 (ink): What Critics Get Right — obs-bar (HLE by deprivation decile, 18.5-year gap), Krieger quote
+  - Ch8 (pink): Women's Health Gap — grouped obs-bar (life vs healthy life by sex), 80% centenarians stat, WHI context, Kenny quote
+  - Ch9 (amber): Economics — $37T stat, obs-timeline (NHS spend vs HLE divergence), policy ask
+  - Ch10 (forest): Monday — Ball's routine narrative, obs-bar (evidence grades for top interventions)
+- Created `src/lib/explainers/longevity/index.ts` — barrel module.
+- Upgraded `src/routes/longevity/explainer/+page.svelte` from coming-soon placeholder to full essay page (hero with forest gradient, chapter loop, closing note, EssayFooter).
+
+**Decisions made**
+- Used `obs-timeline` with age (30–100) on x-axis for the fitness gap chart — `year` field maps to age values; subtitle clarifies.
+- NHS spending vs HLE chart uses two series on the same y-scale (both plateau/rise in different value ranges) — subtitle explains the dual-metric nature.
+- Evidence strength chart uses a relative index (0–100) rather than raw effect sizes to make the ranking legible to a general audience.
+- No `image` type viz yet — no photography for longevity yet; all viz is data-driven until images are available.
+
+**Open questions logged**
+- When will longevity photography be available for the hero and Blue Zones map?
+- Should the women's health chapter include a specific HRT prescription rate chart once the data is sourced?
+
+**Next session — start here**
+1. `pnpm run build` — confirm prerender succeeds with all 10 chapters.
+2. Source photography for `static/explainers/longevity/images/` and run `pnpm build` to generate manifest.
+3. Add cross-link card in UPF EssayFooter → longevity.
+
+---
+
 ## 2026-05-20 — Pixel Poetry platform port
 
 **Goal:** Port the UPF scrollytelling codebase into a new repo and refactor it into a multi-explainer platform under `pixelpoetry.dev`.

@@ -23,7 +23,7 @@ export const meta = {
 	accent: 'forest' as const,
 	readTimeMin: 14,
 	chapterCount: 10,
-	publishedAt: null,
+	publishedAt: undefined,
 	keywords:
 		'longevity, lifespan, healthspan, ageing, hallmarks of aging, blue zones, caloric restriction, exercise longevity, sleep health, evidence-based longevity'
 } as const;

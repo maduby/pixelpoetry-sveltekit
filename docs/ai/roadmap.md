@@ -13,7 +13,10 @@
 
 ## ⏭ Next
 
-- [ ] Build the longevity explainer through scaffold → chapters → publish.
+- [ ] Add longevity photography to `static/explainers/longevity/images/` and run `pnpm build` to generate the image manifest (hero, Blue Zones map, Sir Christopher Ball).
+- [ ] Wire a cross-link card from the UPF `EssayFooter` pointing at the longevity essay (and vice versa).
+- [ ] Set `publishedAt` in `src/lib/explainers/longevity/meta.ts` and change status to `'published'` in `src/lib/data/explainers.ts` once the essay is ready to go live.
+- [x] **2026-05-20** — Longevity essay built: 10 chapters, all viz wired (donut × 2, obs-bar × 4, obs-timeline × 2, stat cards, quotes). Sources, terms, chapters, index, and +page.svelte complete.
 - [ ] Replace placeholder favicons with a Pixel Poetry-branded set (`/static/favicon.*`).
 - [ ] Add a per-route `sitemap.xml` and structured-data (Article JSON-LD) helper.
 - [ ] Per-explainer share images auto-generated via Vercel OG.
