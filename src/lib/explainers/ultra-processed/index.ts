@@ -1,7 +1,7 @@
 /**
  * Barrel module for the Ultra-Processed explainer.
  *
- * Imported by `src/routes/explainers/ultra-processed/+page.svelte` and
+ * Imported by `src/routes/ultra-processed/explainer/+page.svelte` and
  * passed into `setActiveExplainer(...)` so shared components (Nav,
  * ProgressBar, viz, SourceSheet, EssayFooter) can read the right data.
  */

@@ -20,7 +20,10 @@ import type { Chapter, ImageEntry, Source, Term } from '$lib/types/explainer';
 
 export interface ExplainerMetaLike {
 	slug: string;
+	/** Canonical URL of this specific piece, e.g. /ultra-processed/explainer */
 	href: string;
+	/** Root topic URL, e.g. /ultra-processed */
+	topicHref?: string;
 	name: string;
 	shortName: string;
 	emoji?: string;

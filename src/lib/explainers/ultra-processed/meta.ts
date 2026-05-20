@@ -5,7 +5,8 @@
  */
 export const meta = {
 	slug: 'ultra-processed',
-	href: '/explainers/ultra-processed',
+	href: '/ultra-processed/explainer',
+	topicHref: '/ultra-processed',
 	name: 'Ultra-Processed',
 	shortName: 'UPF',
 	emoji: '🍞',

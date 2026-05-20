@@ -230,6 +230,15 @@
 								Sources & methodology →
 							</a>
 						</li>
+						<li class="pt-1">
+							<a
+								href={explainer.meta.topicHref ?? '/'}
+								onclick={close}
+								class="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-ink/35 transition-colors hover:bg-ink/5 hover:text-ink/60"
+							>
+								← {explainer.meta.name} topic hub
+							</a>
+						</li>
 					</ul>
 				</div>
 			{/if}

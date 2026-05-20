@@ -14,7 +14,10 @@ export type ExplainerStatus = 'published' | 'in-progress' | 'planned';
 
 export interface ExplainerSummary {
 	slug: string;
+	/** Canonical URL of the scrollytelling essay, e.g. /ultra-processed/explainer */
 	href: string;
+	/** Root topic URL, e.g. /ultra-processed — the hub for all content under this topic */
+	topicHref: string;
 	status: ExplainerStatus;
 	eyebrow: string;
 	title: string;
@@ -35,7 +38,8 @@ export interface ExplainerSummary {
 export const explainers: ExplainerSummary[] = [
 	{
 		slug: 'ultra-processed',
-		href: '/explainers/ultra-processed',
+		href: '/ultra-processed/explainer',
+		topicHref: '/ultra-processed',
 		status: 'published',
 		eyebrow: 'Food & health',
 		title: 'Ultra-Processed',
@@ -51,7 +55,8 @@ export const explainers: ExplainerSummary[] = [
 	},
 	{
 		slug: 'longevity',
-		href: '/explainers/longevity',
+		href: '/longevity/explainer',
+		topicHref: '/longevity',
 		status: 'planned',
 		eyebrow: 'Health & ageing',
 		title: 'Longevity',
