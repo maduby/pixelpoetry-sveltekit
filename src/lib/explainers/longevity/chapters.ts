@@ -465,24 +465,24 @@ export const chapters: Chapter[] = [
 					sourceId: 'olp-2026'
 				}
 			},
-			{
-				id: 'ch5-exercise',
-				text: 'Exercise is the single most powerful lever in the framework. Not "going to the gym" — daily movement. Gray\'s prescription: walk a mile a day, do something that makes you breathe hard twice a week, and do something that challenges your balance and strength once a week. The evidence for each is overwhelming.',
-				richText:
-					'<strong>Exercise</strong> is the single most powerful lever in the framework. Gray\'s prescription: walk a mile a day, do something that makes you breathe hard twice a week, and do something that challenges your balance and strength once a week. The evidence for each is <strong>overwhelming.</strong>',
-				stat: {
-					value: '7',
-					label: 'extra healthy years from adopting five lifestyle factors',
-					context: 'Li et al. (PNAS, 2021) — 111,966 US health professionals followed 20+ years',
-					sourceId: 'matthew-pnas-2021'
-				}
-			},
-			{
-				id: 'ch5-mindset',
-				text: 'Mindset is the most counterintuitive pillar. Becca Levy\'s research at Yale found that people with positive views of their own ageing live an average of 7.5 years longer than those with negative views — more than the effect of not smoking. The mechanism is partly behavioural (you invest in health if you expect to use it) and partly physiological (chronic ageist self-perception elevates cortisol and inflammatory markers).',
-				richText:
-					'<strong>Mindset</strong> is the most counterintuitive pillar. Becca Levy\'s research at Yale found that people with positive views of their own ageing live an average of <strong>7.5 years longer</strong> than those with negative views — more than the effect of not smoking.'
-			},
+		{
+			id: 'ch5-mindset',
+			text: 'Mindset is the most counterintuitive pillar. Becca Levy\'s research at Yale found that people with positive views of their own ageing live an average of 7.5 years longer than those with negative views — more than the effect of not smoking. The mechanism is partly behavioural (you invest in health if you expect to use it) and partly physiological (chronic ageist self-perception elevates cortisol and inflammatory markers).',
+			richText:
+				'<strong>Mindset</strong> is the most counterintuitive pillar. Becca Levy\'s research at Yale found that people with positive views of their own ageing live an average of <strong>7.5 years longer</strong> than those with negative views — more than the effect of not smoking.'
+		},
+		{
+			id: 'ch5-exercise',
+			text: 'Exercise is the single most powerful lever in the framework. Not "going to the gym" — daily movement. Gray\'s prescription: walk a mile a day, do something that makes you breathe hard twice a week, and do something that challenges your balance and strength once a week. The evidence for each is overwhelming.',
+			richText:
+				'<strong>Exercise</strong> is the single most powerful lever in the framework. Gray\'s prescription: walk a mile a day, do something that makes you breathe hard twice a week, and do something that challenges your balance and strength once a week. The evidence for each is <strong>overwhelming.</strong>',
+			stat: {
+				value: '7',
+				label: 'extra healthy years from adopting five lifestyle factors',
+				context: 'Li et al. (PNAS, 2021) — 111,966 US health professionals followed 20+ years',
+				sourceId: 'matthew-pnas-2021'
+			}
+		},
 			{
 				id: 'ch5-diet-stress',
 				text: 'Diet: plant-forward, minimally processed, protein-sufficient after 50. Every claim in this domain leads back to the same destination. (We wrote nine chapters on the diet question separately.) Stress: chronic psychological pressure doesn\'t just feel bad — it accelerates cellular ageing via cortisol, inflammation, and telomere shortening. Managing it is not a soft skill; it is a clinical one.',
