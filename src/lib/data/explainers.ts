@@ -27,6 +27,17 @@ export interface ExplainerSummary {
 	/** Image name resolvable inside the explainer's own image-manifest, OR a
 	 *  raw absolute URL. Cards prefer the manifest entry when available. */
 	cover?: { name: string; alt: string };
+	/** Responsive cover image for the card. When present, the card renders a
+	 *  full srcset + blurhash placeholder instead of a plain <img>. */
+	coverSrcset?: {
+		src: string;
+		srcset: string;
+		sizes?: string;
+		blurhash: string;
+		width: number;
+		height: number;
+		alt: string;
+	};
 	/** Fallback flat image path if no manifest cover is available. */
 	coverFallback?: string;
 	readTimeMin?: number;
@@ -46,7 +57,19 @@ export const explainers: ExplainerSummary[] = [
 		tagline: "The food that isn't food — and what it's doing to us.",
 		description:
 			'Ultra-processed food now makes up more than half the British diet. An evidence-led interactive essay exploring the science — from addiction and obesity to deforestation and inequality.',
-		cover: { name: 'upf-supermarket', alt: 'Aisle of brightly packaged ultra-processed food' },
+		coverSrcset: {
+			src: '/explainers/ultra-processed/processed/upf-pile-900w.webp',
+			srcset: [
+				'/explainers/ultra-processed/processed/upf-pile-600w.webp 600w',
+				'/explainers/ultra-processed/processed/upf-pile-900w.webp 900w',
+				'/explainers/ultra-processed/processed/upf-pile-1200w.webp 1200w',
+			].join(', '),
+			sizes: '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw',
+			blurhash: 'C3G8ZSuj4=yB~C0JN9-E',
+			width: 1024,
+			height: 629,
+			alt: 'A chaotic pile of ultra-processed food packages, cans, and snacks'
+		},
 		coverFallback: '/explainers/ultra-processed/share-image.jpg',
 		readTimeMin: 12,
 		chapterCount: 9,

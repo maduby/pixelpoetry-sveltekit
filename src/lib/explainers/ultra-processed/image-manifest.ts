@@ -110,6 +110,26 @@ export const imageManifest: ImageEntry[] = [
     "blurhash": "UZLpA^~20yNa+JNIOqo|mpg2kRRk+]V{Shxo"
   },
   {
+    "name": "upf-pile",
+    "width": 1024,
+    "height": 629,
+    "variants": [
+      {
+        "width": 400,
+        "src": "/explainers/ultra-processed/processed/upf-pile-400w.webp"
+      },
+      {
+        "width": 800,
+        "src": "/explainers/ultra-processed/processed/upf-pile-800w.webp"
+      },
+      {
+        "width": 1200,
+        "src": "/explainers/ultra-processed/processed/upf-pile-1200w.webp"
+      }
+    ],
+    "blurhash": "C3G8ZSuj4=yB~C0JN9-E"
+  },
+  {
     "name": "upf-supermarket",
     "width": 2242,
     "height": 1378,

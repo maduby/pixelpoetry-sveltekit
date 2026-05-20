@@ -5,11 +5,10 @@
 	 * tile; gracefully degrades for `in-progress` and `planned` entries with a
 	 * status badge instead of a link.
 	 *
-	 * Cover images are looked up by name in the active explainer's image
-	 * manifest. Because the landing page doesn't have an active explainer
-	 * context, the card falls back to a plain `<img src={coverFallback} />`
-	 * when no manifest entry is found.
+	 * Cover priority: coverSrcset (responsive + blur-up) → coverFallback → gradient placeholder.
 	 */
+	import { onMount } from 'svelte';
+	import { decode } from 'blurhash';
 	import { cn } from '$lib/utils/cn';
 	import { reveal } from '$lib/attachments/reveal';
 	import ArrowRight from 'lucide-svelte/icons/arrow-right';
@@ -51,6 +50,22 @@
 				? 'Coming soon'
 				: ''
 	);
+
+	// Blur-up canvas for coverSrcset entries
+	let canvas = $state<HTMLCanvasElement | undefined>();
+	let imgLoaded = $state(false);
+
+	onMount(() => {
+		const cs = explainer.coverSrcset;
+		if (!cs?.blurhash || !canvas) return;
+		const W = 32, H = Math.round(32 * (cs.height / cs.width));
+		const pixels = decode(cs.blurhash, W, H);
+		canvas.width = W; canvas.height = H;
+		const ctx = canvas.getContext('2d')!;
+		const id = ctx.createImageData(W, H);
+		id.data.set(pixels);
+		ctx.putImageData(id, 0, 0);
+	});
 </script>
 
 {#snippet body()}
@@ -62,7 +77,30 @@
 		)}
 	>
 		<div class="relative aspect-[4/3] w-full overflow-hidden bg-ink/5">
-			{#if explainer.coverFallback}
+			{#if explainer.coverSrcset}
+				{@const cs = explainer.coverSrcset}
+				<!-- Blurhash canvas placeholder -->
+				<canvas
+					bind:this={canvas}
+					class="absolute inset-0 h-full w-full object-cover transition-opacity duration-500"
+					style="image-rendering: auto; opacity: {imgLoaded ? 0 : 1};"
+					aria-hidden="true"
+				></canvas>
+				<!-- Responsive photo -->
+				<img
+					srcset={cs.srcset}
+					sizes={cs.sizes}
+					src={cs.src}
+					alt={cs.alt}
+					width={cs.width}
+					height={cs.height}
+					loading="lazy"
+					decoding="async"
+					class="absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-105"
+					style="opacity: {imgLoaded ? 1 : 0};"
+					onload={() => (imgLoaded = true)}
+				/>
+			{:else if explainer.coverFallback}
 				<img
 					src={explainer.coverFallback}
 					alt={explainer.cover?.alt ?? `${explainer.title} cover`}
