@@ -1,0 +1,204 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+@plugin '@tailwindcss/typography';
+
+/* Self-hosted Google Fonts — bundled, hashed, long-cached.
+   Only the weights we actually use are pulled in. */
+@import '@fontsource/arvo/400.css';
+@import '@fontsource/arvo/700.css';
+@import '@fontsource/arvo/400-italic.css';
+@import '@fontsource/lato/400.css';
+@import '@fontsource/lato/700.css';
+@import '@fontsource/lato/900.css';
+
+/* ------------------------------------------------------------------
+   Tailwind v4 — CSS-first theme configuration
+   These tokens are exposed as Tailwind utilities + CSS custom props.
+------------------------------------------------------------------ */
+@theme {
+	/* Typography */
+	--font-display: 'Arvo', ui-serif, Georgia, serif;
+	--font-body: 'Lato', ui-sans-serif, system-ui, sans-serif;
+
+	/** Nav chrome height: 64px Nav + 3px ProgressBar = 67px.
+	    Used as sticky top offset and scroll-padding. */
+	--nav-h: 4.25rem; /* 68px — slight buffer */
+
+	/* Bold core palette — see docs/ai/decisions.md */
+	--color-ink: #0a0a0a;
+	--color-ink-soft: #1f1f1f;
+	--color-cream: #fef9ef;
+	--color-cream-soft: #f5efe0;
+	--color-paper: #ffffff;
+
+	--color-brand-red: #dc2626;
+	--color-brand-red-deep: #991b1b;
+	--color-brand-amber: #f59e0b;
+	--color-brand-amber-deep: #b45309;
+	--color-brand-pink: #ec4899;
+	--color-brand-pink-deep: #be185d;
+
+	/* Layout */
+	--container-prose: 38rem;
+	/* 80rem (1280px) leaves more room for the chart side of the scrolly
+	   on big desktop screens without overwhelming smaller laptops — the
+	   max-width still caps below 1440px viewports comfortably. */
+	--container-wide: 80rem;
+}
+
+/* ------------------------------------------------------------------
+   Base layer — global defaults
+------------------------------------------------------------------ */
+@layer base {
+	html {
+		scroll-behavior: smooth;
+		/* Leave room for the fixed nav (~64px) + progress bar (~12px) so
+		   anchor jumps don't land under the chrome. */
+		scroll-padding-top: var(--nav-h);
+		-webkit-text-size-adjust: 100%;
+		text-rendering: optimizeLegibility;
+	}
+
+	body {
+		font-family: var(--font-body);
+		background-color: var(--color-cream);
+		color: var(--color-ink);
+		font-feature-settings: 'kern', 'liga', 'calt';
+		font-synthesis-weight: none;
+		/* Defensive: prevent any single rogue child (large headline,
+		   pinned viz, etc.) from triggering a horizontal scrollbar.
+		   `clip` is the modern, non-scrollable variant of hidden. */
+		overflow-x: clip;
+	}
+
+	h1,
+	h2,
+	h3,
+	h4 {
+		font-family: var(--font-display);
+		font-weight: 700;
+		/* Slab serif descenders need breathing room; 1.1 is enough for Arvo's
+		   heavy bottom serifs while still being tight and cinematic. */
+		line-height: 1.1;
+		/* A hair of tracking reduction prevents a tight Bold 900 slab like Arvo
+		   from gaining extra width that eats into the line box on some browsers. */
+		letter-spacing: -0.02em;
+		padding-bottom: 0.5rem;
+	}
+
+	::selection {
+		background-color: var(--color-brand-amber);
+		color: var(--color-ink);
+	}
+
+	/* Honour reduced motion globally */
+	@media (prefers-reduced-motion: reduce) {
+		*,
+		*::before,
+		*::after {
+			animation-duration: 0.001ms !important;
+			animation-iteration-count: 1 !important;
+			transition-duration: 0.001ms !important;
+			scroll-behavior: auto !important;
+		}
+	}
+}
+
+/* Prevent any element (SVG overflow:visible, wide images, etc.) from
+   causing a horizontal scrollbar at the document level. */
+html,
+body {
+	overflow-x: clip;
+	max-width: 100%;
+}
+
+/* ------------------------------------------------------------------
+   Component-level shortcuts (used sparingly — prefer utility composition)
+------------------------------------------------------------------ */
+@utility text-balance {
+	text-wrap: balance;
+}
+
+@utility text-pretty {
+	text-wrap: pretty;
+}
+
+/* Big editorial gradient used on stat numbers + section headers.
+ * padding-bottom prevents -webkit-background-clip:text from cropping
+ * descenders (g, y, p, etc.) at the bottom of the paint box. */
+@utility gradient-warning {
+	background-image: linear-gradient(
+		135deg,
+		var(--color-brand-red) 0%,
+		var(--color-brand-amber) 100%
+	);
+	background-clip: text;
+	-webkit-background-clip: text;
+	color: transparent;
+	padding-bottom: 0.12em;
+}
+
+@utility gradient-shock {
+	background-image: linear-gradient(
+		135deg,
+		var(--color-brand-pink) 0%,
+		var(--color-brand-red) 100%
+	);
+	background-clip: text;
+	-webkit-background-clip: text;
+	color: transparent;
+	padding-bottom: 0.12em;
+}
+
+@utility gradient-amber {
+	background-image: linear-gradient(
+		135deg,
+		var(--color-brand-amber) 0%,
+		var(--color-brand-pink) 100%
+	);
+	background-clip: text;
+	-webkit-background-clip: text;
+	color: transparent;
+	padding-bottom: 0.12em;
+}
+
+@utility gradient-rainbow {
+	background-image: linear-gradient(
+		90deg,
+		#f43f5e 0%,
+		#f97316 18%,
+		#eab308 36%,
+		#22c55e 54%,
+		#3b82f6 72%,
+		#a855f7 100%
+	);
+	background-clip: text;
+	-webkit-background-clip: text;
+	color: transparent;
+	padding-bottom: 0.1em;
+}
+
+/* ── Inline term definition links ─────────────────────────────────────────── */
+/* Applied to <a data-term="…"> elements inside {@html richText} blocks.       */
+a[data-term] {
+	color: var(--color-brand-amber-deep);
+	text-decoration: underline;
+	text-decoration-style: dotted;
+	text-underline-offset: 3px;
+	cursor: pointer;
+	font-weight: inherit;
+	transition: color 150ms ease;
+}
+a[data-term]:hover,
+a[data-term]:focus-visible {
+	color: var(--color-brand-red);
+	text-decoration-style: solid;
+	outline: none;
+}
+
+/* Bits UI floating wrapper — the element Floating UI positions with
+   position:fixed. Must have an explicit z-index so it stacks above
+   any fixed element that has its own stacking context (e.g. progress bar). */
+[data-bits-floating-content-wrapper] {
+	z-index: 9999 !important;
+}

@@ -1,0 +1,346 @@
+<script lang="ts">
+	/**
+	 * <ObsTimelineChart> — multi-series line chart powered by Observable Plot.
+	 *
+	 * Built for the "UPF over time" story: each series is one country and
+	 * one or more (year, value) points. Renders a clean Plot.lineY chart
+	 * with country labels positioned at the right edge of each line so
+	 * legends are inline with the data rather than detached.
+	 *
+	 * Single chart, single Plot.plot() call. The wrapper measures its own
+	 * width with ResizeObserver and re-renders on resize.
+	 */
+	import { browser } from '$app/environment';
+	import { getActiveExplainer } from '$lib/context/explainer.svelte';
+	import { openSourceSheet } from '$lib/context/sheet';
+	import type { TimelineSeries } from '$lib/types/explainer';
+
+	const explainer = $derived(getActiveExplainer());
+
+	interface Props {
+		series?: TimelineSeries[];
+		title?: string;
+		subtitle?: string;
+		unit?: string;
+		domain?: [number, number];
+		valueDomain?: [number, number];
+		sourceId?: string;
+	}
+
+	let {
+		series = [],
+		title,
+		subtitle,
+		unit = '%',
+		domain,
+		valueDomain,
+		sourceId
+	}: Props = $props();
+
+	const source = $derived(sourceId ? explainer?.getSource(sourceId) : undefined);
+
+	let wrapperEl = $state<HTMLDivElement | undefined>(undefined);
+	let containerEl = $state<HTMLDivElement | undefined>(undefined);
+
+	let measuredWidth = $state(560);
+	let chartWidth = $derived(Math.max(320, measuredWidth));
+
+	const MOBILE_BREAKPOINT = 540;
+	let isNarrow = $derived(measuredWidth > 0 && measuredWidth < MOBILE_BREAKPOINT);
+
+	// Flatten series into one row per point with the series label attached
+	// so a single Plot.lineY call can colour and connect them by series.
+	const flatData = $derived(
+		series.flatMap((s) =>
+			s.points.map((p) => ({ label: s.label, color: s.color, year: p.year, value: p.value }))
+		)
+	);
+
+	// The "endpoint" for each series — used to anchor the inline label at
+	// the rightmost (most recent) point of each line.
+	const endpoints = $derived(
+		series
+			.map((s) => {
+				const last = s.points[s.points.length - 1];
+				return last ? { label: s.label, color: s.color, year: last.year, value: last.value } : null;
+			})
+			.filter((d): d is { label: string; color: string; year: number; value: number } => !!d)
+	);
+
+	/**
+	 * De-collide label y-positions so that when two series end at the same
+	 * year and their values are too close for a readable two-line label,
+	 * we nudge them apart symmetrically. `minGap` is in data units.
+	 */
+	function deCollide(
+		ends: { label: string; color: string; year: number; value: number }[],
+		minGap = 6
+	) {
+		// Attach a mutable labelY; sort descending by value so we process
+		// top-to-bottom and each nudge only pushes the lower item further down.
+		const out = ends.map((e) => ({ ...e, labelY: e.value })).sort((a, b) => b.labelY - a.labelY);
+
+		// Single downward pass: if two consecutive items (sorted high→low) are
+		// closer than minGap AND end at the same or adjacent year, push the lower
+		// one down far enough to restore the gap.
+		for (let i = 1; i < out.length; i++) {
+			const above = out[i - 1];
+			const below = out[i];
+			if (Math.abs(below.year - above.year) <= 2 && above.labelY - below.labelY < minGap) {
+				const overlap = minGap - (above.labelY - below.labelY);
+				above.labelY += overlap / 2;
+				below.labelY -= overlap / 2;
+			}
+		}
+
+		return out;
+	}
+
+	const adjustedEndpoints = $derived(deCollide(endpoints));
+
+	const xDomain = $derived<[number, number]>(
+		domain ?? [
+			Math.min(...flatData.map((d) => d.year)) - 1,
+			Math.max(...flatData.map((d) => d.year)) + 2
+		]
+	);
+	const yDomain = $derived<[number, number]>(
+		valueDomain ?? [0, Math.max(...flatData.map((d) => d.value), 10) * 1.15]
+	);
+
+	const prefersReducedMotion =
+		typeof window !== 'undefined' &&
+		window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+	/**
+	 * Gentle fade-in for the data dots on first viewport entry. We do NOT
+	 * touch text elements here — querying `svg text` blindly would also
+	 * match the Plot.tip group's text nodes and keep them permanently
+	 * invisible. Country labels and value pills render immediately.
+	 */
+	function setupAnimation(container: HTMLElement) {
+		if (prefersReducedMotion) return;
+
+		// Only animate the dot mark — scoped via its aria-label group so
+		// we never accidentally hide tip/pointer or axis elements.
+		const circles = Array.from(
+			container.querySelectorAll<SVGCircleElement>('svg g[aria-label="dot"] circle')
+		);
+		if (!circles.length) return;
+
+		circles.forEach((c) => (c.style.opacity = '0'));
+
+		const animate = () => {
+			circles.forEach((c) => {
+				c.style.transition = 'opacity 240ms ease-out';
+				c.style.opacity = '1';
+			});
+		};
+
+		const io = new IntersectionObserver(
+			([entry]) => {
+				if (entry.isIntersecting) {
+					requestAnimationFrame(() => requestAnimationFrame(animate));
+					io.disconnect();
+				}
+			},
+			{ threshold: 0.15 }
+		);
+		io.observe(container);
+
+		// Safety: reveal anyway after 600ms if the IO never fires
+		// (e.g. element mounted already past the viewport).
+		setTimeout(() => {
+			if (circles[0]?.style.opacity === '0') animate();
+		}, 600);
+	}
+
+	$effect(() => {
+		if (!browser || !containerEl) return;
+
+				// Reactivity anchors — read up front so the effect re-runs when any change.
+			const _w = chartWidth;
+			const _narrow = isNarrow;
+			const _flat = flatData;
+			const _ends = adjustedEndpoints;
+			const _xd = xDomain;
+			const _yd = yDomain;
+
+		let cancelled = false;
+		containerEl.innerHTML = '';
+
+		(async () => {
+			const Plot = await import('@observablehq/plot');
+			if (cancelled || !containerEl) return;
+
+			const fontPx = _narrow ? 11 : 13;
+			// Reserve enough right margin for the longest country label
+			// — labels render OUTSIDE the plot area, anchored to each
+			// series' latest point.
+			const longestLabel = _ends.reduce((m, e) => (e.label.length > m.length ? e.label : m), '');
+			const marginRight = Math.min(140, Math.max(_narrow ? 70 : 96, longestLabel.length * fontPx * 0.7));
+
+			const chart = Plot.plot({
+				width: _w,
+				height: _narrow ? 260 : 340,
+				marginLeft: _narrow ? 36 : 48,
+				marginRight,
+				marginTop: 16,
+				marginBottom: 36,
+				style: {
+					background: 'transparent',
+					fontFamily: '"Lato", system-ui, sans-serif',
+					color: '#0a0a0a',
+					overflow: 'visible',
+					fontSize: `${fontPx}px`
+				},
+				x: {
+					label: null,
+					domain: _xd,
+					tickFormat: (d: number) => `${d}`,
+					tickPadding: 6,
+					grid: false
+				},
+				y: {
+					label: null,
+					domain: _yd,
+					tickFormat: (d: number) => `${d}${unit}`,
+					tickPadding: 6,
+					grid: true,
+					ticks: 5
+				},
+				marks: [
+					Plot.ruleY([0], { stroke: '#0a0a0a30' }),
+					// Connect each country's data points with a thin coloured line.
+					// `(d) => d.color` is the function form so Plot uses the literal
+					// hex value rather than passing it through an auto color scale.
+					Plot.line(_flat, {
+						x: 'year',
+						y: 'value',
+						stroke: (d: { color: string }) => d.color,
+						z: 'label',
+						strokeWidth: _narrow ? 1.25 : 1.5,
+						strokeOpacity: 0.85,
+						strokeLinecap: 'round',
+						strokeLinejoin: 'round',
+						curve: 'linear'
+					}),
+					Plot.dot(_flat, {
+						x: 'year',
+						y: 'value',
+						fill: (d: { color: string }) => d.color,
+						stroke: '#fef9ef',
+						strokeWidth: 1.6,
+						r: _narrow ? 3.5 : 4.5
+					}),
+					Plot.text(_ends, {
+						x: 'year',
+						y: 'labelY',
+						text: 'label',
+						fill: (d: { color: string }) => d.color,
+						fontWeight: '700',
+						fontSize: fontPx + 1,
+						textAnchor: 'start',
+						dx: 8
+					}),
+					Plot.text(_ends, {
+						x: 'year',
+						y: 'labelY',
+						text: (d: { value: number }) => `${d.value}${unit}`,
+						fill: '#0a0a0a',
+						fontWeight: '700',
+						fontSize: fontPx,
+						textAnchor: 'start',
+						dx: 8,
+						dy: _narrow ? 14 : 16
+					}),
+					// Tooltip LAST — SVG paint order means last = on top, so the
+					// tip box always renders above country labels and value pills.
+					Plot.tip(
+						_flat,
+						Plot.pointer({
+							x: 'year',
+							y: 'value',
+							title: (d: { label: string; year: number; value: number }) =>
+								`${d.label}\n${d.year}: ${d.value}${unit} of daily calories`
+						})
+					)
+				]
+			});
+
+			containerEl.appendChild(chart);
+			setupAnimation(containerEl);
+		})();
+
+		return () => {
+			cancelled = true;
+		};
+	});
+
+	$effect(() => {
+		if (!wrapperEl) return;
+		const ro = new ResizeObserver((entries) => {
+			const w = entries[0]?.contentRect.width ?? 0;
+			if (w > 0) measuredWidth = Math.round(w);
+		});
+		ro.observe(wrapperEl);
+		return () => ro.disconnect();
+	});
+</script>
+
+<div bind:this={wrapperEl} class="w-full">
+	{#if title}
+		<h3 class="font-display text-xl font-black leading-tight text-ink md:text-2xl">{title}</h3>
+	{/if}
+	{#if subtitle}
+		<p class="mt-1 font-body text-sm text-ink/60">{subtitle}</p>
+	{/if}
+
+	<div
+		bind:this={containerEl}
+		class="tip-host mt-4 w-full overflow-visible [&_svg]:max-w-full!"
+		aria-label={title ?? 'Timeline chart'}
+	></div>
+
+	{#if source}
+		<button
+			type="button"
+			onclick={() => openSourceSheet(source.id)}
+			class="group mt-3 flex cursor-pointer items-center gap-1 text-xs font-semibold text-ink/40 transition-colors hover:text-brand-red"
+		>
+			<span>Source</span>
+			<svg
+				aria-hidden="true"
+				class="h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+				viewBox="0 0 12 12"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			><path d="M2 10 L10 2 M4 2 H10 V8" /></svg>
+		</button>
+	{/if}
+</div>
+
+<style>
+	/* Force the Observable Plot tooltip to always render on top and remain
+	   fully legible regardless of what other SVG marks paint beneath it. */
+	.tip-host :global(svg g[aria-label='tip'] rect),
+	.tip-host :global(svg g[aria-label='tip'] path) {
+		fill: #ffffff;
+		stroke: #0a0a0a20;
+		filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.18));
+	}
+
+	.tip-host :global(svg g[aria-label='tip'] text) {
+		fill: #0a0a0a !important;
+		font-weight: 600;
+	}
+
+	/* Keep label text non-interactive so hover still reaches the dots
+	   even when a country label visually overlaps a data point. */
+	.tip-host :global(svg g[aria-label='text']) {
+		pointer-events: none;
+	}
+</style>
