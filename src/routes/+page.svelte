@@ -39,7 +39,7 @@
 			class="font-body text-sm font-bold tracking-[0.25em] text-ink/60 uppercase"
 			{@attach reveal({ y: 16 })}
 		>
-			Evidence-led scrollytelling essays
+			One topic at a time
 		</p>
 
 		<h1

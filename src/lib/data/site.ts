@@ -8,18 +8,18 @@
 export const site = {
 	name: 'Pixel Poetry',
 	shortName: 'PP',
-	tagline: 'Evidence-led scrollytelling on the things that shape us.',
+	tagline: 'One topic at a time. Done with care.',
 	/**
 	 * Primary meta description (<=160 chars). Appears in Google snippets,
 	 * social previews, and screen-reader page summaries.
 	 */
 	description:
-		'Pixel Poetry is a growing series of immersive, evidence-led web essays exploring food, health, longevity, and the systems that shape modern life.',
+		'Pixel Poetry is a series of carefully researched scrollytelling essays — one topic at a time, built to hold up under scrutiny.',
 	/**
 	 * Extended description for structured data and Open Graph fallback.
 	 */
 	longDescription:
-		'Pixel Poetry publishes immersive, evidence-led scrollytelling essays on topics that quietly shape our lives — diet, health, longevity, the food system, attention, and inequality. Each piece is a chapter-by-chapter investigation backed by peer-reviewed sources, custom data visualisations, and original animations.',
+		'One subject. Months of reading. Every chart earns its place, every claim cites a source. Pixel Poetry is what happens when a data journalist and web engineer gets genuinely alarmed about something and refuses to publish until it\'s right.',
 	url: 'https://pixelpoetry.dev',
 	/** Default OG image. Until a dedicated pixelpoetry.dev hero is shipped we
 	 *  reuse the ultra-processed share image so socials don't 404. */
