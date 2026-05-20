@@ -14,7 +14,7 @@
 		 */
 		variant?: 'default' | 'closing';
 		/** Chapter accent — drives the highlight colour in `closing` variant. */
-		accent?: 'red' | 'amber' | 'pink' | 'ink' | 'forest';
+		accent?: 'red' | 'amber' | 'pink' | 'ink' | 'forest' | 'blue';
 		class?: string;
 	}
 
@@ -22,10 +22,10 @@
 	const source = $derived(quote.sourceId ? explainer?.getSource(quote.sourceId) : undefined);
 
 	const accentColor = $derived(
-		({ red: 'text-brand-red', amber: 'text-brand-amber', pink: 'text-brand-pink', ink: 'text-ink', forest: 'text-brand-forest' } as const)[accent]
+		({ red: 'text-brand-red', amber: 'text-brand-amber', pink: 'text-brand-pink', ink: 'text-ink', forest: 'text-brand-forest', blue: 'text-brand-ocean' } as const)[accent]
 	);
 	const accentBorder = $derived(
-		({ red: 'border-brand-red', amber: 'border-brand-amber', pink: 'border-brand-pink', ink: 'border-ink', forest: 'border-brand-forest' } as const)[accent]
+		({ red: 'border-brand-red', amber: 'border-brand-amber', pink: 'border-brand-pink', ink: 'border-ink', forest: 'border-brand-forest', blue: 'border-brand-ocean' } as const)[accent]
 	);
 </script>
 

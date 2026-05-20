@@ -32,7 +32,7 @@ export interface ExplainerMetaLike {
 	description: string;
 	longDescription?: string;
 	ogImage?: string;
-	accent: 'red' | 'amber' | 'pink' | 'ink' | 'forest';
+	accent: 'red' | 'amber' | 'pink' | 'ink' | 'forest' | 'blue';
 	readTimeMin?: number;
 	chapterCount?: number;
 	publishedAt?: string;

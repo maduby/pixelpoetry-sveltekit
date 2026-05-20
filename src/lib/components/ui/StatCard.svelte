@@ -22,7 +22,7 @@
 		stat: Stat;
 		/** Set to true to skip animation (e.g. prefers-reduced-motion) */
 		manualTrigger?: boolean;
-		accent?: 'red' | 'amber' | 'pink' | 'ink' | 'forest';
+		accent?: 'red' | 'amber' | 'pink' | 'ink' | 'forest' | 'blue';
 		class?: string;
 	}
 
@@ -133,7 +133,7 @@
 	// Style helpers
 	// -----------------------------------------------------------------------
 	const gradientClass = $derived(
-		{ red: 'gradient-warning', amber: 'gradient-amber', pink: 'gradient-shock', ink: 'text-ink', forest: 'gradient-forest' }[
+		{ red: 'gradient-warning', amber: 'gradient-amber', pink: 'gradient-shock', ink: 'text-ink', forest: 'gradient-forest', blue: 'gradient-ocean' }[
 			accent
 		]
 	);

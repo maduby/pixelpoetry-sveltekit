@@ -517,7 +517,7 @@ export const chapters: Chapter[] = [
 		shortTitle: 'Blue Zones',
 		intro:
 			'Five places in the world where healthy longevity is unremarkable. Where people routinely reach 90 and 100 in good health. What they share is not a supplement or a secret. It is a way of living.',
-		accent: 'forest',
+		accent: 'blue',
 		steps: [
 		{
 			id: 'ch6-intro',

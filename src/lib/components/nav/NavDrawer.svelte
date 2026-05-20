@@ -71,7 +71,8 @@
 		amber: 'text-brand-amber-deep',
 		pink: 'text-brand-pink',
 		ink: 'text-ink',
-		forest: 'text-brand-forest'
+		forest: 'text-brand-forest',
+		blue: 'text-brand-ocean'
 	};
 </script>
 

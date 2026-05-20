@@ -43,7 +43,7 @@ export interface ExplainerSummary {
 	readTimeMin?: number;
 	chapterCount?: number;
 	publishedAt?: string;
-	accent: 'red' | 'amber' | 'pink' | 'ink' | 'forest';
+	accent: 'red' | 'amber' | 'pink' | 'ink' | 'forest' | 'blue';
 }
 
 export const explainers: ExplainerSummary[] = [

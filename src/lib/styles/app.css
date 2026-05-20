@@ -44,6 +44,11 @@
 	--color-brand-teal: #0d9488;
 	--color-brand-teal-deep: #134e4a;
 
+	/* Blue Zones / ocean palette */
+	--color-brand-ocean: #2563eb;
+	--color-brand-ocean-deep: #1e40af;
+	--color-brand-sky: #0ea5e9;
+
 	/* Layout */
 	--container-prose: 38rem;
 	/* 80rem (1280px) leaves more room for the chart side of the scrolly
@@ -173,6 +178,19 @@ body {
 		135deg,
 		var(--color-brand-forest) 0%,
 		var(--color-brand-teal) 100%
+	);
+	background-clip: text;
+	-webkit-background-clip: text;
+	color: transparent;
+	padding-bottom: 0.12em;
+}
+
+@utility gradient-ocean {
+	background-image: linear-gradient(
+		135deg,
+		var(--color-brand-ocean-deep) 0%,
+		var(--color-brand-ocean) 50%,
+		var(--color-brand-sky) 100%
 	);
 	background-clip: text;
 	-webkit-background-clip: text;

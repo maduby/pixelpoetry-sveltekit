@@ -49,7 +49,8 @@
 			amber: 'from-cream via-cream to-brand-amber/10',
 			pink: 'from-cream via-cream to-brand-pink/10',
 			ink: 'from-cream to-cream',
-			forest: 'from-cream via-cream to-brand-forest/10'
+			forest: 'from-cream via-cream to-brand-forest/10',
+			blue: 'from-cream via-cream to-brand-ocean/10'
 		}[chapter.accent]
 	);
 
@@ -59,7 +60,8 @@
 			amber: 'gradient-amber',
 			pink: 'gradient-shock',
 			ink: 'text-ink',
-			forest: 'gradient-forest'
+			forest: 'gradient-forest',
+			blue: 'gradient-ocean'
 		}[chapter.accent]
 	);
 
