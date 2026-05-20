@@ -397,27 +397,41 @@ export const chapters: Chapter[] = [
 					series: ch4FitnessGap
 				}
 			},
-			{
-				id: 'ch4-stat-poor-health',
-				text: 'The average UK woman now spends around 19 years of her life in poor health — years that could, in theory, be lived actively.',
-				stat: {
-					value: '19',
-					label: 'years the average UK woman spends in poor health',
-					context: 'ONS Healthy Life Expectancy, 2018–2020 — life expectancy 83, healthy life expectancy 64',
-					sourceId: 'ons-hle-2020'
-				}
+		{
+			id: 'ch4-stat-poor-health',
+			text: 'The average UK woman now spends around 19 years of her life in poor health — years that could, in theory, be lived actively.',
+			stat: {
+				value: '19',
+				label: 'years the average UK woman spends in poor health',
+				context: 'ONS Healthy Life Expectancy, 2018–2020 — life expectancy 83, healthy life expectancy 64',
+				sourceId: 'ons-hle-2020'
 			},
-			{
-				id: 'ch4-isaacs',
-				text: 'Gray quotes the geriatrician Bernard Isaacs: "We should investigate care homes where there were no fractures, because almost certainly the residents were being kept too immobile." The key insight is that what we call the deterioration of old age is often the consequence of immobility — not its cause.',
-				richText:
-					'Gray quotes the geriatrician Bernard Isaacs: <strong>"We should investigate care homes where there were no fractures, because almost certainly the residents were being kept too immobile."</strong> What we call the deterioration of old age is often the consequence of immobility — not its cause.',
-				quote: {
-					text: 'We should investigate care homes where there were no fractures, because almost certainly the residents were being kept too immobile.',
-					attribution: 'Bernard Isaacs — quoted by Sir Muir Gray, Oxford Longevity Project',
-					sourceId: 'olp-2026'
-				}
+			viz: {
+				type: 'image',
+				name: 'longevity-leg-cast',
+				alt: 'A full-length white plaster cast on a leg, the result of a tibial fracture.',
+				caption: 'Falls are the leading cause of injury-related hospitalisation in the over-65s in the UK. Most are preventable — the primary risk factor is not age but inactivity.',
+				credit: 'Jonuscumgi / Wikimedia Commons / CC BY-SA 4.0 (commons.wikimedia.org/wiki/File:Long_leg_cast.jpg)'
 			}
+		},
+		{
+			id: 'ch4-isaacs',
+			text: 'Gray quotes the geriatrician Bernard Isaacs: "We should investigate care homes where there were no fractures, because almost certainly the residents were being kept too immobile." The key insight is that what we call the deterioration of old age is often the consequence of immobility — not its cause.',
+			richText:
+				'Gray quotes the geriatrician Bernard Isaacs: <strong>"We should investigate care homes where there were no fractures, because almost certainly the residents were being kept too immobile."</strong> What we call the deterioration of old age is often the consequence of immobility — not its cause.',
+			viz: {
+				type: 'image',
+				name: 'longevity-walking-frame',
+				alt: 'An older woman steadying herself with a metal walking frame.',
+				caption: 'The walking frame — and the frailty it represents — is not an inevitable destination. It is largely the downstream consequence of years of immobility that could have been interrupted.',
+				credit: 'rawpixel.com / Wikimedia Commons / CC0 1.0 Public Domain (commons.wikimedia.org/wiki/File:A_woman_supporting_herself_with_a_walking_frame.jpg)'
+			},
+			quote: {
+				text: 'We should investigate care homes where there were no fractures, because almost certainly the residents were being kept too immobile.',
+				attribution: 'Bernard Isaacs — quoted by Sir Muir Gray, Oxford Longevity Project',
+				sourceId: 'olp-2026'
+			}
+		}
 		],
 		sources: ['gray-bmj-2019', 'ons-hle-2020', 'olp-2026']
 	},

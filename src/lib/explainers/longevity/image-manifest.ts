@@ -50,6 +50,26 @@ export const imageManifest: ImageEntry[] = [
     "blurhash": "mVMZ:Mt2~oM{9HRkR.RjtURmIts.tdWAt6axS5oexaa#RRjF%Loe"
   },
   {
+    "name": "longevity-leg-cast",
+    "width": 4032,
+    "height": 3024,
+    "variants": [
+      {
+        "width": 400,
+        "src": "/explainers/longevity/processed/longevity-leg-cast-400w.webp"
+      },
+      {
+        "width": 800,
+        "src": "/explainers/longevity/processed/longevity-leg-cast-800w.webp"
+      },
+      {
+        "width": 1200,
+        "src": "/explainers/longevity/processed/longevity-leg-cast-1200w.webp"
+      }
+    ],
+    "blurhash": "LEFFNm00}??b00_NMyMx#QE2X9={"
+  },
+  {
     "name": "longevity-okinawa-village",
     "width": 1920,
     "height": 1080,
@@ -88,6 +108,26 @@ export const imageManifest: ImageEntry[] = [
       }
     ],
     "blurhash": "LsNK3Tx]~qt7%3ozWVRjx]WBM{of"
+  },
+  {
+    "name": "longevity-walking-frame",
+    "width": 7000,
+    "height": 4836,
+    "variants": [
+      {
+        "width": 400,
+        "src": "/explainers/longevity/processed/longevity-walking-frame-400w.webp"
+      },
+      {
+        "width": 800,
+        "src": "/explainers/longevity/processed/longevity-walking-frame-800w.webp"
+      },
+      {
+        "width": 1200,
+        "src": "/explainers/longevity/processed/longevity-walking-frame-1200w.webp"
+      }
+    ],
+    "blurhash": "CFGuE.}+ovET180K?9o$"
   },
   {
     "name": "longevity-women-exercise",
