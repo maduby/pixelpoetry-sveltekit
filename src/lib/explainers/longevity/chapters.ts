@@ -487,12 +487,19 @@ export const chapters: Chapter[] = [
 			}
 		},
 		{
-			id: 'ch5-diet-stress',
-			accentLetter: 'D·S',
-			text: 'Diet: plant-forward, minimally processed, protein-sufficient after 50. Every claim in this domain leads back to the same destination. (We wrote nine chapters on the diet question separately.) Stress: chronic psychological pressure doesn\'t just feel bad — it accelerates cellular ageing via cortisol, inflammation, and telomere shortening. Managing it is not a soft skill; it is a clinical one.',
-				richText:
-					'<strong>Diet:</strong> plant-forward, minimally processed, protein-sufficient after 50. <strong>Stress:</strong> chronic psychological pressure accelerates cellular ageing via cortisol, inflammation, and <strong data-term="telomeres">telomere</strong> shortening. Managing it is not a soft skill — it is a clinical one.'
-			}
+			id: 'ch5-diet',
+			accentLetter: 'D',
+			text: 'Diet: plant-forward, minimally processed, protein-sufficient after 50. Every claim in this domain leads back to the same destination. We wrote nine chapters on that question — read the full essay here.',
+			richText:
+				'<strong>Diet:</strong> plant-forward, minimally processed, protein-sufficient after 50. Every claim in this domain leads back to the same destination. <a href="/ultra-processed/explainer" class="font-semibold underline underline-offset-2 decoration-1 hover:opacity-70 transition-opacity">We wrote nine chapters on that question — read the full essay here.</a>'
+		},
+		{
+			id: 'ch5-stress',
+			accentLetter: 'S',
+			text: 'Stress: chronic psychological pressure doesn\'t just feel bad — it accelerates cellular ageing via cortisol, inflammation, and telomere shortening. Managing it is not a soft skill; it is a clinical one.',
+			richText:
+				'<strong>Stress:</strong> chronic psychological pressure accelerates cellular ageing via cortisol, inflammation, and <strong data-term="telomeres">telomere</strong> shortening. Managing it is not a soft skill — it is a clinical one.'
+		}
 		],
 		sources: ['olp-2026', 'walker-2017', 'matthew-pnas-2021']
 	},
