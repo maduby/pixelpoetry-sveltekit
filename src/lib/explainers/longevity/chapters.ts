@@ -55,6 +55,39 @@ const ch2LifestyleByDisease: ObsBarDataPoint[] = [
 ];
 
 // ─── Chapter 3 ───────────────────────────────────────────────────────────────
+// Diabesity step: UK diagnosed diabetes (millions) and adult obesity (%) rising
+// in almost perfect lockstep since 1990 — the "twin epidemic" made visible.
+const ch3DiabetesRise: TimelineSeries[] = [
+	{
+		label: 'Diagnosed diabetes (M, UK)',
+		color: AMBER,
+		points: [
+			{ year: 1990, value: 1.4 },
+			{ year: 1995, value: 1.6 },
+			{ year: 2000, value: 1.9 },
+			{ year: 2005, value: 2.4 },
+			{ year: 2010, value: 3.0 },
+			{ year: 2015, value: 3.7 },
+			{ year: 2020, value: 4.3 },
+			{ year: 2023, value: 5.0 }
+		]
+	},
+	{
+		label: 'Adult obesity (%, UK)',
+		color: RED,
+		points: [
+			{ year: 1990, value: 14 },
+			{ year: 1995, value: 16 },
+			{ year: 2000, value: 21 },
+			{ year: 2005, value: 24 },
+			{ year: 2010, value: 26 },
+			{ year: 2015, value: 27 },
+			{ year: 2020, value: 28 },
+			{ year: 2023, value: 29 }
+		]
+	}
+];
+
 const ch3CausesOfDeath: ObsBarDataPoint[] = [
 	{ label: 'Heart & vascular disease', value: 29, color: RED },
 	{ label: 'Cancer', value: 28, color: '#7c2d12' },
@@ -63,6 +96,19 @@ const ch3CausesOfDeath: ObsBarDataPoint[] = [
 	{ label: 'Falls & accidents', value: 4, color: '#78716c' },
 	{ label: 'Diabetes', value: 2, color: '#a16207' },
 	{ label: 'Other & infections', value: 17, color: INK_FAINT }
+];
+
+// ─── Chapter 9 ───────────────────────────────────────────────────────────────
+// Prevention ROI: approximate £ returned per £1 invested — NICE/PHE analyses.
+// Walking and cessation programmes vastly outperform acute hospital interventions.
+const ch9PreventionRoi: ObsBarDataPoint[] = [
+	{ label: 'Walking / cycling programmes', value: 14, color: FOREST },
+	{ label: 'Smoking cessation support', value: 12, color: FOREST },
+	{ label: 'NHS Health Check (CVD)', value: 10, color: FOREST },
+	{ label: 'Weight management referral', value: 8, color: '#4d7c0f' },
+	{ label: 'Alcohol brief interventions', value: 6, color: '#65a30d' },
+	{ label: 'Statin therapy (primary prevention)', value: 5, color: AMBER },
+	{ label: 'Typical acute hospital treatment', value: 1, color: INK_FAINT }
 ];
 
 // ─── Chapter 5 (mindset step) ────────────────────────────────────────────────
@@ -385,7 +431,17 @@ export const chapters: Chapter[] = [
 				id: 'ch3-diabesity',
 				text: '"Diabesity" — the co-occurrence of obesity and type 2 diabetes — deserves particular attention. It now affects one in four UK adults in some form, and it is almost entirely driven by diet and physical inactivity. It is the metabolic consequence of the ultra-processed food system. (We wrote a nine-chapter essay about that food system. You can read it here.)',
 				richText:
-					'"Diabesity" — the co-occurrence of obesity and type 2 diabetes — now affects <strong>one in four UK adults</strong> in some form, and it is almost entirely driven by diet and physical inactivity. It is the metabolic consequence of the ultra-processed food system.'
+					'"Diabesity" — the co-occurrence of obesity and type 2 diabetes — now affects <strong>one in four UK adults</strong> in some form, and it is almost entirely driven by diet and physical inactivity. It is the metabolic consequence of the ultra-processed food system.',
+				viz: {
+					type: 'obs-timeline',
+					title: 'The twin epidemic: diabetes & obesity in the UK',
+					subtitle:
+						'Diagnosed diabetes cases (millions) and adult obesity prevalence (%) — NHS Digital, ONS Health Survey for England, 1990–2023. Note: axes differ in scale.',
+					domain: [1990, 2023],
+					valueDomain: [0, 35],
+					sourceId: 'who-gbd-2022',
+					series: ch3DiabetesRise
+				}
 			},
 			{
 				id: 'ch3-ncd-burden',
@@ -782,6 +838,15 @@ export const chapters: Chapter[] = [
 					label: 'economic value of adding one healthy year to US lifespan',
 					context: 'Scott & Ellison, Nature Aging (2021) — exceeds combined value of curing cancer + heart disease',
 					sourceId: 'scott-ellison-2021'
+				},
+				viz: {
+					type: 'obs-bar',
+					title: 'Prevention ROI: £ returned per £1 invested (England)',
+					subtitle:
+						'Estimated benefit-cost ratios for NHS and public health interventions — NICE, Public Health England, and Briggs et al. analyses. Acute hospital treatment included for comparison.',
+					unit: '×',
+					sourceId: 'scott-ellison-2021',
+					data: ch9PreventionRoi
 				}
 			},
 			{

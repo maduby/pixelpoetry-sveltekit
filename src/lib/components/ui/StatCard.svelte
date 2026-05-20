@@ -29,7 +29,7 @@
 	let { stat, manualTrigger = false, accent = 'red', class: className }: Props = $props();
 
 	// -----------------------------------------------------------------------
-	// Parsed numeric value
+	// Parsed numeric value + prefix/suffix extraction
 	// -----------------------------------------------------------------------
 	const numericValue = $derived(() => {
 		const m = stat.value.match(/-?\d+(?:\.\d+)?/);
@@ -38,10 +38,16 @@
 
 	const sign = $derived(stat.value.trim().startsWith('+') ? '+' : '');
 
+	// Characters before the first digit (e.g. "$" in "$37T")
+	const valuePrefix = $derived(stat.value.match(/^([^0-9+-]*)/)?.[1] ?? '');
+	// Characters after the last digit (e.g. "T" in "$37T", "k" in "500k")
+	const valueSuffix = $derived(stat.value.match(/[^0-9.]+$/)?.[0] ?? '');
+
 	// -----------------------------------------------------------------------
-	// Count-up animation state
+	// Count-up animation state — initialise to the real value so SSR/no-JS
+	// never flashes a bare "0".
 	// -----------------------------------------------------------------------
-	let displayValue = $state('0');
+	let displayValue = $state(stat.value);
 	let animationStarted = $state(false);
 
 	// Animation params
@@ -94,7 +100,7 @@
 		const n = numericValue();
 		if (n === null) return stat.value;
 		const decimals = Number.isInteger(n) ? 0 : 1;
-		return `${sign}${value.toFixed(decimals)}`;
+		return `${valuePrefix}${sign}${value.toFixed(decimals)}${valueSuffix}`;
 	}
 
 	// -----------------------------------------------------------------------
