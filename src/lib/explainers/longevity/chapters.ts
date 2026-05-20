@@ -206,12 +206,19 @@ export const chapters: Chapter[] = [
 				richText:
 					'The week that number was published, Harvard\'s professor of social epidemiology called it <strong>"problematic."</strong> A Virginia health-policy director said it was <strong>"taking policymakers off the hook."</strong> An Edinburgh public-health professor asked: otherwise what are we saying? That people who have more expensive houses have more discipline?'
 			},
-			{
-				id: 'ch1-tension',
-				text: 'Somewhere between those two positions is the truth — and a great deal rides on which way it tips. This essay reads all 26 pages of the report, then reads everything the critics pointed at, and tries to land where the evidence actually points.',
-				richText:
-					'Somewhere between those two positions is the truth — and a great deal rides on which way it tips. This essay reads all 26 pages of the report, then reads everything the critics pointed at, and <strong>tries to land where the evidence actually points.</strong>'
-			},
+		{
+			id: 'ch1-tension',
+			text: 'Somewhere between those two positions is the truth — and a great deal rides on which way it tips. This essay reads all 26 pages of the report, then reads everything the critics pointed at, and tries to land where the evidence actually points.',
+			richText:
+				'Somewhere between those two positions is the truth — and a great deal rides on which way it tips. This essay reads all 26 pages of the report, then reads everything the critics pointed at, and <strong>tries to land where the evidence actually points.</strong>',
+			viz: {
+				type: 'image',
+				name: 'longevity-couple-walking',
+				alt: 'An older couple walking together in a sunny park, both in good health and visibly active.',
+				caption: 'What the evidence points toward: sustained, ordinary movement throughout life — not a supplement, not a programme, not a procedure.',
+				credit: 'Bill Branson / National Cancer Institute (visualsonline.cancer.gov) — Public Domain'
+			}
+		},
 			{
 				id: 'ch1-quote-ball',
 				text: '"It\'s good news if you\'re responsible because then you can do something about it."',
@@ -360,12 +367,19 @@ export const chapters: Chapter[] = [
 			'There is a best-possible rate at which the body declines with age — and then there is the rate most of us are actually declining. Sir Muir Gray calls the distance between them the fitness gap. It is enormous, and it is largely reversible.',
 		accent: 'forest',
 		steps: [
-			{
-				id: 'ch4-concept',
-				text: 'After the age of 30, physical capacity declines at roughly 0.5% per year if you stay active and engaged. The problem is that most of us are declining at roughly three times that rate — not because of ageing, but because of disuse. We are not old; we are sedentary.',
-				richText:
-					'After the age of 30, physical capacity declines at roughly <strong>0.5% per year</strong> if you stay active and engaged. The problem is that most of us are declining at roughly <strong>three times that rate</strong> — not because of ageing, but because of disuse. We are not old; we are sedentary.'
-			},
+		{
+			id: 'ch4-concept',
+			text: 'After the age of 30, physical capacity declines at roughly 0.5% per year if you stay active and engaged. The problem is that most of us are declining at roughly three times that rate — not because of ageing, but because of disuse. We are not old; we are sedentary.',
+			richText:
+				'After the age of 30, physical capacity declines at roughly <strong>0.5% per year</strong> if you stay active and engaged. The problem is that most of us are declining at roughly <strong>three times that rate</strong> — not because of ageing, but because of disuse. We are not old; we are sedentary.',
+			viz: {
+				type: 'image',
+				name: 'longevity-grandpa-running',
+				alt: 'An older man running outdoors, relaxed and in full stride.',
+				caption: 'The green line is not a fantasy. It is what the body is capable of when movement is maintained throughout life.',
+				credit: 'AnaStuart / Wikimedia Commons / CC BY-SA 4.0 (commons.wikimedia.org/wiki/File:Grandpa_Running.jpg)'
+			}
+		},
 			{
 				id: 'ch4-chart',
 				text: 'The gap between what\'s possible and what\'s typical widens dramatically after 60. The green line is not fantasy — it is what happens when people maintain daily movement, strength work, and adequate sleep throughout life.',
@@ -422,12 +436,19 @@ export const chapters: Chapter[] = [
 			'The Oxford Longevity Project distils the evidence into five domains where the science is strong enough to act on: Sleep, Mindset, Exercise, Diet, and Stress. Not a lifestyle blog. A framework built from the evidence up.',
 		accent: 'amber',
 		steps: [
-			{
-				id: 'ch5-sleep',
-				text: 'Sleep comes first. Not because it is the easiest, but because it is the highest-leverage intervention available — it costs nothing, requires no equipment, and its benefits compound across every other domain. Leslie Kenny calls it "the most undervalued performance-enhancing and disease-preventing intervention available to us."',
-				richText:
-					'<strong>Sleep</strong> comes first. Not because it is the easiest, but because it is <strong>the highest-leverage intervention available</strong> — it costs nothing, requires no equipment, and its benefits compound across every other domain.',
-				stat: {
+		{
+			id: 'ch5-sleep',
+			text: 'Sleep comes first. Not because it is the easiest, but because it is the highest-leverage intervention available — it costs nothing, requires no equipment, and its benefits compound across every other domain. Leslie Kenny calls it "the most undervalued performance-enhancing and disease-preventing intervention available to us."',
+			richText:
+				'<strong>Sleep</strong> comes first. Not because it is the easiest, but because it is <strong>the highest-leverage intervention available</strong> — it costs nothing, requires no equipment, and its benefits compound across every other domain.',
+			viz: {
+				type: 'image',
+				name: 'longevity-sleep',
+				alt: 'A person lying face-down on white sheets, in deep, peaceful rest.',
+				caption: 'The most underrated longevity intervention costs nothing and requires no equipment. It requires only that you stop treating sleep as negotiable.',
+				credit: 'Vladislav Muslakov / Unsplash (CC0 1.0 Public Domain, published before 5 June 2017) — commons.wikimedia.org/wiki/File:Woman_lying_face_down_(Unsplash).jpg'
+			},
+			stat: {
 					value: '35',
 					unit: '%',
 					label: 'of US adults routinely sleep fewer than 7 hours',
@@ -486,12 +507,19 @@ export const chapters: Chapter[] = [
 			'Five places in the world where healthy longevity is unremarkable. Where people routinely reach 90 and 100 in good health. What they share is not a supplement or a secret. It is a way of living.',
 		accent: 'forest',
 		steps: [
-			{
-				id: 'ch6-intro',
-				text: 'The five Blue Zones — Sardinia, Okinawa, Nicoya, Loma Linda, Ikaria — were mapped by Dan Buettner and colleagues at National Geographic. In each, the proportion of people reaching 100 in reasonable health is many times the global average. The OLP cites them as proof of concept: places where the S-MEDs framework is lived, not prescribed.',
-				richText:
-					'The five Blue Zones — Sardinia, Okinawa, Nicoya, Loma Linda, Ikaria — were mapped by Dan Buettner and colleagues at National Geographic. In each, the proportion of people reaching 100 in reasonable health is <strong>many times the global average.</strong>'
-			},
+		{
+			id: 'ch6-intro',
+			text: 'The five Blue Zones — Sardinia, Okinawa, Nicoya, Loma Linda, Ikaria — were mapped by Dan Buettner and colleagues at National Geographic. In each, the proportion of people reaching 100 in reasonable health is many times the global average. The OLP cites them as proof of concept: places where the S-MEDs framework is lived, not prescribed.',
+			richText:
+				'The five Blue Zones — Sardinia, Okinawa, Nicoya, Loma Linda, Ikaria — were mapped by Dan Buettner and colleagues at National Geographic. In each, the proportion of people reaching 100 in reasonable health is <strong>many times the global average.</strong>',
+			viz: {
+				type: 'image',
+				name: 'longevity-okinawa-village',
+				alt: 'A sun-dappled lane lined with ancient fukugi trees in Bise village, Okinawa, Japan.',
+				caption: 'Bise village, Motobu, Okinawa. The lanes here are lined with ancient fukugi trees planted as windbreaks — and walked daily by residents who routinely live into their nineties.',
+				credit: 'Mokkie / Wikimedia Commons / CC BY-SA 3.0 (commons.wikimedia.org/wiki/File:Fukugi_trees_at_Bise_Village,_Okinawa.jpg)'
+			}
+		},
 			{
 				id: 'ch6-chart',
 				text: 'Okinawa leads the data — historically producing roughly six times as many centenarians per 100,000 people as the UK or US average.',
@@ -605,11 +633,18 @@ export const chapters: Chapter[] = [
 					data: ch8WomensHealth
 				}
 			},
-			{
-				id: 'ch8-centenarians',
-				text: 'Women are not fragile — they are biologically robust. They make up roughly 80% of all centenarians globally. The problem is not female biology; it is how the healthcare system treats female biology, particularly across the hormonal life course.',
-				richText:
-					'Women are not fragile — they are biologically robust. They make up roughly <strong>80% of all centenarians</strong> globally. The problem is not female biology; it is how the healthcare system treats female biology, particularly across the hormonal life course.',
+		{
+			id: 'ch8-centenarians',
+			text: 'Women are not fragile — they are biologically robust. They make up roughly 80% of all centenarians globally. The problem is not female biology; it is how the healthcare system treats female biology, particularly across the hormonal life course.',
+			richText:
+				'Women are not fragile — they are biologically robust. They make up roughly <strong>80% of all centenarians</strong> globally. The problem is not female biology; it is how the healthcare system treats female biology, particularly across the hormonal life course.',
+			viz: {
+				type: 'image',
+				name: 'longevity-women-exercise',
+				alt: 'Three older women stretching and exercising outdoors at exercise stations in a park.',
+				caption: 'Women are the demographic most likely to reach 100 — and the most consistently underserved by a healthcare system designed around male physiology.',
+				credit: 'Bill Branson / National Cancer Institute (visualsonline.cancer.gov, image ID 2376) — Public Domain'
+			},
 				stat: {
 					value: '80',
 					unit: '%',
