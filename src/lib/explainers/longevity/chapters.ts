@@ -99,6 +99,17 @@ const ch3CausesOfDeath: ObsBarDataPoint[] = [
 ];
 
 // ─── Chapter 9 ───────────────────────────────────────────────────────────────
+// Scale comparison: $37T vs economic landmarks readers can anchor to.
+// The number exceeds the entire US GDP — that's the visceral reveal.
+const ch9ScaleComparison: ObsBarDataPoint[] = [
+	{ label: 'Value of +1 healthy year (US pop.)', value: 37.0, color: FOREST },
+	{ label: 'Entire US GDP (2023)', value: 27.4, color: INK_FAINT },
+	{ label: 'Cure cancer + heart disease combined', value: 17.0, color: AMBER },
+	{ label: 'Entire UK GDP (2023)', value: 3.1, color: INK_FAINT },
+	{ label: 'Apple Inc. market cap', value: 3.0, color: INK_FAINT },
+	{ label: 'Global military spending (2023)', value: 2.2, color: RED }
+];
+
 // Prevention ROI: approximate £ returned per £1 invested — NICE/PHE analyses.
 // Walking and cessation programmes vastly outperform acute hospital interventions.
 const ch9PreventionRoi: ObsBarDataPoint[] = [
@@ -832,21 +843,21 @@ export const chapters: Chapter[] = [
 				id: 'ch9-37-trillion',
 				text: 'Economists Scott and Ellison calculated that slowing the rate of biological ageing sufficiently to add one year of healthy life across the US population would generate approximately $37 trillion in economic value. That exceeds the combined benefit of eliminating both cancer and cardiovascular disease entirely.',
 				richText:
-					'Economists Scott and Ellison calculated that slowing biological ageing to add <strong>one year of healthy life</strong> across the US population would generate approximately <strong>$37 trillion</strong> in economic value — exceeding the combined benefit of eliminating cancer and cardiovascular disease.',
+					'Economists Scott and Ellison calculated that slowing biological ageing to add <strong>one year of healthy life</strong> across the US population would generate approximately <strong>$37 trillion</strong> in economic value — enough to spend <strong>$1 billion every single day for 101 years.</strong>',
 				stat: {
 					value: '$37T',
 					label: 'economic value of adding one healthy year to US lifespan',
-					context: 'Scott & Ellison, Nature Aging (2021) — exceeds combined value of curing cancer + heart disease',
+					context: 'Exceeds the entire US GDP. Enough to spend $1 billion every day for 101 years. — Scott & Ellison, Nature Aging (2021)',
 					sourceId: 'scott-ellison-2021'
 				},
 				viz: {
 					type: 'obs-bar',
-					title: 'Prevention ROI: £ returned per £1 invested (England)',
+					title: '$37 trillion in context',
 					subtitle:
-						'Estimated benefit-cost ratios for NHS and public health interventions — NICE, Public Health England, and Briggs et al. analyses. Acute hospital treatment included for comparison.',
-					unit: '×',
+						'Economic value of adding one healthy year to the US population vs other major benchmarks — all figures in US$ trillions. Scott & Ellison, Nature Aging (2021); World Bank; SIPRI (2023).',
+					unit: 'T',
 					sourceId: 'scott-ellison-2021',
-					data: ch9PreventionRoi
+					data: ch9ScaleComparison
 				}
 			},
 			{
@@ -875,7 +886,16 @@ export const chapters: Chapter[] = [
 				id: 'ch9-policy',
 				text: 'The policy case writes itself: tax sugar like tobacco. Tax alcohol like tobacco — Canada\'s 2023 guidelines concluded there is no safe level of alcohol consumption. Make healthy choices the easy choices, not the expensive ones. The alternative — treating the consequences of preventable disease — is costing more every year and delivering less.',
 				richText:
-					'The policy case writes itself: <strong>tax sugar like tobacco.</strong> Tax alcohol like tobacco — Canada\'s 2023 guidelines concluded there is no safe level of alcohol consumption. Make healthy choices the easy choices. The alternative — treating preventable disease — is <strong>costing more every year and delivering less.</strong>'
+					'The policy case writes itself: <strong>tax sugar like tobacco.</strong> Tax alcohol like tobacco — Canada\'s 2023 guidelines concluded there is no safe level of alcohol consumption. Make healthy choices the easy choices. The alternative — treating preventable disease — is <strong>costing more every year and delivering less.</strong>',
+				viz: {
+					type: 'obs-bar',
+					title: 'Prevention ROI: £ returned per £1 invested',
+					subtitle:
+						'Estimated benefit-cost ratios for prevention programmes vs acute treatment — NICE, Public Health England, and Briggs et al. analyses.',
+					unit: '×',
+					sourceId: 'scott-ellison-2021',
+					data: ch9PreventionRoi
+				}
 			}
 		],
 		sources: ['scott-ellison-2021', 'ons-hle-2020', 'olp-2026']
