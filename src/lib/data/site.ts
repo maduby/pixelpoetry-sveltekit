@@ -8,7 +8,7 @@
 export const site = {
 	name: 'Pixel Poetry',
 	shortName: 'PP',
-	tagline: 'One topic at a time. Done with care.',
+	tagline: 'Slow journalism. One scroll at a time.',
 	/**
 	 * Primary meta description (<=160 chars). Appears in Google snippets,
 	 * social previews, and screen-reader page summaries.

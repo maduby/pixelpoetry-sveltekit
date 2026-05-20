@@ -55,7 +55,7 @@
 			class="mt-6 max-w-2xl text-xl leading-relaxed text-ink/70 md:text-2xl"
 			{@attach reveal({ y: 20, delay: 200 })}
 		>
-			One topic at a time. Months of reading. Every claim cited. Done with care.
+			One topic at a time. Months of reading. Every claim cited. Slow journalism. One scroll at a time.
 		</p>
 	</div>
 </section>

@@ -41,6 +41,10 @@
 		"typescript-eslint": "^8.58.1",
 		"vite": "^8.0.7"
 	},
+	"engines": {
+		"node": ">=25.0.0",
+		"pnpm": ">=10.0.0"
+	},
 	"dependencies": {
 		"@observablehq/plot": "^0.6.17",
 		"@rodneylab/svelte-social-icons": "^0.0.31",

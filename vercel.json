@@ -1,0 +1,4 @@
+{
+  "framework": "sveltekit",
+  "nodeVersion": "24.x"
+}

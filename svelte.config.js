@@ -7,7 +7,7 @@ const config = {
 		runes: ({ filename }) => filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 	},
 	kit: {
-		adapter: adapter(),
+		adapter: adapter({ runtime: 'nodejs24.x' }),
 		// Required for PostHog session replay to work correctly with SSR
 		paths: {
 			relative: false
