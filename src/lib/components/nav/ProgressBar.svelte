@@ -89,6 +89,8 @@
 	// -----------------------------------------------------------------------
 	// Lifecycle
 	// -----------------------------------------------------------------------
+
+	// Scroll + resize listeners — mounted once, always active.
 	onMount(() => {
 		let rafId = 0;
 
@@ -107,20 +109,45 @@
 		};
 
 		measureBar();
+		computeProgress();
+
+		window.addEventListener('scroll', onScroll, { passive: true });
+		window.addEventListener('resize', onResize);
+
+		return () => {
+			window.removeEventListener('scroll', onScroll);
+			window.removeEventListener('resize', onResize);
+			if (rafId) cancelAnimationFrame(rafId);
+		};
+	});
+
+	/**
+	 * Re-runs whenever `chapters` changes — covers both fresh page loads and
+	 * client-side navigation into or away from an explainer route.
+	 *
+	 * `$effect` fires after Svelte has updated the DOM, so chapter <section>
+	 * elements are already present when this runs.
+	 */
+	$effect(() => {
+		if (chapters.length === 0) {
+			markers = [];
+			activeId = null;
+			return;
+		}
+
+		// Compute initial marker positions immediately (DOM is ready).
+		measureBar();
 		computeMarkers();
 		computeProgress();
 
-		// Re-measure after fonts/images settle (scroll heights finalise).
+		// Re-measure after fonts/images settle and GSAP shifts layout.
 		const settleTimer = window.setTimeout(() => {
 			measureBar();
 			computeMarkers();
 			computeProgress();
 		}, 500);
 
-		window.addEventListener('scroll', onScroll, { passive: true });
-		window.addEventListener('resize', onResize);
-
-		// Track active chapter via IntersectionObserver.
+		// Track which chapter is in the viewport.
 		const sections = chapters
 			.map((c) => document.getElementById(c.id))
 			.filter((el): el is HTMLElement => el !== null);
@@ -137,11 +164,8 @@
 		sections.forEach((s) => observer.observe(s));
 
 		return () => {
-			window.removeEventListener('scroll', onScroll);
-			window.removeEventListener('resize', onResize);
 			window.clearTimeout(settleTimer);
 			observer.disconnect();
-			if (rafId) cancelAnimationFrame(rafId);
 		};
 	});
 </script>
