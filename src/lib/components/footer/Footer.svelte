@@ -35,6 +35,12 @@
 						class="text-cream/60 underline decoration-dotted underline-offset-2 transition-colors hover:text-brand-amber"
 						>Marc Duby</a
 					>
+					·
+					<a
+						href="/about"
+						class="text-cream/60 underline decoration-dotted underline-offset-2 transition-colors hover:text-brand-amber"
+						>About this project</a
+					>
 				</p>
 			</div>
 
