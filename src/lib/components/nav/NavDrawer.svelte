@@ -70,7 +70,8 @@
 		red: 'text-brand-red',
 		amber: 'text-brand-amber-deep',
 		pink: 'text-brand-pink',
-		ink: 'text-ink'
+		ink: 'text-ink',
+		forest: 'text-brand-forest'
 	};
 </script>
 

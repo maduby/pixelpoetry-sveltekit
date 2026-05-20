@@ -14,7 +14,7 @@
 		 */
 		variant?: 'default' | 'closing';
 		/** Chapter accent — drives the highlight colour in `closing` variant. */
-		accent?: 'red' | 'amber' | 'pink' | 'ink';
+		accent?: 'red' | 'amber' | 'pink' | 'ink' | 'forest';
 		class?: string;
 	}
 
@@ -22,10 +22,10 @@
 	const source = $derived(quote.sourceId ? explainer?.getSource(quote.sourceId) : undefined);
 
 	const accentColor = $derived(
-		({ red: 'text-brand-red', amber: 'text-brand-amber', pink: 'text-brand-pink', ink: 'text-ink' } as const)[accent]
+		({ red: 'text-brand-red', amber: 'text-brand-amber', pink: 'text-brand-pink', ink: 'text-ink', forest: 'text-brand-forest' } as const)[accent]
 	);
 	const accentBorder = $derived(
-		({ red: 'border-brand-red', amber: 'border-brand-amber', pink: 'border-brand-pink', ink: 'border-ink' } as const)[accent]
+		({ red: 'border-brand-red', amber: 'border-brand-amber', pink: 'border-brand-pink', ink: 'border-ink', forest: 'border-brand-forest' } as const)[accent]
 	);
 </script>
 
@@ -53,10 +53,11 @@
 						onclick={() => openSourceSheet(source.id)}
 						class={cn(
 							'group flex cursor-pointer items-center gap-1 text-ink/40 transition-colors',
-							accent === 'red' && 'hover:text-brand-red',
-							accent === 'amber' && 'hover:text-brand-amber',
-							accent === 'pink' && 'hover:text-brand-pink',
-							accent === 'ink' && 'hover:text-ink'
+						accent === 'red' && 'hover:text-brand-red',
+						accent === 'amber' && 'hover:text-brand-amber',
+						accent === 'pink' && 'hover:text-brand-pink',
+						accent === 'ink' && 'hover:text-ink',
+						accent === 'forest' && 'hover:text-brand-forest'
 						)}
 					>
 						<span>Source</span>

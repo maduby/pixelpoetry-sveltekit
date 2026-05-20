@@ -29,7 +29,8 @@
 			red: 'group-hover:border-brand-red',
 			amber: 'group-hover:border-brand-amber',
 			pink: 'group-hover:border-brand-pink',
-			ink: 'group-hover:border-ink'
+			ink: 'group-hover:border-ink',
+			forest: 'group-hover:border-brand-forest'
 		} as const)[explainer.accent]
 	);
 
@@ -38,7 +39,8 @@
 			red: 'text-brand-red',
 			amber: 'text-brand-amber-deep',
 			pink: 'text-brand-pink',
-			ink: 'text-ink'
+			ink: 'text-ink',
+			forest: 'text-brand-forest'
 		} as const)[explainer.accent]
 	);
 

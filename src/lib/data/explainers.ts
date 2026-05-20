@@ -32,7 +32,7 @@ export interface ExplainerSummary {
 	readTimeMin?: number;
 	chapterCount?: number;
 	publishedAt?: string;
-	accent: 'red' | 'amber' | 'pink' | 'ink';
+	accent: 'red' | 'amber' | 'pink' | 'ink' | 'forest';
 }
 
 export const explainers: ExplainerSummary[] = [
@@ -62,8 +62,10 @@ export const explainers: ExplainerSummary[] = [
 		title: 'Longevity',
 		tagline: 'What actually moves the needle on a longer, healthier life.',
 		description:
-			'A working draft. Sources are being gathered in /docs/explainers/longevity/sources/. The scrollytelling essay is next up.',
-		accent: 'amber'
+			'What does the science actually say about living longer? A chapter-by-chapter investigation into longevity research — separating signal from noise on diet, exercise, sleep, and the biology of ageing.',
+		readTimeMin: 14,
+		chapterCount: 10,
+		accent: 'forest'
 	}
 ];
 

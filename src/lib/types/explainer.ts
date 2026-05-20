@@ -51,7 +51,7 @@ export interface Chapter {
 	sources?: string[];
 }
 
-export type AccentColor = 'red' | 'amber' | 'pink' | 'ink';
+export type AccentColor = 'red' | 'amber' | 'pink' | 'ink' | 'forest';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Viz primitives
