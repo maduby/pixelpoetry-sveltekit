@@ -31,7 +31,7 @@
 		background-clip: text;
 		-webkit-background-clip: text;
 		color: transparent;
-		animation: rainbow-flow 6s linear infinite;
+		animation: rainbow-flow 20s linear infinite;
 	}
 </style>
 
