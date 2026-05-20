@@ -34,6 +34,12 @@ export interface Step {
 	quote?: Quote;
 	/** Chart to render in the Scrolly viz slot. */
 	viz?: VizConfig;
+	/**
+	 * Optional large decorative letter displayed above the step prose
+	 * in the chapter's accent colour. Used to visually surface acronym
+	 * letters (e.g. "S", "M", "E", "D" for S-MEDs).
+	 */
+	accentLetter?: string;
 }
 
 export interface Chapter {

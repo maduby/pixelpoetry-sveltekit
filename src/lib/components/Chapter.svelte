@@ -177,6 +177,12 @@
 		{#snippet steps({ activeStep })}
 			{#each chapter.steps as step, i (step.id)}
 				<Step isActive={i === activeStep}>
+					{#if step.accentLetter}
+						<p
+							class="select-none font-display font-black leading-none mb-3 text-[clamp(5rem,14vw,11rem)] {accentText}"
+							aria-hidden="true"
+						>{step.accentLetter}</p>
+					{/if}
 					<!--
 						richText uses <strong> for key phrases; safe — it's
 						hardcoded, never user input. max-w-3xl keeps the
