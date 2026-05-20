@@ -80,7 +80,7 @@ export const explainers: ExplainerSummary[] = [
 		slug: 'longevity',
 		href: '/longevity/explainer',
 		topicHref: '/longevity',
-		status: 'planned',
+		status: 'in-progress',
 		eyebrow: 'Health & ageing',
 		title: 'Longevity',
 		tagline: 'What actually moves the needle on a longer, healthier life.',
