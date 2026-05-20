@@ -178,7 +178,7 @@
 			// — labels render OUTSIDE the plot area, anchored to each
 			// series' latest point.
 			const longestLabel = _ends.reduce((m, e) => (e.label.length > m.length ? e.label : m), '');
-			const marginRight = Math.min(140, Math.max(_narrow ? 70 : 96, longestLabel.length * fontPx * 0.7));
+			const marginRight = Math.min(200, Math.max(_narrow ? 70 : 96, longestLabel.length * fontPx * 0.7));
 
 			const chart = Plot.plot({
 				width: _w,
@@ -261,8 +261,8 @@
 						Plot.pointer({
 							x: 'year',
 							y: 'value',
-							title: (d: { label: string; year: number; value: number }) =>
-								`${d.label}\n${d.year}: ${d.value}${unit} of daily calories`
+						title: (d: { label: string; year: number; value: number }) =>
+							`${d.label}\n${d.year}: ${d.value}${unit}`
 						})
 					)
 				]

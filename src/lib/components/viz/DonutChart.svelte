@@ -42,7 +42,6 @@
 	let arcs = $derived(data.length > 0 ? pie(data) : []);
 
 	let heroValue = $derived(data[0]?.value ?? 0);
-	let heroLabel = $derived(data[0]?.label ?? '');
 </script>
 
 <div class="mx-auto flex h-full w-full max-w-sm flex-col items-center gap-5 py-6">
@@ -66,17 +65,10 @@
 			<text
 				text-anchor="middle"
 				dominant-baseline="middle"
-				y={-18}
+				y={0}
 				style="font-family: 'Arvo', serif; font-size: 80px; font-weight: 700; fill: #0a0a0a; letter-spacing: -2px"
 			>
 				{heroValue}%
-			</text>
-			<text
-				text-anchor="middle"
-				y={44}
-				style="font-family: 'Lato', sans-serif; font-size: 14px; fill: #0a0a0a80; font-weight: 400; text-transform: uppercase; letter-spacing: 1.5px"
-			>
-				{heroLabel.toLowerCase()}
 			</text>
 		</g>
 	</svg>
