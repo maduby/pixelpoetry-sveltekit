@@ -41,6 +41,7 @@
 	let { chapter, index }: Props = $props();
 
 	const closingQuotes = $derived(chapter.steps.filter((s) => s.quote));
+	const visibleSteps = $derived(chapter.steps.filter((s) => !s.closingOnly));
 
 	const accentBg = $derived(
 		{
@@ -175,7 +176,7 @@
 		{/snippet}
 
 		{#snippet steps({ activeStep })}
-			{#each chapter.steps as step, i (step.id)}
+			{#each visibleSteps as step, i (step.id)}
 				<Step isActive={i === activeStep}>
 					{#if step.accentLetter}
 						<p

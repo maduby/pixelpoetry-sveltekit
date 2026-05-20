@@ -40,6 +40,13 @@ export interface Step {
 	 * letters (e.g. "S", "M", "E", "D" for S-MEDs).
 	 */
 	accentLetter?: string;
+	/**
+	 * When true the step is excluded from the scrolly body but still
+	 * picked up by the closing-quotes renderer at the bottom of the
+	 * chapter. Use for quote steps that should only appear as a large
+	 * editorial pull-quote, not as a small inline text card.
+	 */
+	closingOnly?: boolean;
 }
 
 export interface Chapter {

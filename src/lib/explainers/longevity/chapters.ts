@@ -457,15 +457,16 @@ export const chapters: Chapter[] = [
 					sourceId: 'walker-2017'
 				}
 			},
-			{
-				id: 'ch5-sleep-quote',
-				text: '"Sleep is the most undervalued performance-enhancing and disease-preventing intervention available to us."',
-				quote: {
-					text: 'Sleep is the most undervalued performance-enhancing and disease-preventing intervention available to us.',
-					attribution: 'Leslie Kenny — Oxford Longevity Project',
-					sourceId: 'olp-2026'
-				}
-			},
+		{
+			id: 'ch5-sleep-quote',
+			closingOnly: true,
+			text: '"Sleep is the most undervalued performance-enhancing and disease-preventing intervention available to us."',
+			quote: {
+				text: 'Sleep is the most undervalued performance-enhancing and disease-preventing intervention available to us.',
+				attribution: 'Leslie Kenny — Oxford Longevity Project',
+				sourceId: 'olp-2026'
+			}
+		},
 		{
 			id: 'ch5-mindset',
 			accentLetter: 'M',
