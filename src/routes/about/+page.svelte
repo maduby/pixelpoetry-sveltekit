@@ -1,8 +1,29 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { decode } from 'blurhash';
 	import { setActiveExplainer } from '$lib/context/explainer.svelte';
 	import { site } from '$lib/data/site';
 	import SEO from '$lib/components/SEO.svelte';
 	import { reveal } from '$lib/attachments/reveal';
+
+	/** Blurhash placeholder for the byline photo */
+	const BLURHASH = 'CzEpQUxuR+Rj?wt7WWWC';
+	const PHOTO_W = 1920;
+	const PHOTO_H = 1280;
+
+	let canvas: HTMLCanvasElement | undefined = $state();
+	let imgLoaded = $state(false);
+
+	onMount(() => {
+		if (!canvas) return;
+		const pixels = decode(BLURHASH, 32, 21);
+		canvas.width = 32;
+		canvas.height = 21;
+		const ctx = canvas.getContext('2d')!;
+		const imageData = ctx.createImageData(32, 21);
+		imageData.data.set(pixels);
+		ctx.putImageData(imageData, 0, 0);
+	});
 
 	setActiveExplainer(null);
 
@@ -133,77 +154,123 @@
 				</div>
 			</div>
 
-			<!-- The byline -->
-			<div
-				class="rounded-3xl border border-ink/10 bg-ink p-8 text-cream md:p-12"
-				{@attach reveal({ y: 24 })}
+			</div>
+	</div>
+</section>
+
+<!-- Byline — full-bleed photo section -->
+<section class="relative overflow-hidden" style="min-height: clamp(480px, 60vw, 760px);">
+	<!-- Blurhash canvas placeholder (fades out when photo loads) -->
+	<canvas
+		bind:this={canvas}
+		class="absolute inset-0 h-full w-full object-cover transition-opacity duration-700"
+		style="image-rendering: auto; opacity: {imgLoaded ? 0 : 1};"
+		aria-hidden="true"
+	></canvas>
+
+	<!-- Responsive photo -->
+	<img
+		srcset="
+			/about/processed/aboutme-800w.webp   800w,
+			/about/processed/aboutme-1200w.webp 1200w,
+			/about/processed/aboutme-1920w.webp 1920w
+		"
+		sizes="100vw"
+		src="/about/processed/aboutme-1200w.webp"
+		alt="Marc Duby"
+		width={PHOTO_W}
+		height={PHOTO_H}
+		class="absolute inset-0 h-full w-full object-cover transition-opacity duration-700"
+		style="opacity: {imgLoaded ? 1 : 0};"
+		onload={() => (imgLoaded = true)}
+		loading="lazy"
+		decoding="async"
+	/>
+
+	<!-- Gradient overlay: dark at bottom, lighter at top -->
+	<div
+		class="absolute inset-0"
+		style="background: linear-gradient(to top, rgba(10,9,8,0.92) 0%, rgba(10,9,8,0.45) 50%, rgba(10,9,8,0.10) 100%);"
+	></div>
+
+	<!-- Content pinned to bottom -->
+	<div class="relative z-10 flex h-full min-h-[inherit] flex-col justify-end">
+		<div class="mx-auto w-full max-w-(--container-wide) px-6 pb-14 lg:px-8 lg:pb-20">
+			<p
+				class="font-body text-xs font-bold tracking-[0.22em] text-cream/40 uppercase"
+				{@attach reveal({ y: 12 })}
 			>
-				<p class="font-body text-xs font-bold tracking-[0.2em] text-cream/40 uppercase">The byline</p>
+				The byline
+			</p>
 
-				<div class="mt-6 flex flex-col gap-8 md:flex-row md:items-start md:gap-12">
-					<!-- Text -->
-					<div class="flex-1 space-y-4 text-base leading-relaxed text-cream/75 md:text-lg">
-						<p>
-							I'm based between Cape Town and Switzerland. When I'm not at a keyboard I'm on a trail,
-							on a climbing wall, or in the water. That preference for focus and clean lines follows
-							me into the work.
-						</p>
-						<p>
-							For my full portfolio, professional background, and work at The New Humanitarian, see
-							<a
-								href="https://duby.io"
-								target="_blank"
-								rel="noopener noreferrer"
-								class="text-cream underline decoration-dotted underline-offset-4 transition-colors hover:text-brand-amber"
-								>duby.io</a
-							>.
-						</p>
-						<p class="text-cream/50">
-							Suggest a topic, flag a correction, or point me at a source I missed:
-							<a
-								href="mailto:hello@pixelpoetry.dev"
-								class="text-cream/80 underline decoration-dotted underline-offset-4 transition-colors hover:text-brand-amber"
-								>hello@pixelpoetry.dev</a
-							>
-						</p>
-					</div>
-
-					<!-- Links -->
-					<div class="flex flex-col gap-3 md:min-w-[180px]">
+			<div class="mt-5 flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
+				<!-- Text block -->
+				<div
+					class="max-w-xl space-y-4 text-base leading-relaxed text-cream/80 md:text-lg"
+					{@attach reveal({ y: 20, delay: 80 })}
+				>
+					<p>
+						I'm based between Cape Town and Switzerland. When I'm not at a keyboard I'm on a trail,
+						on a climbing wall, or in the water. That preference for focus and clean lines follows
+						me into the work.
+					</p>
+					<p>
+						For my full portfolio, professional background, and work at The New Humanitarian, see
 						<a
 							href="https://duby.io"
 							target="_blank"
 							rel="noopener noreferrer"
-							class="inline-flex items-center gap-2 rounded-full border border-cream/20 px-5 py-2.5 text-sm font-semibold text-cream/80 transition-colors hover:border-brand-amber/60 hover:text-brand-amber"
-						>
-							Portfolio ↗
-						</a>
-						<a
-							href="https://www.linkedin.com/in/marcduby/"
-							target="_blank"
-							rel="noopener noreferrer"
-							class="inline-flex items-center gap-2 rounded-full border border-cream/20 px-5 py-2.5 text-sm font-semibold text-cream/80 transition-colors hover:border-brand-amber/60 hover:text-brand-amber"
-						>
-							LinkedIn ↗
-						</a>
-						<a
-							href="https://github.com/maduby"
-							target="_blank"
-							rel="noopener noreferrer"
-							class="inline-flex items-center gap-2 rounded-full border border-cream/20 px-5 py-2.5 text-sm font-semibold text-cream/80 transition-colors hover:border-brand-amber/60 hover:text-brand-amber"
-						>
-							GitHub ↗
-						</a>
+							class="text-cream underline decoration-dotted underline-offset-4 transition-colors hover:text-brand-amber"
+							>duby.io</a
+						>.
+					</p>
+					<p class="text-cream/50 text-sm">
+						Suggest a topic, flag a correction, or point me at a source I missed:
 						<a
 							href="mailto:hello@pixelpoetry.dev"
-							class="inline-flex items-center gap-2 rounded-full border border-cream/20 px-5 py-2.5 text-sm font-semibold text-cream/80 transition-colors hover:border-brand-amber/60 hover:text-brand-amber"
+							class="text-cream/70 underline decoration-dotted underline-offset-4 transition-colors hover:text-brand-amber"
+							>hello@pixelpoetry.dev</a
 						>
-							Email
-						</a>
-					</div>
+					</p>
+				</div>
+
+				<!-- Link pills -->
+				<div
+					class="flex flex-wrap gap-3 md:flex-col md:items-end"
+					{@attach reveal({ y: 16, delay: 160 })}
+				>
+					<a
+						href="https://duby.io"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="inline-flex items-center gap-2 rounded-full border border-cream/25 bg-cream/5 px-5 py-2.5 text-sm font-semibold text-cream/80 backdrop-blur-sm transition-all hover:border-brand-amber/60 hover:bg-cream/10 hover:text-brand-amber"
+					>
+						Portfolio ↗
+					</a>
+					<a
+						href="https://www.linkedin.com/in/marcduby/"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="inline-flex items-center gap-2 rounded-full border border-cream/25 bg-cream/5 px-5 py-2.5 text-sm font-semibold text-cream/80 backdrop-blur-sm transition-all hover:border-brand-amber/60 hover:bg-cream/10 hover:text-brand-amber"
+					>
+						LinkedIn ↗
+					</a>
+					<a
+						href="https://github.com/maduby"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="inline-flex items-center gap-2 rounded-full border border-cream/25 bg-cream/5 px-5 py-2.5 text-sm font-semibold text-cream/80 backdrop-blur-sm transition-all hover:border-brand-amber/60 hover:bg-cream/10 hover:text-brand-amber"
+					>
+						GitHub ↗
+					</a>
+					<a
+						href="mailto:hello@pixelpoetry.dev"
+						class="inline-flex items-center gap-2 rounded-full border border-cream/25 bg-cream/5 px-5 py-2.5 text-sm font-semibold text-cream/80 backdrop-blur-sm transition-all hover:border-brand-amber/60 hover:bg-cream/10 hover:text-brand-amber"
+					>
+						Email
+					</a>
 				</div>
 			</div>
-
 		</div>
 	</div>
 </section>
