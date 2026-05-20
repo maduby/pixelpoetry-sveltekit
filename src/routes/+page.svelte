@@ -145,7 +145,7 @@
 					class="mt-6 font-display text-4xl font-bold leading-tight tracking-tight text-balance md:text-5xl"
 					{@attach reveal({ y: 24, delay: 100 })}
 				>
-					Slow journalism,<br />pretty fast to read.
+					Slow journalism,<br />one scroll at a time.
 				</h2>
 			</div>
 
