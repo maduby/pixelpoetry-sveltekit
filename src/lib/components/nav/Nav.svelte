@@ -26,6 +26,33 @@
 
 <NavDrawer bind:open={drawerOpen} />
 
+<style>
+	@keyframes rainbow-flow {
+		0%   { background-position: 0% 50%; }
+		100% { background-position: 200% 50%; }
+	}
+
+	.logo-rainbow {
+		/* Wide gradient so the shift is gradual and smooth */
+		background: linear-gradient(
+			90deg,
+			#f43f5e  0%,
+			#f97316 14%,
+			#eab308 28%,
+			#22c55e 42%,
+			#3b82f6 56%,
+			#a855f7 70%,
+			#f43f5e 84%,
+			#f97316 100%
+		);
+		background-size: 200% auto;
+		background-clip: text;
+		-webkit-background-clip: text;
+		color: transparent;
+		animation: rainbow-flow 6s linear infinite;
+	}
+</style>
+
 <header
 	class="fixed inset-x-0 top-0 z-50 bg-cream/80 backdrop-blur supports-backdrop-filter:bg-cream/60"
 >
@@ -56,16 +83,14 @@
 					</span>
 				</a>
 			{:else}
-				<a
-					href="/"
-					class="flex items-baseline gap-2 font-display text-xl font-bold tracking-tight"
-				>
-					<span
-						style="background: linear-gradient(90deg, #f43f5e 0%, #f97316 25%, #eab308 50%, #22c55e 75%, #3b82f6 100%); -webkit-background-clip: text; background-clip: text; color: transparent;"
-					>
-						{site.name}
-					</span>
-				</a>
+			<a
+				href="/"
+				class="flex items-baseline gap-2 font-display text-xl font-bold tracking-tight"
+			>
+				<span class="logo-rainbow">
+					{site.name}
+				</span>
+			</a>
 			{/if}
 		</div>
 
