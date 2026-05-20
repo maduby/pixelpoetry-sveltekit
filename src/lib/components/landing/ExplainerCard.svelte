@@ -96,7 +96,7 @@
 					height={cs.height}
 					loading="lazy"
 					decoding="async"
-					class="absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-105"
+					class="absolute inset-0 h-full w-full object-cover"
 					style="opacity: {imgLoaded ? 1 : 0};"
 					onload={() => (imgLoaded = true)}
 				/>
@@ -105,7 +105,7 @@
 					src={explainer.coverFallback}
 					alt={explainer.cover?.alt ?? `${explainer.title} cover`}
 					loading="lazy"
-					class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+					class="h-full w-full object-cover"
 				/>
 			{:else}
 				<div
