@@ -193,15 +193,18 @@
 			// so we only need a tiny right margin for the axis tick itself.
 			const marginRight = _narrow ? 10 : 12;
 
-			// Offset each label anchor left by ~8% of the x-domain width so
-			// the connector has a visible angle and the text clears the endpoint dot.
+			// Offset each label anchor left by ~16% of the x-domain width so
+			// the callout text sits well clear of the endpoint dot.
 			const xRange = _xd[1] - _xd[0];
-			const labelXOff = xRange * 0.08;
-			const annotated = _ends.map((e) => ({
-				...e,
-				// Clamp so the anchor never falls outside the chart canvas.
-				labelYear: Math.max(e.year - labelXOff, _xd[0] + xRange * 0.04)
-			}));
+			const labelXOff = xRange * 0.16;
+			const annotated = _ends.map((e) => {
+				const labelYear = Math.max(e.year - labelXOff, _xd[0] + xRange * 0.04);
+				// Elbow point: short horizontal stub 28% along the total offset, at the
+				// series' actual data value (same y). The connector then bends diagonally
+				// from there down/up to the de-collided labelY.
+				const elbowYear = e.year - (e.year - labelYear) * 0.28;
+				return { ...e, labelYear, elbowYear };
+			});
 
 			const chart = Plot.plot({
 				width: _w,
@@ -256,15 +259,27 @@
 						strokeWidth: 1.6,
 						r: _narrow ? 3.5 : 4.5
 					}),
-					// Callout connector: thin angled line from the endpoint dot to
-					// the label anchor (which sits inside the chart, slightly left).
+					// Elbow connector — two segments:
+					//   1. Short horizontal stub from the endpoint to the elbow point.
+					//   2. Longer diagonal from the elbow down/up to the label anchor.
+					// This gives a gentle bent-line callout rather than a pure diagonal.
 					Plot.link(annotated, {
 						x1: 'year',
+						y1: 'value',
+						x2: 'elbowYear',
+						y2: 'value',
+						stroke: (d: { color: string }) => d.color,
+						strokeOpacity: 0.4,
+						strokeWidth: 1,
+						strokeLinecap: 'round'
+					}),
+					Plot.link(annotated, {
+						x1: 'elbowYear',
 						y1: 'value',
 						x2: 'labelYear',
 						y2: 'labelY',
 						stroke: (d: { color: string }) => d.color,
-						strokeOpacity: 0.45,
+						strokeOpacity: 0.4,
 						strokeWidth: 1,
 						strokeLinecap: 'round'
 					}),
@@ -277,19 +292,20 @@
 						fontWeight: '700',
 						fontSize: fontPx + 1,
 						textAnchor: 'end',
-						dx: -5
+						dx: -6
 					}),
-					// Value pill on the line below the name.
+					// End-value callout — always visible so readers don't need to hover.
+					// Intentionally lighter than the label so it reads as supplementary.
 					Plot.text(annotated, {
 						x: 'labelYear',
 						y: 'labelY',
 						text: (d: { value: number }) => `${d.value}${unit}`,
-						fill: '#0a0a0a',
-						fontWeight: '700',
-						fontSize: fontPx,
+						fill: '#0a0a0a99',
+						fontWeight: '600',
+						fontSize: fontPx - 1,
 						textAnchor: 'end',
-						dx: -5,
-						dy: _narrow ? 14 : 16
+						dx: -6,
+						dy: _narrow ? 13 : 15
 					}),
 					// Tooltip LAST — SVG paint order means last = on top, so the
 					// tip box always renders above country labels and value pills.
