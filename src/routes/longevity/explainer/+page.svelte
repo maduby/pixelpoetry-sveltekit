@@ -9,7 +9,16 @@
 	import EditorialSheet from '$lib/components/ui/EditorialSheet.svelte';
 </script>
 
-<SEO />
+<SEO
+	title={meta.name}
+	description={meta.description}
+	ogImage={meta.ogImage}
+	imageAlt="Pixel Poetry longevity explainer social preview"
+	canonical={meta.href}
+	type="article"
+	keywords={meta.keywords}
+	publishedTime={meta.publishedAt}
+/>
 
 <!-- ============================================================
      HERO

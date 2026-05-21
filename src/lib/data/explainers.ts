@@ -71,7 +71,7 @@ export const explainers: ExplainerSummary[] = [
 			height: 629,
 			alt: 'A chaotic pile of ultra-processed food packages, cans, and snacks'
 		},
-		coverFallback: '/explainers/ultra-processed/share-image.jpg',
+		coverFallback: '/explainers/ultra-processed/images/share-image--upf.png',
 		readTimeMin: 12,
 		chapterCount: 9,
 		publishedAt: '2025-05-16',
