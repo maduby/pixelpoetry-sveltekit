@@ -237,10 +237,13 @@
 			containerW >= 400
 				? Math.min(52, Math.round(metrics.rowH * (1 + (containerW - 400) / 800)))
 				: metrics.rowH;
-		// Right padding has to fit the value label, which can be quite
-		// wide on mobile ("80% of calories" ≈ 110px at 14px). We size it
-		// against the current value font so it shrinks with compact tiers.
-		const MARGIN_RIGHT = Math.round(metrics.valueFontSize * 7.5);
+		// Only reserve right margin for bars that won't get an inside label.
+		// Bars whose pixel width ≥ INSIDE_MIN_PX will carry their value label
+		// inside (white text), so they don't need right-margin space.
+		const MARGIN_RIGHT_OUTSIDE = Math.round(metrics.valueFontSize * 6);
+		const barPxW = (item.value / domainMax) * containerW;
+		const insideLabel = barPxW >= 52;
+		const MARGIN_RIGHT = insideLabel ? 8 : MARGIN_RIGHT_OUTSIDE;
 		return Plot.plot({
 			width: containerW,
 			height: scaledRowH,
@@ -261,15 +264,15 @@
 					x: 'value',
 					y: () => '',
 					fill: colorFor(item),
-					rx: Math.max(3, Math.round(metrics.rowH / 6))
+					rx: Math.max(3, Math.round(metrics.rowH / 5))
 				}),
 				Plot.text([item], {
 					x: 'value',
 					y: () => '',
 					text: (d: ObsBarDataPoint) => `${prefix}${d.value}${unit}`,
-					dx: 8,
-					textAnchor: 'start',
-					fill: '#0a0a0a',
+					dx: insideLabel ? -8 : 8,
+					textAnchor: insideLabel ? 'end' : 'start',
+					fill: insideLabel ? 'white' : '#0a0a0a',
 					fontWeight: '700',
 					fontSize: metrics.valueFontSize
 				}),
@@ -328,12 +331,14 @@
 			300,
 			Math.max(compact ? 120 : 150, estimateLabelWidth(longestGroupStr, fontPx))
 		);
+		const marginRight = 56;
+		const chartAreaW = chartWidth - marginLeft - marginRight;
 		const h = rows.length * rowH + 20;
 		return Plot.plot({
 			width: chartWidth,
 			height: h,
 			marginLeft,
-			marginRight: 80,
+			marginRight,
 			marginTop: 4,
 			marginBottom: 4,
 			style: {
@@ -350,9 +355,21 @@
 					x: 'value',
 					y: 'group',
 					fill: colorFor,
-					rx: compact ? 4 : 6
+					rx: compact ? 4 : 7
 				}),
-				Plot.text(rows, {
+				// Inside labels (wide bars — white text)
+				Plot.text(rows.filter((d) => (d.value / domainMax) * chartAreaW >= 52), {
+					x: 'value',
+					y: 'group',
+					text: (d: ObsBarDataPoint) => `${prefix}${d.value}${unit}`,
+					dx: -8,
+					textAnchor: 'end',
+					fill: 'white',
+					fontWeight: '700',
+					fontSize: valueFontSize
+				}),
+				// Outside labels (narrow bars — dark text)
+				Plot.text(rows.filter((d) => (d.value / domainMax) * chartAreaW < 52), {
 					x: 'value',
 					y: 'group',
 					text: (d: ObsBarDataPoint) => `${prefix}${d.value}${unit}`,
@@ -390,7 +407,13 @@
 			if (destroyed || !containerEl) return;
 
 			const hasGroups = data.some((d) => d.group);
-			const domainMax = maxValue ?? Math.max(...data.map((d) => d.value)) * 1.3;
+			const actualMax = Math.max(...data.map((d) => d.value));
+			// Tight domain — just 8% beyond actual max. Value labels go INSIDE wide
+			// bars (white text) and outside narrow bars, so we no longer need the
+			// 30% "reserved for label" headroom.
+			const domainMax = maxValue ?? actualMax * 1.08;
+			// Bar pixel width helper used to decide inside vs outside label placement.
+			const INSIDE_MIN_PX = 52;
 
 			containerEl.innerHTML = '';
 
@@ -477,7 +500,8 @@
 			}
 
 			// ── Label-left simple mode ─────────────────────────────────
-			const rowH = calcRowH(data.length, 62);
+			// Slightly taller default rows for bolder visual presence.
+			const rowH = calcRowH(data.length, 72);
 			const compact = rowH < 42;
 			const fontPxSimple = compact ? 11 : 13;
 			const h = data.length * rowH + 32;
@@ -489,12 +513,16 @@
 				320,
 				Math.max(compact ? 140 : 170, estimateLabelWidth(longestLabelStr, fontPxSimple))
 			);
+			// Right margin only needs to fit outside-label values on narrow bars.
+			// Wide bars carry the label inside (white text), so no extra space needed.
+			const simpleMarginRight = 56;
+			const simpleChartAreaW = chartWidth - simpleMarginLeft - simpleMarginRight;
 
 			const chart = Plot.plot({
 				width: chartWidth,
 				height: h,
 				marginLeft: simpleMarginLeft,
-				marginRight: 88,
+				marginRight: simpleMarginRight,
 				marginTop: 8,
 				marginBottom: 8,
 				style: {
@@ -511,10 +539,22 @@
 						x: 'value',
 						y: 'label',
 						fill: (d: ObsBarDataPoint) => d.color ?? AFTER_COLOR,
-						rx: compact ? 4 : 6,
+						rx: compact ? 4 : 7,
 						sort: { y: '-x' }
 					}),
-					Plot.text(data, {
+					// Inside labels for wide bars (white text sits within the bar)
+				Plot.text(data.filter((d) => (d.value / domainMax) * simpleChartAreaW >= INSIDE_MIN_PX), {
+						x: 'value',
+						y: 'label',
+						text: (d: ObsBarDataPoint) => `${prefix}${d.value}${unit}`,
+						dx: -9,
+						textAnchor: 'end',
+						fill: 'white',
+						fontWeight: '700',
+						fontSize: compact ? 12 : 15
+					}),
+					// Outside labels for narrow bars (dark text after the bar)
+					Plot.text(data.filter((d) => (d.value / domainMax) * simpleChartAreaW < INSIDE_MIN_PX), {
 						x: 'value',
 						y: 'label',
 						text: (d: ObsBarDataPoint) => `${prefix}${d.value}${unit}`,
