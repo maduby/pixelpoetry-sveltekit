@@ -123,15 +123,12 @@ const ch9PreventionRoi: ObsBarDataPoint[] = [
 ];
 
 // ─── Chapter 5 (mindset step) ────────────────────────────────────────────────
-// Extra healthy years associated with each lifestyle factor — Levy (Yale) is
-// the surprise: positive ageing mindset ties regular exercise, beats social ties.
-const ch5MindsetEffect: ObsBarDataPoint[] = [
-	{ label: 'Not smoking', value: 10.0, color: FOREST },
-	{ label: 'Positive ageing mindset', value: 7.5, color: FOREST },
-	{ label: 'Regular exercise', value: 7.0, color: FOREST },
-	{ label: 'Strong social ties', value: 5.5, color: FOREST },
-	{ label: 'Adequate sleep (7–9 h)', value: 4.7, color: '#4d7c0f' },
-	{ label: 'Maintaining healthy weight', value: 3.5, color: '#65a30d' }
+// Focused 2-bar comparison from Levy et al. (2002, JPERS). The key claim is
+// that positive ageing mindset (7.5 yrs) beats not smoking (5.5 yrs) as
+// measured within the same Ohio Longitudinal Study cohort.
+const ch5MindsetComparison: ObsBarDataPoint[] = [
+	{ label: 'Positive ageing mindset', value: 7.5, color: AMBER },
+	{ label: 'Not smoking', value: 5.5, color: '#64748b' }
 ];
 
 // ─── Chapter 4 ───────────────────────────────────────────────────────────────
@@ -635,12 +632,12 @@ export const chapters: Chapter[] = [
 				'<strong>Mindset</strong> is the most counterintuitive pillar. Becca Levy\'s research at Yale found that people with positive views of their own ageing live an average of <strong>7.5 years longer</strong> than those with negative views — more than the effect of not smoking.',
 			viz: {
 				type: 'obs-bar',
-				title: 'Extra healthy years by lifestyle factor',
+				title: 'Years added to life expectancy',
 				subtitle:
-					'Approximate gain in healthy life expectancy from adopting each factor — Levy (Yale, 2002), Li et al. (PNAS, 2021), Holt-Lunstad (PLOS Medicine, 2010), Walker (2017), and WHO GBD estimates.',
+					'Measured within the same cohort — Ohio Longitudinal Study of Aging and Retirement. Levy et al., Journal of Personality and Social Psychology, 2002.',
 				unit: ' yrs',
-				sourceId: 'matthew-pnas-2021',
-				data: ch5MindsetEffect
+				sourceId: 'levy-2002',
+				data: ch5MindsetComparison
 			}
 		},
 		{

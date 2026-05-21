@@ -168,6 +168,19 @@ export const sources: Record<string, Source> = {
 			}
 		]
 	},
+	'levy-2002': {
+		id: 'levy-2002',
+		short: 'Levy et al. / JPERS (2002)',
+		full: 'Levy, B. R., Slade, M. D., Kunkel, S. R., & Kasl, S. V. (2002). Longevity increased by positive self-perceptions of aging. Journal of Personality and Social Psychology, 83(2), 261–270.',
+		url: 'https://doi.org/10.1037/0022-3514.83.2.261',
+		year: 2002,
+		references: [
+			{
+				citation:
+					'In the Ohio Longitudinal Study of Aging and Retirement (n=660, 23-year follow-up), participants with more positive self-perceptions of ageing lived 7.5 years longer than those with negative views — an effect greater than the survival advantage from not smoking (5.5 years) measured within the same cohort, after controlling for age, gender, socioeconomic status, loneliness, and functional health.'
+			}
+		]
+	},
 	'matthew-pnas-2021': {
 		id: 'matthew-pnas-2021',
 		short: 'Li et al. / PNAS (2021)',
