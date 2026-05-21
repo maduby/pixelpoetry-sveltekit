@@ -30,6 +30,7 @@
 	import ObsBarChart from '$lib/components/viz/ObsBarChart.svelte';
 	import ObsTimelineChart from '$lib/components/viz/ObsTimelineChart.svelte';
 	import ImageChart from '$lib/components/viz/ImageChart.svelte';
+	import EraTimeline from '$lib/components/viz/EraTimeline.svelte';
 	import { cn } from '$lib/utils/cn';
 	import { posthog } from '$lib/analytics/posthog';
 
@@ -139,8 +140,10 @@
 				valueDomain={step.viz.valueDomain}
 				sourceId={step.viz.sourceId}
 			/>
-		{:else if step.viz?.type === 'donut'}
-			<DonutChart data={step.viz.data} label={chapter.title} />
+	{:else if step.viz?.type === 'donut'}
+		<DonutChart data={step.viz.data} label={chapter.title} />
+	{:else if step.viz?.type === 'era-timeline'}
+		<EraTimeline eras={step.viz.eras} title={step.viz.title} />
 	{:else if step.viz?.type === 'image'}
 		<ImageChart
 			name={step.viz.name}

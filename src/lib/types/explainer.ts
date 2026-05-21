@@ -168,6 +168,26 @@ export interface TimelineSeries {
 	points: TimelinePoint[];
 }
 
+/** One band in the era-timeline chart — a named period with a colour and date range. */
+export interface EraData {
+	/** Display name, e.g. "Era of Infection". */
+	title: string;
+	/** Short keyword phrase rendered below the bar, e.g. "Sewers · Vaccines · Antibiotics". */
+	keyword: string;
+	startYear: number;
+	/** null = ongoing (renders with an arrow extending to the right). */
+	endYear: number | null;
+	/** Hex fill colour for the bar. */
+	color: string;
+}
+
+/** Swim-lane era chart — staggered horizontal bars on a shared time axis. */
+export interface EraTimelineViz {
+	type: 'era-timeline';
+	eras: EraData[];
+	title?: string;
+}
+
 /** Observable Plot powered multi-series timeline / line chart. */
 export interface ObsTimelineViz {
 	type: 'obs-timeline';
@@ -189,7 +209,8 @@ export type VizConfig =
 	| LineViz
 	| DonutViz
 	| ObsBarViz
-	| ObsTimelineViz;
+	| ObsTimelineViz
+	| EraTimelineViz;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Source / Term / Image — the lookup tables every explainer needs

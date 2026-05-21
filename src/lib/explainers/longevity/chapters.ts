@@ -345,12 +345,39 @@ export const chapters: Chapter[] = [
 			'19th-century medicine fought infection. 20th-century medicine fought genetics. 21st-century medicine is fighting choices — and our understanding of what "choices" even means has fundamentally shifted.',
 		accent: 'amber',
 		steps: [
-			{
-				id: 'ch2-paradigms',
-				text: 'In 1850, if you wanted to understand why people died young, you studied sewers. In 1950, you studied chromosomes. In 2025, you study the exposome — the full weight of everything your body has ever been exposed to, from the food you ate as a child to the air you breathed this morning.',
-				richText:
-					'In 1850, if you wanted to understand why people died young, you studied sewers. In 1950, you studied chromosomes. In 2025, you study the <strong data-term="exposome">exposome</strong> — the full weight of everything your body has ever been exposed to, from the food you ate as a child to the air you breathed this morning.'
-			},
+		{
+			id: 'ch2-paradigms',
+			text: 'In 1850, if you wanted to understand why people died young, you studied sewers. In 1950, you studied chromosomes. In 2025, you study the exposome — the full weight of everything your body has ever been exposed to, from the food you ate as a child to the air you breathed this morning.',
+			richText:
+				'In 1850, if you wanted to understand why people died young, you studied sewers. In 1950, you studied chromosomes. In 2025, you study the <strong data-term="exposome">exposome</strong> — the full weight of everything your body has ever been exposed to, from the food you ate as a child to the air you breathed this morning.',
+			viz: {
+				type: 'era-timeline',
+				title: 'The shifting paradigm of medicine',
+				eras: [
+					{
+						title: 'Era of Infection',
+						keyword: 'Sewers · Vaccines · Antibiotics',
+						startYear: 1850,
+						endYear: 1940,
+						color: '#b45309'
+					},
+					{
+						title: 'Era of Genetics',
+						keyword: 'DNA · Chromosomes · Heredity',
+						startYear: 1920,
+						endYear: 2000,
+						color: '#374151'
+					},
+					{
+						title: 'Era of the Exposome',
+						keyword: 'Lifestyle · Epigenetics · Environment',
+						startYear: 1990,
+						endYear: null,
+						color: '#166534'
+					}
+				]
+			}
+		},
 			{
 				id: 'ch2-genetics-share',
 				text: 'Genetics account for roughly 25% of variation in lifespan. The other 75% is lifestyle and environment — a finding consistent across the largest twin studies ever conducted.',
