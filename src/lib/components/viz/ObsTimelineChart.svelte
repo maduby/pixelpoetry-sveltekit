@@ -44,9 +44,22 @@
 
 	let measuredWidth = $state(560);
 	let chartWidth = $derived(Math.max(320, measuredWidth));
+	/** Height of the nearest sticky viz column. 0 = not inside one (renders inline). */
+	let availableHeight = $state(0);
 
 	const MOBILE_BREAKPOINT = 540;
 	let isNarrow = $derived(measuredWidth > 0 && measuredWidth < MOBILE_BREAKPOINT);
+
+	/**
+	 * Responsive chart height: fill ~65% of the sticky column height when
+	 * available, clamped between a comfortable minimum and a readable maximum.
+	 * Falls back to fixed 260/340 when rendered inline (no sticky ancestor).
+	 */
+	const chartH = $derived(
+		availableHeight > 0
+			? Math.min(Math.max(isNarrow ? 200 : 240, Math.round(availableHeight * 0.65)), isNarrow ? 320 : 440)
+			: (isNarrow ? 260 : 340)
+	);
 
 	// Flatten series into one row per point with the series label attached
 	// so a single Plot.lineY call can colour and connect them by series.
@@ -158,9 +171,11 @@
 	$effect(() => {
 		if (!browser || !containerEl) return;
 
-				// Reactivity anchors — read up front so the effect re-runs when any change.
-			const _w = chartWidth;
-			const _narrow = isNarrow;
+		// Reactivity anchors — read up front so the effect re-runs when any change.
+		const _w = chartWidth;
+		const _narrow = isNarrow;
+		// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+		availableHeight;
 			const _flat = flatData;
 			const _ends = adjustedEndpoints;
 			const _xd = xDomain;
@@ -182,7 +197,7 @@
 
 			const chart = Plot.plot({
 				width: _w,
-				height: _narrow ? 260 : 340,
+				height: chartH,
 				marginLeft: _narrow ? 36 : 48,
 				marginRight,
 				marginTop: 16,
@@ -284,6 +299,22 @@
 			if (w > 0) measuredWidth = Math.round(w);
 		});
 		ro.observe(wrapperEl);
+		return () => ro.disconnect();
+	});
+
+	// Observe the nearest sticky viz column so we can size the chart height
+	// to fill the available viewport slot rather than using a fixed px value.
+	$effect(() => {
+		if (!browser || !wrapperEl) return;
+		const stickyAncestor = wrapperEl.closest<HTMLElement>('[data-viz-sticky]');
+		if (!stickyAncestor) {
+			availableHeight = 0;
+			return;
+		}
+		const ro = new ResizeObserver(([e]) => {
+			availableHeight = e.contentRect.height || 0;
+		});
+		ro.observe(stickyAncestor);
 		return () => ro.disconnect();
 	});
 </script>

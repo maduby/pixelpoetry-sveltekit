@@ -217,24 +217,33 @@
 	}
 
 	/**
-	 * Mobile layout: render ONE bar as its own tiny Plot, with no y-axis
+	 * Stacked layout: render ONE bar as its own tiny Plot, with no y-axis
 	 * and no left margin. The label is added separately as a sibling
 	 * HTML heading (see callers below) so the bar can use the full
 	 * container width.
+	 *
+	 * When `containerW` is wider than a phone (≥ 400px) we scale the bar
+	 * height up proportionally so it looks bold on larger screens.
 	 */
 	function buildMobileSingleBar(
 		Plot: typeof import('@observablehq/plot'),
 		item: ObsBarDataPoint,
 		domainMax: number,
-		metrics: MobileMetrics
+		metrics: MobileMetrics,
+		containerW = measuredWidth
 	): Element {
+		// On wider containers scale bar height up to a comfortable maximum.
+		const scaledRowH =
+			containerW >= 400
+				? Math.min(52, Math.round(metrics.rowH * (1 + (containerW - 400) / 800)))
+				: metrics.rowH;
 		// Right padding has to fit the value label, which can be quite
 		// wide on mobile ("80% of calories" ≈ 110px at 14px). We size it
 		// against the current value font so it shrinks with compact tiers.
-		const MARGIN_RIGHT = Math.round(metrics.valueFontSize * 7);
+		const MARGIN_RIGHT = Math.round(metrics.valueFontSize * 7.5);
 		return Plot.plot({
-			width: measuredWidth,
-			height: metrics.rowH,
+			width: containerW,
+			height: scaledRowH,
 			marginLeft: 0,
 			marginRight: MARGIN_RIGHT,
 			marginTop: 2,
@@ -385,15 +394,25 @@
 
 			containerEl.innerHTML = '';
 
-			// ── Mobile path ────────────────────────────────────────────
-			// Always: HTML label above, single-bar Plot below. Free of
-			// y-axis margin so the bar uses the full container width.
+			// ── Decide layout: label-left (desktop) vs label-above (stacked) ──
 			//
-			// CRITICAL: every bar + label must fit inside `availableHeight`,
-			// because the sticky viz column has `overflow-hidden` and the
-			// chart itself doesn't scroll. `calcMobileMetrics` walks a
-			// roomy → tight tier list and picks the first that fits.
-			if (narrow) {
+			// We use label-above whenever the container is narrow OR whenever
+			// the estimated left-label margin would leave fewer than 200px for
+			// the actual bars. This makes the decision data-driven (long labels
+			// in a medium-width container trigger stacked layout automatically)
+			// rather than purely width-based.
+			const longestForLayout = hasGroups
+				? data.reduce((m, d) => (d.group && d.group.length > m.length ? d.group : m), '')
+				: data.reduce((m, d) => (d.label.length > m.length ? d.label : m), '');
+			const estimatedLeftMargin = Math.min(320, Math.max(140, estimateLabelWidth(longestForLayout, 13)));
+			const projectedBarArea = chartWidth - estimatedLeftMargin - 88;
+			const useStackedLayout = narrow || projectedBarArea < 200;
+
+			// ── Stacked path ────────────────────────────────────────────
+			// Label rendered as HTML ABOVE each bar. Zero left margin means
+			// the bar uses the full container width. Adapts row height and
+			// font size to the available column height via calcMobileMetrics.
+			if (useStackedLayout) {
 				const numSections = hasGroups ? new Set(data.map((d) => d.label)).size : 0;
 				const metrics = calcMobileMetrics(data.length, numSections);
 
@@ -407,27 +426,27 @@
 							if (item.group) {
 								appendMobileLabel(containerEl, item.group, metrics, { firstItem });
 							}
-							containerEl.appendChild(buildMobileSingleBar(Plot, item, domainMax, metrics));
-							firstItem = false;
-						}
-					}
-				} else {
-					// Sort by value descending so the biggest bar reads first
-					const sorted = [...data].sort((a, b) => b.value - a.value);
-					for (const [i, item] of sorted.entries()) {
-						appendMobileLabel(containerEl, item.label, metrics, {
-							strong: true,
-							firstItem: i === 0
-						});
-						containerEl.appendChild(buildMobileSingleBar(Plot, item, domainMax, metrics));
+						containerEl.appendChild(buildMobileSingleBar(Plot, item, domainMax, metrics, measuredWidth));
+						firstItem = false;
 					}
 				}
+			} else {
+				// Sort by value descending so the biggest bar reads first
+				const sorted = [...data].sort((a, b) => b.value - a.value);
+				for (const [i, item] of sorted.entries()) {
+					appendMobileLabel(containerEl, item.label, metrics, {
+						strong: true,
+						firstItem: i === 0
+					});
+					containerEl.appendChild(buildMobileSingleBar(Plot, item, domainMax, metrics, measuredWidth));
+				}
+			}
 
 				setupBarAnimation(containerEl);
 				return;
 			}
 
-			// ── Desktop grouped mode ───────────────────────────────────
+			// ── Label-left grouped mode ────────────────────────────────
 			if (hasGroups) {
 				const uniqueLabels = [...new Set(data.map((d) => d.label))];
 				const maxRowsPerGroup = Math.max(
@@ -457,7 +476,7 @@
 				return;
 			}
 
-			// ── Desktop simple mode ────────────────────────────────────
+			// ── Label-left simple mode ─────────────────────────────────
 			const rowH = calcRowH(data.length, 62);
 			const compact = rowH < 42;
 			const fontPxSimple = compact ? 11 : 13;
