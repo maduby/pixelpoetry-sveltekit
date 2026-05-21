@@ -61,12 +61,18 @@
 				/>
 			{/each}
 
-			<!-- Centre hero number -->
+			<!-- Centre hero number.
+			     dy="0.35em" is the SVG-standard trick for optically centering
+			     bold numerals: it shifts the text down by 35% of the em so the
+			     visual mid-point of the digits lands exactly on y=0.
+			     dominant-baseline="middle" is intentionally omitted — it aligns
+			     the mathematical midpoint, not the optical one, and makes bold
+			     numbers look too high. -->
 			<text
 				text-anchor="middle"
-				dominant-baseline="middle"
 				y={0}
-				style="font-family: 'Arvo', serif; font-size: 80px; font-weight: 700; fill: #0a0a0a; letter-spacing: -2px"
+				dy="0.35em"
+				style="font-family: 'Arvo', serif; font-size: 80px; font-weight: 700; fill: #0a0a0a; letter-spacing: -2px; line-height: 1;"
 			>
 				{heroValue}%
 			</text>
