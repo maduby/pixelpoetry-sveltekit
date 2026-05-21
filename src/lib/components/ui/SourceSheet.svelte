@@ -28,14 +28,14 @@
 	});
 </script>
 
-<Sheet bind:open title={activeTerm ? 'Definition' : 'Source'}>
-	<!-- ── TERM VIEW ─────────────────────────────────────────────────── -->
+<Sheet bind:open title={activeTerm ? 'Annotation' : 'Source'}>
+	<!-- ── TERM / ANNOTATION VIEW ────────────────────────────────────── -->
 	{#if activeTerm}
 		<div class="flex flex-col gap-6">
 			<span
 				class="inline-block w-fit rounded-full bg-brand-amber/15 px-3 py-1 font-body text-xs font-bold uppercase tracking-widest text-brand-amber"
 			>
-				Term
+				Annotation
 			</span>
 
 			<h3 class="font-display text-2xl font-bold text-ink">{activeTerm.name}</h3>

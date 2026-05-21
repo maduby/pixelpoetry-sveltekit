@@ -214,21 +214,21 @@ body {
 	padding-bottom: 0.1em;
 }
 
-/* ── Inline term definition links ─────────────────────────────────────────── */
-/* Applied to <a data-term="…"> elements inside {@html richText} blocks.       */
-a[data-term] {
-	color: var(--color-brand-amber-deep);
-	text-decoration: underline;
-	text-decoration-style: dotted;
-	text-underline-offset: 3px;
+/* ── Inline annotation / jargon links ────────────────────────────────────── */
+/* Applied to any [data-term="…"] element — <strong>, <span>, <a> — inside     */
+/* {@html richText} blocks. Click opens the "Annotation" bottom sheet.          */
+[data-term] {
+	font-weight: 600;
+	text-decoration: underline wavy var(--color-brand-amber);
+	text-decoration-thickness: 1.5px;
+	text-underline-offset: 4px;
 	cursor: pointer;
-	font-weight: inherit;
-	transition: color 150ms ease;
+	color: inherit;
+	transition: text-decoration-color 150ms ease;
 }
-a[data-term]:hover,
-a[data-term]:focus-visible {
-	color: var(--color-brand-red);
-	text-decoration-style: solid;
+[data-term]:hover,
+[data-term]:focus-visible {
+	text-decoration-color: var(--color-brand-red);
 	outline: none;
 }
 
