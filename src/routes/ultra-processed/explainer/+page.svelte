@@ -8,6 +8,7 @@
 	import ArrowDown from 'lucide-svelte/icons/arrow-down';
 	import { reveal } from '$lib/attachments/reveal';
 	import { posthog } from '$lib/analytics/posthog';
+	import EditorialSheet from '$lib/components/ui/EditorialSheet.svelte';
 
 	// Register this explainer as the active one so Nav, ProgressBar, viz
 	// components and SourceSheet can read its data via context. The returned
@@ -68,9 +69,13 @@
 				Start reading
 				<ArrowDown size={18} aria-hidden="true" />
 			</a>
-			<p class="text-sm text-ink/60">
-				{meta.chapterCount} chapters &#183; ~{meta.readTimeMin} min read
-			</p>
+			<div class="flex items-center gap-3 text-sm text-ink/60">
+				<span>{meta.chapterCount} chapters &#183; ~{meta.readTimeMin} min read</span>
+				{#if meta.editorial}
+					<span aria-hidden="true" class="text-ink/25">·</span>
+					<EditorialSheet editorial={meta.editorial} slug={meta.slug} />
+				{/if}
+			</div>
 		</div>
 	</div>
 

@@ -23,7 +23,27 @@ export const meta = {
 	chapterCount: 9,
 	publishedAt: '2025-05-16',
 	keywords:
-		'ultra-processed food, UPF, NOVA classification, food addiction, obesity, processed food health risks, Chris van Tulleken, food system, junk food, diet and cancer, food inequality'
+		'ultra-processed food, UPF, NOVA classification, food addiction, obesity, processed food health risks, Chris van Tulleken, food system, junk food, diet and cancer, food inequality',
+	editorial: {
+		title: 'Why I made this',
+		body: `
+<p>Write your motivation, backstory, and caveats here. This is your editorial note to the reader — the part of the essay that sits behind the byline.</p>
+
+<p>You can use full rich text: <strong>bold</strong>, <em>italic</em>, <a href="#">links</a>, blockquotes, images, and lists. Replace this placeholder with your own words.</p>
+
+<blockquote><p>What triggered this piece, what you were trying to understand, what surprised you along the way, and what you are still uncertain about.</p></blockquote>
+
+<h2>Caveats</h2>
+<p>What you would add, qualify, or change after writing it. Where the evidence is genuinely contested. What you left out and why.</p>
+
+<h2>Sources</h2>
+<p>The primary sources are listed at the bottom of the essay. A few that shaped the thinking most:</p>
+<ul class="sources-list">
+  <li>Chris van Tulleken — <em>Ultra-Processed People</em> (2023)</li>
+  <li>Carlos Monteiro et al. — <a href="https://www.thelancet.com" target="_blank" rel="noopener">NOVA classification, Public Health Nutrition</a></li>
+</ul>
+`
+	}
 } as const;
 
 export type ExplainerMeta = typeof meta;
