@@ -7,6 +7,7 @@
 	import { reveal } from '$lib/attachments/reveal';
 	import { posthog } from '$lib/analytics/posthog';
 	import EditorialSheet from '$lib/components/ui/EditorialSheet.svelte';
+	import KeyTakeaways from '$lib/components/ui/KeyTakeaways.svelte';
 </script>
 
 <SEO
@@ -24,7 +25,7 @@
      HERO
      ============================================================ -->
 <section
-	class="relative isolate flex min-h-[calc(100svh-var(--nav-h,4rem))] flex-col justify-center overflow-hidden bg-cream -mb-px"
+	class="relative isolate -mb-px flex min-h-[calc(100svh-var(--nav-h,4rem))] flex-col justify-center overflow-hidden bg-cream"
 	aria-labelledby="hero-title"
 >
 	<!-- Decorative background gradient. -->
@@ -90,12 +91,20 @@
 	</a>
 </section>
 
+{#if meta.keyTakeaways}
+	<KeyTakeaways items={meta.keyTakeaways} variant="top" accent="warning" slug={meta.slug} />
+{/if}
+
 <!-- ============================================================
      CHAPTERS
      ============================================================ -->
 {#each chapters as chapter, i (chapter.id)}
 	<Chapter {chapter} index={i} />
 {/each}
+
+{#if meta.keyTakeaways}
+	<KeyTakeaways items={meta.keyTakeaways} variant="bottom" accent="warning" slug={meta.slug} />
+{/if}
 
 <!-- ============================================================
      CLOSING NOTE

@@ -26,6 +26,33 @@ export const meta = {
 	publishedAt: '2026-05-21',
 	keywords:
 		'longevity, lifespan, healthspan, ageing, hallmarks of aging, blue zones, caloric restriction, exercise longevity, sleep health, evidence-based longevity',
+	keyTakeaways: [
+		{
+			text: 'In 2025, you study the exposome — the full weight of everything your body has ever been exposed to.',
+			href: '#three-eras-of-medicine',
+			linkLabel: 'Read the evidence'
+		},
+		{
+			text: 'Sleep, Mindset, Exercise, Diet, and Stress. Not a lifestyle blog. A framework built from the evidence up.',
+			href: '#smeds-framework',
+			linkLabel: 'Read the framework'
+		},
+		{
+			text: 'The OLP report frames its evidence at the level of the individual. The same evidence supports a very different reading.',
+			href: '#what-critics-get-right',
+			linkLabel: 'Read the critique'
+		},
+		{
+			text: 'Here is what the evidence actually supports — ordered by strength of evidence.',
+			href: '#what-do-you-do-on-monday',
+			linkLabel: 'Read what works'
+		},
+		{
+			text: 'The things with the strongest evidence are free, or nearly so.',
+			href: '#what-do-you-do-on-monday',
+			linkLabel: 'Go to Monday'
+		}
+	],
 	editorial: {
 		title: 'Why I made this',
 		lastUpdated: '21 May 2026 at 10:49am SAST',

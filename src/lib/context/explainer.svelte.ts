@@ -19,6 +19,12 @@
 import { getContext, setContext } from 'svelte';
 import type { Chapter, ImageEntry, Source, Term } from '$lib/types/explainer';
 
+export interface KeyTakeaway {
+	text: string;
+	href?: `#${string}`;
+	linkLabel?: string;
+}
+
 export interface ExplainerMetaLike {
 	slug: string;
 	/** Canonical URL of this specific piece, e.g. /ultra-processed/explainer */
@@ -43,6 +49,7 @@ export interface ExplainerMetaLike {
 		lastUpdated?: string;
 		body: string;
 	};
+	keyTakeaways?: readonly KeyTakeaway[];
 }
 
 export interface ActiveExplainer {

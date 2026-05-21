@@ -7,6 +7,7 @@
 	import { reveal } from '$lib/attachments/reveal';
 	import { posthog } from '$lib/analytics/posthog';
 	import EditorialSheet from '$lib/components/ui/EditorialSheet.svelte';
+	import KeyTakeaways from '$lib/components/ui/KeyTakeaways.svelte';
 </script>
 
 <SEO
@@ -24,7 +25,7 @@
      HERO
      ============================================================ -->
 <section
-	class="relative isolate flex min-h-[calc(100svh-var(--nav-h,4rem))] flex-col justify-center overflow-hidden bg-cream -mb-px"
+	class="relative isolate -mb-px flex min-h-[calc(100svh-var(--nav-h,4rem))] flex-col justify-center overflow-hidden bg-cream"
 	aria-labelledby="hero-title"
 >
 	<!-- Forest/teal gradient matching longevity's green palette. -->
@@ -90,12 +91,20 @@
 	</a>
 </section>
 
+{#if meta.keyTakeaways}
+	<KeyTakeaways items={meta.keyTakeaways} variant="top" accent="forest" slug={meta.slug} />
+{/if}
+
 <!-- ============================================================
      CHAPTERS
      ============================================================ -->
 {#each chapters as chapter, i (chapter.id)}
 	<Chapter {chapter} index={i} />
 {/each}
+
+{#if meta.keyTakeaways}
+	<KeyTakeaways items={meta.keyTakeaways} variant="bottom" accent="forest" slug={meta.slug} />
+{/if}
 
 <!-- ============================================================
      CLOSING NOTE
@@ -106,7 +115,9 @@
 			class="max-w-3xl font-display text-4xl leading-tight text-balance md:text-6xl"
 			{@attach reveal({ y: 32 })}
 		>
-			The science is clearer than the culture admits. You have more control than you have been told — and less than the report implies. The honest answer is somewhere in the middle, and it starts on Monday.
+			The science is clearer than the culture admits. You have more control than you have been told
+			— and less than the report implies. The honest answer is somewhere in the middle, and it
+			starts on Monday.
 		</p>
 	</div>
 </section>

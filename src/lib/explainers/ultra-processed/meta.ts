@@ -24,6 +24,33 @@ export const meta = {
 	publishedAt: '2025-05-16',
 	keywords:
 		'ultra-processed food, UPF, NOVA classification, food addiction, obesity, processed food health risks, Chris van Tulleken, food system, junk food, diet and cancer, food inequality',
+	keyTakeaways: [
+		{
+			text: 'Walk into any supermarket. Pick up almost anything. Read the back of the packet.',
+			href: '#the-new-normal',
+			linkLabel: 'Read the shift'
+		},
+		{
+			text: 'Food becomes ultra-processed when its ingredients leave the kitchen entirely.',
+			href: '#what-is-it',
+			linkLabel: 'Read NOVA'
+		},
+		{
+			text: 'The largest pooled study ever conducted on UPF found adverse health effects across nearly every organ system.',
+			href: '#body-under-siege',
+			linkLabel: 'Read the risks'
+		},
+		{
+			text: 'Soft. Calorie-dense. Fast to chew. Slow to satiate.',
+			href: '#engineered-to-addict',
+			linkLabel: 'Read the design'
+		},
+		{
+			text: 'There is no clean exit from a food system this large. There are, however, levers.',
+			href: '#what-now',
+			linkLabel: 'Read what now'
+		}
+	],
 	editorial: {
 		title: 'Why I made this',
 		lastUpdated: '21 May 2026 at 9:52am SAST',

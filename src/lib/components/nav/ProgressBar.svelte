@@ -32,6 +32,7 @@
 		id: string;
 		title: string;
 		eyebrow: string;
+		description: string;
 		number: number;
 		/** 0–1 fraction of scroll progress at which this marker sits. */
 		position: number;
@@ -72,7 +73,14 @@
 			const fallback = (i + 1) / (chapters.length + 1);
 			const raw = max > 0 ? offsetTop / max : fallback;
 			const position = Math.min(maxPos, Math.max(minPos, raw));
-			return { id: c.id, title: c.title, eyebrow: c.eyebrow, number: c.number, position };
+			return {
+				id: c.id,
+				title: c.title,
+				eyebrow: c.eyebrow,
+				description: c.intro,
+				number: c.number,
+				position
+			};
 		});
 	}
 
@@ -175,67 +183,82 @@
 
 <!-- The bar only appears on explainer routes where a chapter list exists. -->
 {#if chapters.length}
-<!-- The bar lives directly below the fixed 64px Nav. -->
-<div class="pointer-events-none fixed inset-x-0 top-16 z-50" role="presentation">
-	<!-- Constrained to the same max-width as the page content -->
-	<div class="mx-auto max-w-(--container-wide) px-6 lg:px-8">
-		<!-- bind:this so we can measure the bar's pixel position on screen -->
-		<div bind:this={barEl} class="relative h-[3px] rounded-full bg-ink/10">
-			<!-- Fill: percentage of the bar element (not viewport) -->
-			<div
-				class="absolute inset-y-0 left-0 rounded-full transition-[width] duration-150 ease-out {theme.barGradient}"
-				style:width="{(progress * 100).toFixed(2)}%"
-			></div>
+	<!-- The bar lives directly below the fixed 64px Nav. -->
+	<div class="pointer-events-none fixed inset-x-0 top-16 z-50" role="presentation">
+		<!-- Constrained to the same max-width as the page content -->
+		<div class="mx-auto max-w-(--container-wide) px-6 lg:px-8">
+			<!-- bind:this so we can measure the bar's pixel position on screen -->
+			<div bind:this={barEl} class="relative h-[3px] rounded-full bg-ink/10">
+				<!-- Fill: percentage of the bar element (not viewport) -->
+				<div
+					class="absolute inset-y-0 left-0 rounded-full transition-[width] duration-150 ease-out {theme.barGradient}"
+					style:width="{(progress * 100).toFixed(2)}%"
+				></div>
 
-			<!-- Markers — nav is absolute/inset-0 so % left = % of bar width -->
-			<nav aria-label="Chapter progress" class="pointer-events-auto absolute inset-0">
-				{#each markers as marker (marker.id)}
-					{@const reached = progress >= marker.position - 0.005}
-					{@const isActive = activeId === marker.id}
-					{@const isHovered = hoveredId === marker.id}
+				<!-- Markers — nav is absolute/inset-0 so % left = % of bar width -->
+				<nav aria-label="Chapter progress" class="pointer-events-auto absolute inset-0">
+					{#each markers as marker (marker.id)}
+						{@const reached = progress >= marker.position - 0.005}
+						{@const isActive = activeId === marker.id}
+						{@const isHovered = hoveredId === marker.id}
 
-					<!-- Dot anchor — left is a % of the nav (which = bar width) -->
-					<a
-						href={`#${marker.id}`}
-						class="group absolute top-1/2 -translate-y-1/2 -translate-x-1/2 outline-none"
-						style:left="{(marker.position * 100).toFixed(2)}%"
-						aria-current={isActive ? 'location' : undefined}
-						aria-label={`${marker.eyebrow}: ${marker.title}`}
-						onclick={() => posthog.capture('progress_bar_chapter_clicked', { explainer_slug: explainer?.meta.slug, chapter_id: marker.id, chapter_number: marker.number, chapter_title: marker.title })}
-						onmouseenter={() => (hoveredId = marker.id)}
-						onmouseleave={() => (hoveredId = null)}
-						onfocus={() => (hoveredId = marker.id)}
-						onblur={() => (hoveredId = null)}
-					>
-					<span
-						class={cn(
-							'block rounded-full border-2 transition-all duration-200',
-							isActive
-								? `size-4 ${theme.activeDot}`
-								: reached
-									? 'size-2.5 border-ink bg-ink'
-									: 'size-2.5 border-ink/40 bg-cream',
-							`group-hover:scale-125 group-focus-visible:scale-125 group-focus-visible:ring-2 ${theme.focusRing} group-focus-visible:ring-offset-2`
-						)}
-						aria-hidden="true"
-					></span>
-					</a>
-
-					<!-- Tooltip — shown only on hover/focus, perfectly centered under the dot -->
-					{#if isHovered}
-						<span
-							class="pointer-events-none fixed z-50 -translate-x-1/2 rounded-md bg-ink px-2.5 py-1 text-[11px] font-semibold tracking-wide whitespace-nowrap text-cream shadow-lg"
-							style:left="{dotCenterPx(marker)}px"
-							style:top="80px"
-							aria-hidden="true"
+						<!-- Dot anchor — left is a % of the nav (which = bar width) -->
+						<a
+							href={`#${marker.id}`}
+							class="group absolute top-1/2 -translate-x-1/2 -translate-y-1/2 outline-none"
+							style:left="{(marker.position * 100).toFixed(2)}%"
+							aria-current={isActive ? 'location' : undefined}
+							aria-label={`${marker.eyebrow}: ${marker.title}`}
+							onclick={() =>
+								posthog.capture('progress_bar_chapter_clicked', {
+									explainer_slug: explainer?.meta.slug,
+									chapter_id: marker.id,
+									chapter_number: marker.number,
+									chapter_title: marker.title
+								})}
+							onmouseenter={() => (hoveredId = marker.id)}
+							onmouseleave={() => (hoveredId = null)}
+							onfocus={() => (hoveredId = marker.id)}
+							onblur={() => (hoveredId = null)}
 						>
-							<span class={theme.tooltipNumber}>{marker.number.toString().padStart(2, '0')}</span>
-							<span class="ml-1">{marker.title}</span>
-						</span>
-					{/if}
-				{/each}
-			</nav>
+							<span
+								class={cn(
+									'block rounded-full border-2 transition-all duration-200',
+									isActive
+										? `size-4 ${theme.activeDot}`
+										: reached
+											? 'size-2.5 border-ink bg-ink'
+											: 'size-2.5 border-ink/40 bg-cream',
+									`group-hover:scale-125 group-focus-visible:scale-125 group-focus-visible:ring-2 ${theme.focusRing} group-focus-visible:ring-offset-2`
+								)}
+								aria-hidden="true"
+							></span>
+						</a>
+
+						<!-- Tooltip — shown only on hover/focus, perfectly centered under the dot -->
+						{#if isHovered}
+							<span
+								class="pointer-events-none fixed z-50 w-64 -translate-x-1/2 rounded-md bg-ink px-3 py-2 text-left text-[11px] font-semibold tracking-wide text-cream shadow-lg"
+								style:left="{dotCenterPx(marker)}px"
+								style:top="80px"
+								aria-hidden="true"
+							>
+								<span class="block whitespace-nowrap">
+									<span class={theme.tooltipNumber}
+										>{marker.number.toString().padStart(2, '0')}</span
+									>
+									<span class="ml-1">{marker.title}</span>
+								</span>
+								<span
+									class="mt-1 hidden text-xs leading-snug font-medium tracking-normal text-cream/70 md:block"
+								>
+									{marker.description}
+								</span>
+							</span>
+						{/if}
+					{/each}
+				</nav>
+			</div>
 		</div>
 	</div>
-</div>
 {/if}
