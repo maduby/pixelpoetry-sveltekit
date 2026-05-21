@@ -9,12 +9,14 @@
 	 */
 	import { site } from '$lib/data/site';
 	import { getActiveExplainer } from '$lib/context/explainer.svelte';
+	import { getTheme } from '$lib/utils/explainer-theme';
 	import { posthog } from '$lib/analytics/posthog';
 	import Menu from 'lucide-svelte/icons/menu';
 	import ShareMenu from '$lib/components/nav/ShareMenu.svelte';
 	import NavDrawer from '$lib/components/nav/NavDrawer.svelte';
 
 	const explainer = $derived(getActiveExplainer());
+	const theme = $derived(getTheme(explainer?.meta.accent));
 
 	let drawerOpen = $state(false);
 
@@ -72,11 +74,11 @@
 		<!-- Logo / essay name — centred between hamburger and right rail -->
 		<div class="flex flex-1 items-center justify-center lg:justify-start">
 			{#if explainer}
-				<a
-					href={explainer.meta.href}
-					class="flex items-baseline gap-2 font-display text-xl font-bold tracking-tight"
-				>
-					<span class="text-brand-red">{explainer.meta.shortName}</span>
+			<a
+				href={explainer.meta.href}
+				class="flex items-baseline gap-2 font-display text-xl font-bold tracking-tight"
+			>
+				<span class={theme.badgeText}>{explainer.meta.shortName}</span>
 					<span class="hidden text-ink/70 sm:inline">
 						{#if explainer.meta.emoji}<span aria-hidden="true">{explainer.meta.emoji}</span>{/if}
 						{explainer.meta.name}
@@ -101,7 +103,7 @@
 				<ShareMenu />
 				<a
 					href="#sources"
-					class="hidden rounded-full bg-ink px-4 py-2 text-sm font-semibold text-cream transition-colors hover:bg-brand-red sm:block"
+					class="hidden rounded-full bg-ink px-4 py-2 text-sm font-semibold text-cream transition-colors sm:block {theme.sourcesHover}"
 					onclick={() => posthog.capture('sources_nav_clicked')}
 				>
 					Sources

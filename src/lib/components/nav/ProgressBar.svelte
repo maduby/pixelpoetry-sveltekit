@@ -19,11 +19,13 @@
 	 */
 	import { onMount } from 'svelte';
 	import { getActiveExplainer } from '$lib/context/explainer.svelte';
+	import { getTheme } from '$lib/utils/explainer-theme';
 	import { cn } from '$lib/utils/cn';
 	import { posthog } from '$lib/analytics/posthog';
 
 	const explainer = $derived(getActiveExplainer());
 	const chapters = $derived(explainer?.chapters ?? []);
+	const theme = $derived(getTheme(explainer?.meta.accent));
 
 	interface Marker {
 		id: string;
@@ -180,7 +182,7 @@
 		<div bind:this={barEl} class="relative h-[3px] rounded-full bg-ink/10">
 			<!-- Fill: percentage of the bar element (not viewport) -->
 			<div
-				class="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-brand-red via-brand-amber to-brand-pink transition-[width] duration-150 ease-out"
+				class="absolute inset-y-0 left-0 rounded-full transition-[width] duration-150 ease-out {theme.barGradient}"
 				style:width="{(progress * 100).toFixed(2)}%"
 			></div>
 
@@ -204,18 +206,18 @@
 						onfocus={() => (hoveredId = marker.id)}
 						onblur={() => (hoveredId = null)}
 					>
-						<span
-							class={cn(
-								'block rounded-full border-2 transition-all duration-200',
-								isActive
-									? 'size-4 border-brand-red bg-brand-red shadow-[0_0_0_4px_rgb(254_249_239)]'
-									: reached
-										? 'size-2.5 border-ink bg-ink'
-										: 'size-2.5 border-ink/40 bg-cream',
-								'group-hover:scale-125 group-focus-visible:scale-125 group-focus-visible:ring-2 group-focus-visible:ring-brand-red group-focus-visible:ring-offset-2'
-							)}
-							aria-hidden="true"
-						></span>
+					<span
+						class={cn(
+							'block rounded-full border-2 transition-all duration-200',
+							isActive
+								? `size-4 ${theme.activeDot}`
+								: reached
+									? 'size-2.5 border-ink bg-ink'
+									: 'size-2.5 border-ink/40 bg-cream',
+							`group-hover:scale-125 group-focus-visible:scale-125 group-focus-visible:ring-2 ${theme.focusRing} group-focus-visible:ring-offset-2`
+						)}
+						aria-hidden="true"
+					></span>
 					</a>
 
 					<!-- Tooltip — shown only on hover/focus, perfectly centered under the dot -->
@@ -226,7 +228,7 @@
 							style:top="80px"
 							aria-hidden="true"
 						>
-							<span class="text-brand-amber">{marker.number.toString().padStart(2, '0')}</span>
+							<span class={theme.tooltipNumber}>{marker.number.toString().padStart(2, '0')}</span>
 							<span class="ml-1">{marker.title}</span>
 						</span>
 					{/if}
