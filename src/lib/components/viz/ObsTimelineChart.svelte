@@ -69,8 +69,7 @@
 		)
 	);
 
-	// The "endpoint" for each series — used to anchor the inline label at
-	// the rightmost (most recent) point of each line.
+	// Latest data point for each series — drives the legend values.
 	const endpoints = $derived(
 		series
 			.map((s) => {
@@ -81,35 +80,35 @@
 	);
 
 	/**
-	 * De-collide label y-positions so that when two series end at the same
-	 * year and their values are too close for a readable two-line label,
-	 * we nudge them apart symmetrically. `minGap` is in data units.
+	 * Highlight one series in the chart by dimming the others.
+	 * Works by querying the rendered SVG for path/circle elements and
+	 * comparing their stroke/fill attributes against the series colour.
+	 * Pass null to reset all elements to full opacity.
 	 */
-	function deCollide(
-		ends: { label: string; color: string; year: number; value: number }[],
-		minGap = 6
-	) {
-		// Attach a mutable labelY; sort descending by value so we process
-		// top-to-bottom and each nudge only pushes the lower item further down.
-		const out = ends.map((e) => ({ ...e, labelY: e.value })).sort((a, b) => b.labelY - a.labelY);
-
-		// Single downward pass: if two consecutive items (sorted high→low) are
-		// closer than minGap AND end at the same or adjacent year, push the lower
-		// one down far enough to restore the gap.
-		for (let i = 1; i < out.length; i++) {
-			const above = out[i - 1];
-			const below = out[i];
-			if (Math.abs(below.year - above.year) <= 2 && above.labelY - below.labelY < minGap) {
-				const overlap = minGap - (above.labelY - below.labelY);
-				above.labelY += overlap / 2;
-				below.labelY -= overlap / 2;
-			}
+	function highlightSeries(label: string | null) {
+		const svgEl = containerEl?.querySelector('svg');
+		if (!svgEl) return;
+		const lines = svgEl.querySelectorAll<SVGPathElement>('g[aria-label="line"] path');
+		const dots = svgEl.querySelectorAll<SVGCircleElement>('g[aria-label="dot"] circle');
+		if (!label) {
+			[...lines, ...dots].forEach((el) => {
+				el.style.opacity = '';
+				el.style.transition = 'opacity 180ms ease';
+			});
+			return;
 		}
-
-		return out;
+		const targetColor = series.find((s) => s.label === label)?.color?.toLowerCase();
+		lines.forEach((path) => {
+			const match = path.getAttribute('stroke')?.toLowerCase() === targetColor;
+			path.style.opacity = match ? '1' : '0.08';
+			path.style.transition = 'opacity 180ms ease';
+		});
+		dots.forEach((circle) => {
+			const match = circle.getAttribute('fill')?.toLowerCase() === targetColor;
+			circle.style.opacity = match ? '1' : '0.08';
+			circle.style.transition = 'opacity 180ms ease';
+		});
 	}
-
-	const adjustedEndpoints = $derived(deCollide(endpoints));
 
 	const xDomain = $derived<[number, number]>(
 		domain ?? [
@@ -177,7 +176,6 @@
 		// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 		availableHeight;
 			const _flat = flatData;
-			const _ends = adjustedEndpoints;
 			const _xd = xDomain;
 			const _yd = yDomain;
 
@@ -189,22 +187,8 @@
 			if (cancelled || !containerEl) return;
 
 			const fontPx = _narrow ? 11 : 13;
-			// Labels render INSIDE the chart area via a short callout connector,
-			// so we only need a tiny right margin for the axis tick itself.
+			// No inside labels → only a tiny right margin for the final axis tick.
 			const marginRight = _narrow ? 10 : 12;
-
-			// Offset each label anchor left by ~16% of the x-domain width so
-			// the callout text sits well clear of the endpoint dot.
-			const xRange = _xd[1] - _xd[0];
-			const labelXOff = xRange * 0.16;
-			const annotated = _ends.map((e) => {
-				const labelYear = Math.max(e.year - labelXOff, _xd[0] + xRange * 0.04);
-				// Elbow point: short horizontal stub 28% along the total offset, at the
-				// series' actual data value (same y). The connector then bends diagonally
-				// from there down/up to the de-collided labelY.
-				const elbowYear = e.year - (e.year - labelYear) * 0.28;
-				return { ...e, labelYear, elbowYear };
-			});
 
 			const chart = Plot.plot({
 				width: _w,
@@ -258,54 +242,6 @@
 						stroke: '#fef9ef',
 						strokeWidth: 1.6,
 						r: _narrow ? 3.5 : 4.5
-					}),
-					// Elbow connector — two segments:
-					//   1. Short horizontal stub from the endpoint to the elbow point.
-					//   2. Longer diagonal from the elbow down/up to the label anchor.
-					// This gives a gentle bent-line callout rather than a pure diagonal.
-					Plot.link(annotated, {
-						x1: 'year',
-						y1: 'value',
-						x2: 'elbowYear',
-						y2: 'value',
-						stroke: (d: { color: string }) => d.color,
-						strokeOpacity: 0.4,
-						strokeWidth: 1,
-						strokeLinecap: 'round'
-					}),
-					Plot.link(annotated, {
-						x1: 'elbowYear',
-						y1: 'value',
-						x2: 'labelYear',
-						y2: 'labelY',
-						stroke: (d: { color: string }) => d.color,
-						strokeOpacity: 0.4,
-						strokeWidth: 1,
-						strokeLinecap: 'round'
-					}),
-					// Series name at the label anchor — flows left from the anchor point.
-					Plot.text(annotated, {
-						x: 'labelYear',
-						y: 'labelY',
-						text: 'label',
-						fill: (d: { color: string }) => d.color,
-						fontWeight: '700',
-						fontSize: fontPx + 1,
-						textAnchor: 'end',
-						dx: -6
-					}),
-					// End-value callout — always visible so readers don't need to hover.
-					// Intentionally lighter than the label so it reads as supplementary.
-					Plot.text(annotated, {
-						x: 'labelYear',
-						y: 'labelY',
-						text: (d: { value: number }) => `${d.value}${unit}`,
-						fill: '#0a0a0a99',
-						fontWeight: '600',
-						fontSize: fontPx - 1,
-						textAnchor: 'end',
-						dx: -6,
-						dy: _narrow ? 13 : 15
 					}),
 					// Tooltip LAST — SVG paint order means last = on top, so the
 					// tip box always renders above country labels and value pills.
@@ -370,6 +306,34 @@
 		class="tip-host mt-4 w-full overflow-visible [&_svg]:max-w-full!"
 		aria-label={title ?? 'Timeline chart'}
 	></div>
+
+	<!-- ── Series legend ── colored dot · label · latest value ── -->
+	{#if series.length > 0}
+		<div class="mt-4 flex flex-wrap gap-x-5 gap-y-2">
+			{#each endpoints as ep}
+				<button
+					type="button"
+					class="group flex cursor-pointer items-center gap-2"
+					onmouseenter={() => highlightSeries(ep.label)}
+					onmouseleave={() => highlightSeries(null)}
+					onfocus={() => highlightSeries(ep.label)}
+					onblur={() => highlightSeries(null)}
+					aria-label="Highlight {ep.label}"
+				>
+					<span
+						class="h-2.5 w-2.5 shrink-0 rounded-full transition-transform group-hover:scale-125"
+						style="background-color:{ep.color}"
+					></span>
+					<span class="font-body text-sm font-medium text-ink/60 transition-colors group-hover:text-ink"
+						>{ep.label}</span
+					>
+					<span class="font-body text-sm font-bold" style="color:{ep.color}"
+						>{ep.value}{unit}</span
+					>
+				</button>
+			{/each}
+		</div>
+	{/if}
 
 	{#if source}
 		<button
