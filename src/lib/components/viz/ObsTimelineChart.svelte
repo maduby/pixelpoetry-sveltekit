@@ -114,7 +114,7 @@
 	const xDomain = $derived<[number, number]>(
 		domain ?? [
 			Math.min(...flatData.map((d) => d.year)) - 1,
-			Math.max(...flatData.map((d) => d.year)) + 2
+			Math.max(...flatData.map((d) => d.year)) + 1
 		]
 	);
 	const yDomain = $derived<[number, number]>(
@@ -189,11 +189,19 @@
 			if (cancelled || !containerEl) return;
 
 			const fontPx = _narrow ? 11 : 13;
-			// Reserve enough right margin for the longest country label
-			// — labels render OUTSIDE the plot area, anchored to each
-			// series' latest point.
-			const longestLabel = _ends.reduce((m, e) => (e.label.length > m.length ? e.label : m), '');
-			const marginRight = Math.min(200, Math.max(_narrow ? 70 : 96, longestLabel.length * fontPx * 0.7));
+			// Labels render INSIDE the chart area via a short callout connector,
+			// so we only need a tiny right margin for the axis tick itself.
+			const marginRight = _narrow ? 10 : 12;
+
+			// Offset each label anchor left by ~8% of the x-domain width so
+			// the connector has a visible angle and the text clears the endpoint dot.
+			const xRange = _xd[1] - _xd[0];
+			const labelXOff = xRange * 0.08;
+			const annotated = _ends.map((e) => ({
+				...e,
+				// Clamp so the anchor never falls outside the chart canvas.
+				labelYear: Math.max(e.year - labelXOff, _xd[0] + xRange * 0.04)
+			}));
 
 			const chart = Plot.plot({
 				width: _w,
@@ -248,25 +256,39 @@
 						strokeWidth: 1.6,
 						r: _narrow ? 3.5 : 4.5
 					}),
-					Plot.text(_ends, {
-						x: 'year',
+					// Callout connector: thin angled line from the endpoint dot to
+					// the label anchor (which sits inside the chart, slightly left).
+					Plot.link(annotated, {
+						x1: 'year',
+						y1: 'value',
+						x2: 'labelYear',
+						y2: 'labelY',
+						stroke: (d: { color: string }) => d.color,
+						strokeOpacity: 0.45,
+						strokeWidth: 1,
+						strokeLinecap: 'round'
+					}),
+					// Series name at the label anchor — flows left from the anchor point.
+					Plot.text(annotated, {
+						x: 'labelYear',
 						y: 'labelY',
 						text: 'label',
 						fill: (d: { color: string }) => d.color,
 						fontWeight: '700',
 						fontSize: fontPx + 1,
-						textAnchor: 'start',
-						dx: 8
+						textAnchor: 'end',
+						dx: -5
 					}),
-					Plot.text(_ends, {
-						x: 'year',
+					// Value pill on the line below the name.
+					Plot.text(annotated, {
+						x: 'labelYear',
 						y: 'labelY',
 						text: (d: { value: number }) => `${d.value}${unit}`,
 						fill: '#0a0a0a',
 						fontWeight: '700',
 						fontSize: fontPx,
-						textAnchor: 'start',
-						dx: 8,
+						textAnchor: 'end',
+						dx: -5,
 						dy: _narrow ? 14 : 16
 					}),
 					// Tooltip LAST — SVG paint order means last = on top, so the
