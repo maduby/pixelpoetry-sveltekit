@@ -1,18 +1,42 @@
 <script lang="ts">
 	import '$lib/styles/app.css';
 	import { afterNavigate } from '$app/navigation';
+	import { page } from '$app/state';
 	import Nav from '$lib/components/nav/Nav.svelte';
 	import ProgressBar from '$lib/components/nav/ProgressBar.svelte';
 	import Footer from '$lib/components/footer/Footer.svelte';
 	import SourceSheet from '$lib/components/ui/SourceSheet.svelte';
 	import { initPostHog, capturePageView } from '$lib/analytics/posthog';
-	import { provideExplainerHolder } from '$lib/context/explainer.svelte';
+	import { provideExplainerHolder, type ActiveExplainer } from '$lib/context/explainer.svelte';
+	import { longevity } from '$lib/explainers/longevity';
+	import { ultraProcessed } from '$lib/explainers/ultra-processed';
 
 	let { children } = $props();
 
 	// Provide a single explainer holder for the whole app. Each explainer
-	// route's `+page.svelte` updates it; static pages reset it to null.
-	provideExplainerHolder();
+	// route is resolved here so layout-level components (Nav, ProgressBar,
+	// SourceSheet) are correct on direct loads and story-to-story navigation.
+	const explainerHolder = provideExplainerHolder();
+
+	function resolveExplainer(pathname: string): ActiveExplainer | null {
+		if (pathname === longevity.meta.href || pathname.startsWith(`${longevity.meta.href}/`)) {
+			return longevity;
+		}
+		if (
+			pathname === ultraProcessed.meta.href ||
+			pathname.startsWith(`${ultraProcessed.meta.href}/`)
+		) {
+			return ultraProcessed;
+		}
+		return null;
+	}
+
+	explainerHolder.current = resolveExplainer(page.url.pathname);
+	const activeExplainer = $derived(resolveExplainer(page.url.pathname));
+
+	$effect(() => {
+		explainerHolder.current = activeExplainer;
+	});
 
 	// Initialise once on first mount, then capture a pageview after every navigation.
 	initPostHog();

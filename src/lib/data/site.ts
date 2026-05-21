@@ -6,7 +6,7 @@
  * on explainer routes.
  */
 export const site = {
-	name: 'Pixel Poetry',
+	name: 'PixelPoetry',
 	shortName: 'PP',
 	tagline: 'Slow journalism. One scroll at a time.',
 	/**
@@ -21,9 +21,8 @@ export const site = {
 	longDescription:
 		'Pixel Poetry is a new little corner of the Internet where I turn topics I find interesting, worrying, or strangely sticky into interactive essays. A bit of reporting, a bit of data visualisation, a bit of trying to make sense of things without pretending to have the final word.',
 	url: 'https://www.pixelpoetry.dev',
-	/** Default OG image. Until a dedicated pixelpoetry.dev hero is shipped we
-	 *  reuse the ultra-processed share image so socials don't 404. */
-	ogImage: '/explainers/ultra-processed/share-image.jpg',
+	/** Default OG image for the homepage, about page, explainers index, and fallbacks. */
+	ogImage: '/share-image--pixelpoetry.png',
 	locale: 'en-GB',
 	twitter: '@marcduby',
 	author: 'Marc Duby & Pixel Poetry',

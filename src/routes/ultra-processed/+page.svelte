@@ -55,6 +55,8 @@
 <SEO
 	title="Ultra-Processed"
 	description="Everything Pixel Poetry has published on ultra-processed food — essays, tools, and data."
+	ogImage="/explainers/ultra-processed/images/share-image--upf.png"
+	imageAlt="Pixel Poetry ultra-processed food explainer social preview"
 	canonical="/ultra-processed"
 	jsonLd={topicJsonLd}
 />

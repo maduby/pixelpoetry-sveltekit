@@ -18,12 +18,13 @@
 	 * already collapses the bar's width transition; nothing else to do.
 	 */
 	import { onMount } from 'svelte';
-	import { getActiveExplainer } from '$lib/context/explainer.svelte';
+	import { getExplainerHolder } from '$lib/context/explainer.svelte';
 	import { getTheme } from '$lib/utils/explainer-theme';
 	import { cn } from '$lib/utils/cn';
 	import { posthog } from '$lib/analytics/posthog';
 
-	const explainer = $derived(getActiveExplainer());
+	const explainerHolder = getExplainerHolder();
+	const explainer = $derived(explainerHolder?.current ?? null);
 	const chapters = $derived(explainer?.chapters ?? []);
 	const theme = $derived(getTheme(explainer?.meta.accent));
 

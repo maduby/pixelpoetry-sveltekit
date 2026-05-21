@@ -11,12 +11,13 @@
 	 * finish) over ~1.4 seconds.
 	 */
 	import { onDestroy } from 'svelte';
-	import { getActiveExplainer } from '$lib/context/explainer.svelte';
+	import { getExplainerHolder } from '$lib/context/explainer.svelte';
 	import { openSourceSheet } from '$lib/context/sheet';
 	import { cn } from '$lib/utils/cn';
 	import type { Stat } from '$lib/types/explainer';
 
-	const explainer = $derived(getActiveExplainer());
+	const explainerHolder = getExplainerHolder();
+	const explainer = $derived(explainerHolder?.current ?? null);
 
 	interface Props {
 		stat: Stat;

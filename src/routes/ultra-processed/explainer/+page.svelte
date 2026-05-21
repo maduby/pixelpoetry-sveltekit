@@ -1,7 +1,5 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte';
-	import { activateExplainer } from '$lib/context/explainer.svelte';
-	import { ultraProcessed, chapters, meta } from '$lib/explainers/ultra-processed';
+	import { chapters, meta } from '$lib/explainers/ultra-processed';
 	import Chapter from '$lib/components/Chapter.svelte';
 	import EssayFooter from '$lib/components/footer/EssayFooter.svelte';
 	import SEO from '$lib/components/SEO.svelte';
@@ -9,15 +7,9 @@
 	import { reveal } from '$lib/attachments/reveal';
 	import { posthog } from '$lib/analytics/posthog';
 	import EditorialSheet from '$lib/components/ui/EditorialSheet.svelte';
-
-	// Register this explainer as the active one so Nav, ProgressBar, viz
-	// components and SourceSheet can read its data via context. The returned
-	// cleanup resets the holder on navigation.
-	onDestroy(activateExplainer(ultraProcessed));
 </script>
 
 <SEO />
-
 
 <!-- ============================================================
      HERO

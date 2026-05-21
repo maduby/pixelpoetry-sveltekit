@@ -2,7 +2,7 @@
 	import Share2 from 'lucide-svelte/icons/share-2';
 	import Copy from 'lucide-svelte/icons/copy';
 	import { site } from '$lib/data/site';
-	import { getActiveExplainer } from '$lib/context/explainer.svelte';
+	import { getExplainerHolder } from '$lib/context/explainer.svelte';
 	import { posthog } from '$lib/analytics/posthog';
 
 	interface Props {
@@ -10,7 +10,8 @@
 	}
 	let { class: className = '' }: Props = $props();
 
-	const explainer = $derived(getActiveExplainer());
+	const explainerHolder = getExplainerHolder();
+	const explainer = $derived(explainerHolder?.current ?? null);
 
 	let open = $state(false);
 	let copied = $state(false);

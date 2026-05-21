@@ -445,11 +445,12 @@ export const chapters: Chapter[] = [
 					'The six diseases are not random bad luck. They are, as Daniel Lieberman calls them, <strong data-term="mismatch-disease">mismatch diseases</strong>: conditions caused by putting a <span data-term="palaeolithic-body">Palaeolithic body</span> into an environment it was never built for. The body evolved to sprint from predators and walk ten miles a day. It did not evolve for office chairs, <span data-term="hyperpalatable">hyperpalatable</span> snacks, and stress that never resolves.',
 				viz: {
 					type: 'image',
-					name: 'longevity-altamira-cave',
-					alt: 'Polychrome bison and deer paintings on the ceiling of the Altamira cave replica, Cantabria, Spain — some of the finest examples of Palaeolithic art, c. 36,000 years old.',
+					name: 'centre-for-ageing-better-REIecbS8XQY-unsplash',
+					alt: 'Older adults exercising together outdoors on a running track.',
 					caption:
-						'The Palaeolithic body spent 2.5 million years shaped by hunting, walking, and scarcity. It has barely changed since.',
-					credit: 'Thilo Parg / Wikimedia Commons / CC BY-SA 4.0',
+						'The mismatch is ordinary and modern: bodies adapted for frequent movement now spend much of the day sitting, snacking, and absorbing unresolved stress.',
+					credit: 'Centre for Ageing Better / Unsplash / unsplash.com/photos/REIecbS8XQY',
+					sourceId: 'centre-ageing-better-exercise',
 					aspect: 'auto'
 				}
 			},
@@ -659,7 +660,8 @@ export const chapters: Chapter[] = [
 					alt: 'An older woman doing exercises at an outdoor fitness class on a running track, surrounded by other participants.',
 					caption:
 						'Daily movement — not the gym, not performance sport. Walking, breathing hard twice a week, and balance work once a week.',
-					credit: 'Centre for Ageing Better / Unsplash / unsplash.com/photos/REIecbS8XQY'
+					credit: 'Centre for Ageing Better / Unsplash / unsplash.com/photos/REIecbS8XQY',
+					sourceId: 'centre-ageing-better-exercise'
 				}
 			},
 			{
@@ -887,15 +889,6 @@ export const chapters: Chapter[] = [
 				text: "In 2002, the Women's Health Initiative published findings that were widely interpreted as showing that hormone replacement therapy caused breast cancer and heart disease. The paper generated a wave of prescription cancellations that persisted for a decade. The problem: the interpretation was almost entirely wrong. The WHI study used older synthetic hormones at doses no longer standard — and its results have since been reanalysed, heavily qualified, and in some cases reversed.",
 				richText:
 					"In 2002, the Women's Health Initiative published findings widely interpreted as showing that hormone replacement therapy caused cancer and heart disease. The interpretation was <strong>almost entirely wrong</strong> — but the wave of prescription cancellations it triggered persisted for a decade."
-			},
-			{
-				id: 'ch8-kenny-quote',
-				text: '"Menopause-related ill-health is the single largest preventable burden in modern women\'s healthspan."',
-				quote: {
-					text: "Menopause-related ill-health is the single largest preventable burden in modern women's healthspan.",
-					attribution: 'Leslie Kenny — Oxford Longevity Project',
-					sourceId: 'olp-2026'
-				}
 			}
 		],
 		sources: ['ons-hle-2020', 'who-gbd-2022', 'olp-2026']
@@ -917,14 +910,14 @@ export const chapters: Chapter[] = [
 		steps: [
 			{
 				id: 'ch9-37-trillion',
-				text: 'Economists Scott and Ellison calculated that slowing the rate of biological ageing sufficiently to add one year of healthy life across the US population would generate approximately $37 trillion in economic value. That exceeds the combined benefit of eliminating both cancer and cardiovascular disease entirely.',
+				text: 'Economists Scott and Ellison calculated that slowing the rate of biological ageing sufficiently to add one year of healthy life expectancy across the US population would generate approximately $37 trillion in economic value. That is enough to spend $1 million every minute for more than 70 years.',
 				richText:
-					'Economists Scott and Ellison calculated that slowing biological ageing to add <strong>one year of healthy life</strong> across the US population would generate approximately <strong>$37 trillion</strong> in economic value — enough to spend <strong>$1 billion every single day for 101 years.</strong>',
+					'Economists Scott and Ellison calculated that slowing biological ageing to add <strong>one year of healthy life expectancy</strong> across the US population would generate approximately <strong>$37 trillion</strong> in economic value — enough to spend <strong>$1 million every single minute for more than 70 years.</strong>',
 				stat: {
 					value: '$37T',
-					label: 'economic value of adding one healthy year to US lifespan',
+					label: 'estimated economic value',
 					context:
-						'Exceeds the entire US GDP. Enough to spend $1 billion every day for 101 years. — Scott & Ellison, Nature Aging (2021)',
+						'An economic-value estimate, not literal cash. Enough to spend $1 million every minute for more than 70 years. — Scott & Ellison, Nature Aging (2021)',
 					sourceId: 'scott-ellison-2021'
 				},
 				viz: {

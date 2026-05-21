@@ -5,12 +5,13 @@
 	 * definitions (opened by [data-term] links in story text).
 	 */
 	import { initSheetContext, type SheetPayload } from '$lib/context/sheet';
-	import { getActiveExplainer } from '$lib/context/explainer.svelte';
+	import { getExplainerHolder } from '$lib/context/explainer.svelte';
 	import Sheet from '$lib/components/ui/Sheet.svelte';
 	import ArrowUpRight from 'lucide-svelte/icons/arrow-up-right';
 	import { posthog } from '$lib/analytics/posthog';
 
-	const explainer = $derived(getActiveExplainer());
+	const explainerHolder = getExplainerHolder();
+	const explainer = $derived(explainerHolder?.current ?? null);
 
 	let open = $state(false);
 	let payload = $state<SheetPayload | null>(null);

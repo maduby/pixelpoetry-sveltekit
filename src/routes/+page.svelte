@@ -47,7 +47,7 @@
 	<!-- Decorative background gradient — rainbow spectrum hints at the variety of stories. -->
 	<div
 		aria-hidden="true"
-		class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_left,color-mix(in_oklab,var(--color-brand-red)_14%,transparent),transparent_55%),radial-gradient(ellipse_at_top_right,color-mix(in_oklab,var(--color-brand-amber)_14%,transparent),transparent_55%),radial-gradient(ellipse_at_bottom_left,color-mix(in_oklab,var(--color-brand-pink)_14%,transparent),transparent_55%),radial-gradient(ellipse_at_bottom_right,#3b82f622,transparent_55%)]"
+		class="hero-rainbow pointer-events-none absolute inset-0 -z-10"
 	></div>
 
 	<div class="mx-auto w-full max-w-(--container-wide) px-6 pt-[6vh] pb-[10vh] lg:px-8 lg:py-[12vh]">
@@ -106,6 +106,100 @@
 		<ArrowDown size={32} />
 	</a>
 </section>
+
+<style>
+	.hero-rainbow {
+		background:
+			radial-gradient(
+				circle at 14% 22%,
+				color-mix(in oklab, var(--color-brand-pink) 18%, transparent),
+				transparent 30%
+			),
+			radial-gradient(
+				circle at 82% 18%,
+				color-mix(in oklab, var(--color-brand-amber) 22%, transparent),
+				transparent 32%
+			),
+			radial-gradient(
+				circle at 20% 88%,
+				color-mix(in oklab, var(--color-brand-red) 16%, transparent),
+				transparent 34%
+			),
+			radial-gradient(circle at 72% 78%, rgb(59 130 246 / 16%), transparent 34%),
+			radial-gradient(circle at 55% 54%, rgb(34 197 94 / 12%), transparent 38%),
+			linear-gradient(120deg, #fff7ed 0%, #fff1f2 38%, #eef7ff 74%, #fff8e1 100%);
+		background-size:
+			145% 145%,
+			135% 135%,
+			150% 150%,
+			140% 140%,
+			160% 160%,
+			100% 100%;
+		background-position:
+			0% 0%,
+			100% 0%,
+			0% 100%,
+			100% 100%,
+			50% 50%,
+			0% 0%;
+	}
+
+	.hero-rainbow::before {
+		content: '';
+		position: absolute;
+		inset: -18%;
+		background: conic-gradient(
+			from 210deg at 50% 50%,
+			rgb(244 63 94 / 10%),
+			rgb(249 115 22 / 12%),
+			rgb(234 179 8 / 12%),
+			rgb(34 197 94 / 10%),
+			rgb(59 130 246 / 11%),
+			rgb(168 85 247 / 10%),
+			rgb(244 63 94 / 10%)
+		);
+		filter: blur(56px);
+		opacity: 0.72;
+		transform: rotate(0deg) scale(1.06);
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.hero-rainbow {
+			animation: hero-rainbow-drift 32s ease-in-out infinite alternate;
+		}
+
+		.hero-rainbow::before {
+			animation: hero-rainbow-turn 46s linear infinite;
+		}
+	}
+
+	@keyframes hero-rainbow-drift {
+		0% {
+			background-position:
+				0% 0%,
+				100% 0%,
+				0% 100%,
+				100% 100%,
+				50% 50%,
+				0% 0%;
+		}
+		100% {
+			background-position:
+				8% 5%,
+				92% 8%,
+				10% 90%,
+				88% 84%,
+				56% 46%,
+				0% 0%;
+		}
+	}
+
+	@keyframes hero-rainbow-turn {
+		to {
+			transform: rotate(360deg) scale(1.06);
+		}
+	}
+</style>
 
 <!-- ============================================================
      EXPLAINER GRID

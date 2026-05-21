@@ -17,7 +17,7 @@ export const meta = {
 		'Ultra-processed food now makes up more than half the British diet. An evidence-led interactive essay exploring the science — from addiction and obesity to deforestation and inequality.',
 	longDescription:
 		'An immersive, chapter-by-chapter investigation into ultra-processed food (UPF): what the NOVA classification reveals, how UPF rewires appetite and drives addiction, its links to cancer, obesity, and cardiovascular disease, and the systemic inequalities that make it hardest to avoid for those who can least afford the health consequences.',
-	ogImage: '/explainers/ultra-processed/share-image.jpg',
+	ogImage: '/explainers/ultra-processed/images/share-image--upf.png',
 	accent: 'red' as const,
 	readTimeMin: 12,
 	chapterCount: 9,
@@ -26,7 +26,7 @@ export const meta = {
 		'ultra-processed food, UPF, NOVA classification, food addiction, obesity, processed food health risks, Chris van Tulleken, food system, junk food, diet and cancer, food inequality',
 	editorial: {
 		title: 'Why I made this',
-		lastUpdated: '21 May 2026 at 9:52am',
+		lastUpdated: '21 May 2026 at 9:52am SAST',
 		body: `
 <p>My name is <a href="https://duby.io" target="_blank" rel="noopener">Marc Duby</a>, and I try to boil down stories, articles, and topics that I find interesting and worth reading. I know it is hard to find enough time to read articles, books, or even, imagine, scientific papers. That is why I am trying to explain complex topics with these hopefully easy-to-use and interesting little interactive essays.</p>
 

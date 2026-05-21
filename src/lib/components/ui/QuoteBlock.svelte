@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { getActiveExplainer } from '$lib/context/explainer.svelte';
+	import { getExplainerHolder } from '$lib/context/explainer.svelte';
 	import { openSourceSheet } from '$lib/context/sheet';
 	import { cn } from '$lib/utils/cn';
 	import type { Quote } from '$lib/types/explainer';
 
-	const explainer = $derived(getActiveExplainer());
+	const explainerHolder = getExplainerHolder();
+	const explainer = $derived(explainerHolder?.current ?? null);
 
 	interface Props {
 		quote: Quote;

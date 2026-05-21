@@ -10,7 +10,7 @@
 	 */
 	import { page } from '$app/state';
 	import { site } from '$lib/data/site';
-	import { getActiveExplainer } from '$lib/context/explainer.svelte';
+	import { getExplainerHolder } from '$lib/context/explainer.svelte';
 	import {
 		absoluteAssetUrl,
 		absoluteUrl,
@@ -49,7 +49,8 @@
 		jsonLd
 	}: Props = $props();
 
-	const explainer = $derived(getActiveExplainer());
+	const explainerHolder = getExplainerHolder();
+	const explainer = $derived(explainerHolder?.current ?? null);
 
 	const resolvedTitle = $derived(title ?? explainer?.meta.name);
 	const resolvedDescription = $derived(
@@ -75,6 +76,9 @@
 	// correct in prerendered HTML (url.origin is 'http://sveltekit-prerender' at build time).
 	const ogImageUrl = $derived(absoluteAssetUrl(resolvedOgImage));
 	const resolvedImageAlt = $derived(imageAlt ?? fullTitle);
+	const ogImageType = $derived(
+		resolvedOgImage.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg'
+	);
 
 	const baseJsonLd = $derived.by(() => {
 		const common = {
@@ -152,7 +156,8 @@
 	<meta property="og:title" content={fullTitle} />
 	<meta property="og:description" content={resolvedDescription} />
 	<meta property="og:image" content={ogImageUrl} />
-	<meta property="og:image:type" content="image/jpeg" />
+	<meta property="og:image:secure_url" content={ogImageUrl} />
+	<meta property="og:image:type" content={ogImageType} />
 	<meta property="og:image:width" content="1200" />
 	<meta property="og:image:height" content="630" />
 	<meta property="og:image:alt" content={resolvedImageAlt} />
@@ -178,7 +183,7 @@
 	{/if}
 
 	<meta name="theme-color" content="#fef9ef" />
-	{#each schemaScripts as schema}
+	{#each schemaScripts as schema, i (`schema-${i}`)}
 		<script type="application/ld+json">{@html schema}</script>
 	{/each}
 </svelte:head>

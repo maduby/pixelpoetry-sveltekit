@@ -9,14 +9,15 @@
 	 */
 	import { site } from '$lib/data/site';
 	import { page } from '$app/state';
-	import { getActiveExplainer } from '$lib/context/explainer.svelte';
+	import { getExplainerHolder } from '$lib/context/explainer.svelte';
 	import { getTheme } from '$lib/utils/explainer-theme';
 	import { posthog } from '$lib/analytics/posthog';
 	import Menu from 'lucide-svelte/icons/menu';
 	import ShareMenu from '$lib/components/nav/ShareMenu.svelte';
 	import NavDrawer from '$lib/components/nav/NavDrawer.svelte';
 
-	const explainer = $derived(getActiveExplainer());
+	const explainerHolder = getExplainerHolder();
+	const explainer = $derived(explainerHolder?.current ?? null);
 	const theme = $derived(getTheme(explainer?.meta.accent));
 	const currentPath = $derived(page.url.pathname);
 
@@ -33,7 +34,7 @@
 <header
 	class="fixed inset-x-0 top-0 z-50 bg-cream/80 backdrop-blur supports-backdrop-filter:bg-cream/60"
 >
-	<div class="mx-auto flex h-16 max-w-(--container-wide) items-center gap-3 px-4 lg:px-8">
+	<div class="relative mx-auto flex h-16 max-w-(--container-wide) items-center justify-between gap-3 px-4 lg:px-8">
 		<!-- Hamburger — always on the far left -->
 		<button
 			type="button"
@@ -45,12 +46,12 @@
 			<Menu size={22} aria-hidden="true" />
 		</button>
 
-		<!-- Logo / essay name — centred between hamburger and right rail -->
-		<div class="flex flex-1 items-center justify-center lg:justify-start">
+		<!-- Logo / essay name — centred in the nav, independent of side controls -->
+		<div class="pointer-events-none absolute left-1/2 flex max-w-[calc(100%-9rem)] -translate-x-1/2 items-center justify-center text-center sm:max-w-[calc(100%-18rem)]">
 			{#if explainer}
 				<a
 					href={explainer.meta.href}
-					class="flex items-baseline gap-2 font-display text-xl font-bold tracking-tight"
+					class="pointer-events-auto flex items-baseline justify-center gap-2 font-display text-xl font-bold tracking-tight"
 				>
 					<span class={theme.badgeText}>{explainer.meta.shortName}</span>
 					<span class="hidden text-ink/70 sm:inline">
@@ -59,7 +60,7 @@
 					</span>
 				</a>
 			{:else}
-				<a href="/" class="flex items-baseline gap-2 font-display text-xl font-bold tracking-tight">
+				<a href="/" class="pointer-events-auto flex items-baseline justify-center gap-2 font-display text-xl font-bold tracking-tight">
 					<span class="logo-rainbow">
 						{site.name}
 					</span>
@@ -68,7 +69,7 @@
 		</div>
 
 		<!-- Right rail -->
-		<div class="flex shrink-0 items-center gap-2">
+		<div class="ml-auto flex shrink-0 items-center gap-2">
 			{#if explainer}
 				<!-- Essay pages: Share + Sources pill -->
 				<ShareMenu />

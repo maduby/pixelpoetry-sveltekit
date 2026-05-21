@@ -8,23 +8,30 @@
 	 * `+page.svelte`. Reads everything via the active explainer context.
 	 */
 	import { onMount } from 'svelte';
-	import { getActiveExplainer } from '$lib/context/explainer.svelte';
+	import { getExplainerHolder } from '$lib/context/explainer.svelte';
 	import { posthog } from '$lib/analytics/posthog';
 	import type { ImageViz } from '$lib/types/explainer';
 
-	const explainer = $derived(getActiveExplainer());
+	const explainerHolder = getExplainerHolder();
+	const explainer = $derived(explainerHolder?.current ?? null);
 
 	const sourceList = $derived(
 		explainer ? Object.values(explainer.sources).sort((a, b) => b.year - a.year) : []
 	);
 
+	function dedupeImageCredits(images: ImageViz[]): ImageViz[] {
+		return Array.from(new Map(images.map((image) => [image.name, image])).values());
+	}
+
 	const imageCredits = $derived(
 		explainer
-			? explainer.chapters
-					.flatMap((c) => c.steps)
-					.map((s) => s.viz)
-					.filter((v): v is ImageViz => v?.type === 'image')
-					.filter((v) => v.credit)
+			? dedupeImageCredits(
+					explainer.chapters
+						.flatMap((c) => c.steps)
+						.map((s) => s.viz)
+						.filter((v): v is ImageViz => v?.type === 'image')
+						.filter((v) => v.credit)
+				)
 			: []
 	);
 

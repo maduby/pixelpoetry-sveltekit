@@ -33,6 +33,8 @@
 <SEO
 	title="Longevity"
 	description="Evidence, tools, and interactive stories on longevity science and healthier ageing."
+	ogImage="/explainers/longevity/images/share-image--longevity.png"
+	imageAlt="Pixel Poetry longevity explainer social preview"
 	canonical="/longevity"
 	jsonLd={topicJsonLd}
 />

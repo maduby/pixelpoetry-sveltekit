@@ -9,7 +9,7 @@
 	import { page } from '$app/state';
 	import { site } from '$lib/data/site';
 	import { explainers } from '$lib/data/explainers';
-	import { getActiveExplainer } from '$lib/context/explainer.svelte';
+	import { getExplainerHolder } from '$lib/context/explainer.svelte';
 	import { posthog } from '$lib/analytics/posthog';
 	import X from 'lucide-svelte/icons/x';
 	import BookOpen from 'lucide-svelte/icons/book-open';
@@ -21,7 +21,8 @@
 	}
 	let { open = $bindable(false) }: Props = $props();
 
-	const explainer = $derived(getActiveExplainer());
+	const explainerHolder = getExplainerHolder();
+	const explainer = $derived(explainerHolder?.current ?? null);
 	const currentPath = $derived(page.url.pathname);
 
 	let dialogEl = $state<HTMLDialogElement | undefined>(undefined);
@@ -169,6 +170,7 @@
 							{#if isPublished}
 								<a
 									href={e.href}
+									data-sveltekit-reload
 									onclick={() => { close(); posthog.capture('drawer_explainer_clicked', { slug: e.slug }); }}
 									class="group flex flex-col rounded-xl px-3 py-2.5 transition-colors {isActive(e.href) ? 'bg-ink/6' : 'hover:bg-ink/5'}"
 								>

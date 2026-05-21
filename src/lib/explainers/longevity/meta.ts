@@ -19,7 +19,7 @@ export const meta = {
 		'An evidence-led interactive essay on longevity science — separating the signal from the noise on diet, exercise, sleep, and the biology of ageing.',
 	longDescription:
 		'What does the science actually say about living longer, healthier? A chapter-by-chapter investigation into longevity research: the hallmarks of ageing, what lifestyle interventions have real evidence behind them, and why most of what gets sold as "longevity" is noise.',
-	ogImage: '/longevity/share-image.jpg',
+	ogImage: '/explainers/longevity/images/share-image--longevity.png',
 	accent: 'forest' as const,
 	readTimeMin: 14,
 	chapterCount: 10,
@@ -28,7 +28,7 @@ export const meta = {
 		'longevity, lifespan, healthspan, ageing, hallmarks of aging, blue zones, caloric restriction, exercise longevity, sleep health, evidence-based longevity',
 	editorial: {
 		title: 'Why I made this',
-		lastUpdated: '21 May 2026 at 10:49am',
+		lastUpdated: '21 May 2026 at 10:49am SAST',
 		body: `
 <p>My name is <a href="https://duby.io" target="_blank" rel="noopener">Marc Duby</a>, and I try to boil down stories, articles, and topics that I find interesting and worth reading. I know it is hard to find enough time to read articles, books, or even, imagine, scientific papers. That is why I am trying to explain complex topics with these hopefully easy-to-use and interesting little interactive essays.</p>
 

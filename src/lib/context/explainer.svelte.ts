@@ -10,10 +10,11 @@
  *
  * Wiring:
  *   - `+layout.svelte` calls `provideExplainerHolder()` once.
- *   - Each explainer's `+page.svelte` calls `setActiveExplainer(data)` in
- *     its `<script>` and resets to `null` on destroy.
- *   - Consumer components read the value via `getActiveExplainer()` which
- *     is reactive because the holder's `current` is `$state`.
+ *   - `+layout.svelte` resolves the active explainer from the current path
+ *     so layout-level components have the right story on direct loads.
+ *   - Layout-level consumer components capture the holder during init and
+ *     derive from `holder.current`, which is reactive because `current` is
+ *     `$state`.
  */
 import { getContext, setContext } from 'svelte';
 import type { Chapter, ImageEntry, Source, Term } from '$lib/types/explainer';
@@ -98,13 +99,14 @@ export function setActiveExplainer(value: ActiveExplainer | null): void {
  * Convenience helper for explainer pages:
  *   activateExplainer(ultraProcessed);
  * Captures the holder during component init, sets the value, and returns
- * a destroy function that resets it to `null`. Hand the returned function
- * to `onDestroy` so navigating away clears the context.
+ * a destroy function that clears it only if this page is still the active
+ * owner. That avoids an old route clearing the next explainer during
+ * client-side story-to-story navigation.
  */
 export function activateExplainer(value: ActiveExplainer): () => void {
 	const holder = getExplainerHolder();
 	if (holder) holder.current = value;
 	return () => {
-		if (holder) holder.current = null;
+		if (holder?.current === value) holder.current = null;
 	};
 }

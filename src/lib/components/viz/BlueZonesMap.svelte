@@ -5,7 +5,7 @@
 	 * and a simplified land outline for fast rendering.
 	 */
 	import { browser } from '$app/environment';
-	import { getActiveExplainer } from '$lib/context/explainer.svelte';
+	import { getExplainerHolder } from '$lib/context/explainer.svelte';
 	import { openSourceSheet } from '$lib/context/sheet';
 	import { CHART_W, CHART_H } from './chart-constants';
 
@@ -44,7 +44,8 @@
 	const BUBBLE_HALO = '#2f7fb5';
 	const LABEL = '#061926';
 
-	const explainer = $derived(getActiveExplainer());
+	const explainerHolder = getExplainerHolder();
+	const explainer = $derived(explainerHolder?.current ?? null);
 	const source = $derived(explainer?.getSource(SOURCE_ID));
 
 	let containerEl = $state<HTMLDivElement | undefined>(undefined);

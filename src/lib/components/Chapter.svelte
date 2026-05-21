@@ -35,7 +35,7 @@
 	import BillionDollarTimeline from '$lib/components/viz/BillionDollarTimeline.svelte';
 	import { cn } from '$lib/utils/cn';
 	import { posthog } from '$lib/analytics/posthog';
-	import { getActiveExplainer } from '$lib/context/explainer.svelte';
+	import { getExplainerHolder } from '$lib/context/explainer.svelte';
 
 	interface Props {
 		chapter: ChapterData;
@@ -69,7 +69,8 @@
 		}[chapter.accent]
 	);
 
-	const explainer = $derived(getActiveExplainer());
+	const explainerHolder = getExplainerHolder();
+	const explainer = $derived(explainerHolder?.current ?? null);
 
 	let sectionEl = $state<HTMLElement | undefined>(undefined);
 	let activeStepIndex = $state(0);

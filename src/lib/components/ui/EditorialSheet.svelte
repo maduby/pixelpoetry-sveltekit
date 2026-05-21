@@ -38,6 +38,13 @@
 	let { editorial, slug = 'unknown', class: className = '' }: Props = $props();
 
 	let open = $state(false);
+	const lastUpdatedLabel = $derived(
+		editorial.lastUpdated
+			? editorial.lastUpdated.includes('SAST')
+				? editorial.lastUpdated
+				: `${editorial.lastUpdated} SAST`
+			: undefined
+	);
 
 	function handleOpen() {
 		open = true;
@@ -67,7 +74,7 @@
 	-->
 	<article class="editorial-body pb-8">
 		{#if editorial.lastUpdated}
-			<p class="editorial-updated">Piece last updated: {editorial.lastUpdated}</p>
+			<p class="editorial-updated">Piece last updated: {lastUpdatedLabel}</p>
 		{/if}
 		{@html editorial.body}
 	</article>

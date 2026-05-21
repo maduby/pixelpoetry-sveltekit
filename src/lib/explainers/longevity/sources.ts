@@ -208,6 +208,19 @@ export const sources: Record<string, Source> = {
 			}
 		]
 	},
+	'centre-ageing-better-exercise': {
+		id: 'centre-ageing-better-exercise',
+		short: 'Centre for Ageing Better / Unsplash',
+		full: 'Centre for Ageing Better. Older adults exercising together outdoors. Unsplash.',
+		url: 'https://unsplash.com/photos/REIecbS8XQY',
+		year: 2020,
+		references: [
+			{
+				citation:
+					'Used as an editorial illustration of ordinary, social movement across the life course.'
+			}
+		]
+	},
 	'riseyoga-marc-duby-photo': {
 		id: 'riseyoga-marc-duby-photo',
 		short: 'Rise Yoga / Marc Duby',

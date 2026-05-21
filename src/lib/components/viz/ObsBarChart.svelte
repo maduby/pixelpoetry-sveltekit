@@ -26,10 +26,11 @@
 	 * No scroll animation; renders once and responds to container resize.
 	 */
 	import { browser } from '$app/environment';
-	import { getActiveExplainer } from '$lib/context/explainer.svelte';
+	import { getExplainerHolder } from '$lib/context/explainer.svelte';
 	import { openSourceSheet } from '$lib/context/sheet';
 
-	const explainer = $derived(getActiveExplainer());
+	const explainerHolder = getExplainerHolder();
+	const explainer = $derived(explainerHolder?.current ?? null);
 
 	import type { ObsBarDataPoint } from '$lib/types/explainer';
 

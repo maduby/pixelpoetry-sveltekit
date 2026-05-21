@@ -27,7 +27,11 @@ function formatTimestamp(date = new Date()) {
 	}).formatToParts(date);
 
 	const get = (type) => parts.find((part) => part.type === type)?.value ?? '';
-	return `${get('day')} ${get('month')} ${get('year')} at ${get('hour')}:${get('minute')}${get('dayPeriod').toLowerCase()}`;
+	return `${get('day')} ${get('month')} ${get('year')} at ${get('hour')}:${get('minute')}${get('dayPeriod').toLowerCase()} SAST`;
+}
+
+function withTimezone(timestamp) {
+	return timestamp.includes('SAST') ? timestamp : `${timestamp} SAST`;
 }
 
 function allExplainerSlugs() {
@@ -78,7 +82,7 @@ const slugs = explicitSlugs.length
 		? changedExplainerSlugs()
 		: allExplainerSlugs();
 
-const timestamp = explicitTimestamp ?? formatTimestamp();
+const timestamp = withTimezone(explicitTimestamp ?? formatTimestamp());
 
 for (const slug of slugs) {
 	const metaPath = path.join(explainersDir, slug, 'meta.ts');

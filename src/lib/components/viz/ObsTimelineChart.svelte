@@ -11,11 +11,12 @@
 	 * width with ResizeObserver and re-renders on resize.
 	 */
 	import { browser } from '$app/environment';
-	import { getActiveExplainer } from '$lib/context/explainer.svelte';
+	import { getExplainerHolder } from '$lib/context/explainer.svelte';
 	import { openSourceSheet } from '$lib/context/sheet';
 	import type { TimelineSeries } from '$lib/types/explainer';
 
-	const explainer = $derived(getActiveExplainer());
+	const explainerHolder = getExplainerHolder();
+	const explainer = $derived(explainerHolder?.current ?? null);
 
 	interface Props {
 		series?: TimelineSeries[];
