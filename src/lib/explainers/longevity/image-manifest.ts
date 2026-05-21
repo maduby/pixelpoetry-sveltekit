@@ -10,6 +10,186 @@ export type { ImageEntry } from '$lib/types/explainer';
 
 export const imageManifest: ImageEntry[] = [
   {
+    "name": "L1040910",
+    "width": 3832,
+    "height": 5757,
+    "variants": [
+      {
+        "width": 400,
+        "src": "/explainers/longevity/processed/L1040910-400w.webp"
+      },
+      {
+        "width": 800,
+        "src": "/explainers/longevity/processed/L1040910-800w.webp"
+      },
+      {
+        "width": 1200,
+        "src": "/explainers/longevity/processed/L1040910-1200w.webp"
+      }
+    ],
+    "blurhash": "mnF=~-%2azof_Nt7aykC9vR*f5ay4.RjjsayaJj@j[js-oofflj["
+  },
+  {
+    "name": "balance",
+    "width": 1971,
+    "height": 1478,
+    "variants": [
+      {
+        "width": 400,
+        "src": "/explainers/longevity/processed/balance-400w.webp"
+      },
+      {
+        "width": 800,
+        "src": "/explainers/longevity/processed/balance-800w.webp"
+      },
+      {
+        "width": 1200,
+        "src": "/explainers/longevity/processed/balance-1200w.webp"
+      }
+    ],
+    "blurhash": "L5Ci,Sr9lB?a0A00E7%3?X_NnLMy"
+  },
+  {
+    "name": "centre-for-ageing-better-REIecbS8XQY-unsplash",
+    "width": 6000,
+    "height": 4000,
+    "variants": [
+      {
+        "width": 400,
+        "src": "/explainers/longevity/processed/centre-for-ageing-better-REIecbS8XQY-unsplash-400w.webp"
+      },
+      {
+        "width": 800,
+        "src": "/explainers/longevity/processed/centre-for-ageing-better-REIecbS8XQY-unsplash-800w.webp"
+      },
+      {
+        "width": 1200,
+        "src": "/explainers/longevity/processed/centre-for-ageing-better-REIecbS8XQY-unsplash-1200w.webp"
+      }
+    ],
+    "blurhash": "CEE.FF}?xBxI1HFt9u-o"
+  },
+  {
+    "name": "diet",
+    "width": 5184,
+    "height": 3456,
+    "variants": [
+      {
+        "width": 400,
+        "src": "/explainers/longevity/processed/diet-400w.webp"
+      },
+      {
+        "width": 800,
+        "src": "/explainers/longevity/processed/diet-800w.webp"
+      },
+      {
+        "width": 1200,
+        "src": "/explainers/longevity/processed/diet-1200w.webp"
+      }
+    ],
+    "blurhash": "CHFrkTn~kItP~ps,x]OE"
+  },
+  {
+    "name": "healthy-habit",
+    "width": 6000,
+    "height": 4000,
+    "variants": [
+      {
+        "width": 400,
+        "src": "/explainers/longevity/processed/healthy-habit-400w.webp"
+      },
+      {
+        "width": 800,
+        "src": "/explainers/longevity/processed/healthy-habit-800w.webp"
+      },
+      {
+        "width": 1200,
+        "src": "/explainers/longevity/processed/healthy-habit-1200w.webp"
+      }
+    ],
+    "blurhash": "C49*q_.N9YcP*Eo|VcX2"
+  },
+  {
+    "name": "jon-bovi",
+    "width": 900,
+    "height": 1200,
+    "variants": [
+      {
+        "width": 400,
+        "src": "/explainers/longevity/processed/jon-bovi-400w.webp"
+      },
+      {
+        "width": 800,
+        "src": "/explainers/longevity/processed/jon-bovi-800w.webp"
+      },
+      {
+        "width": 1200,
+        "src": "/explainers/longevity/processed/jon-bovi-1200w.webp"
+      }
+    ],
+    "blurhash": "dKM=|E9b0LIp~B$%IVxZ?Yj]D*xZ%Lt6Rja{9vs:n+WV"
+  },
+  {
+    "name": "lifestyle-pattern",
+    "width": 2587,
+    "height": 3880,
+    "variants": [
+      {
+        "width": 400,
+        "src": "/explainers/longevity/processed/lifestyle-pattern-400w.webp"
+      },
+      {
+        "width": 800,
+        "src": "/explainers/longevity/processed/lifestyle-pattern-800w.webp"
+      },
+      {
+        "width": 1200,
+        "src": "/explainers/longevity/processed/lifestyle-pattern-1200w.webp"
+      }
+    ],
+    "blurhash": "mFH_Y$~C5W%Nt-%gxuS457S#%1xatRS%ogWCg2xtt7sp$Os:%L%M"
+  },
+  {
+    "name": "longevity-altamira-cave",
+    "width": 5000,
+    "height": 3328,
+    "variants": [
+      {
+        "width": 400,
+        "src": "/explainers/longevity/processed/longevity-altamira-cave-400w.webp"
+      },
+      {
+        "width": 800,
+        "src": "/explainers/longevity/processed/longevity-altamira-cave-800w.webp"
+      },
+      {
+        "width": 1200,
+        "src": "/explainers/longevity/processed/longevity-altamira-cave-1200w.webp"
+      }
+    ],
+    "blurhash": "C8HSr-Vv0%%0}EENxrI="
+  },
+  {
+    "name": "longevity-aylesbury-estate",
+    "width": 2304,
+    "height": 3072,
+    "variants": [
+      {
+        "width": 400,
+        "src": "/explainers/longevity/processed/longevity-aylesbury-estate-400w.webp"
+      },
+      {
+        "width": 800,
+        "src": "/explainers/longevity/processed/longevity-aylesbury-estate-800w.webp"
+      },
+      {
+        "width": 1200,
+        "src": "/explainers/longevity/processed/longevity-aylesbury-estate-1200w.webp"
+      }
+    ],
+    "blurhash": "dtHC4V^,tRRj~q-;t7j@t7t7oLt6V@fkWBWBWBWBRjWB"
+  },
+  {
     "name": "longevity-couple-walking",
     "width": 3000,
     "height": 1993,
@@ -110,6 +290,26 @@ export const imageManifest: ImageEntry[] = [
     "blurhash": "LsNK3Tx]~qt7%3ozWVRjx]WBM{of"
   },
   {
+    "name": "longevity-strength-training",
+    "width": 3496,
+    "height": 2268,
+    "variants": [
+      {
+        "width": 400,
+        "src": "/explainers/longevity/processed/longevity-strength-training-400w.webp"
+      },
+      {
+        "width": 800,
+        "src": "/explainers/longevity/processed/longevity-strength-training-800w.webp"
+      },
+      {
+        "width": 1200,
+        "src": "/explainers/longevity/processed/longevity-strength-training-1200w.webp"
+      }
+    ],
+    "blurhash": "CuJHt5IAS5xa?waJjYRk"
+  },
+  {
     "name": "longevity-walking-frame",
     "width": 7000,
     "height": 4836,
@@ -148,5 +348,45 @@ export const imageManifest: ImageEntry[] = [
       }
     ],
     "blurhash": "C6Eo74~C9wTHy=?b$,yD"
+  },
+  {
+    "name": "okinawa",
+    "width": 2000,
+    "height": 1300,
+    "variants": [
+      {
+        "width": 400,
+        "src": "/explainers/longevity/processed/okinawa-400w.webp"
+      },
+      {
+        "width": 800,
+        "src": "/explainers/longevity/processed/okinawa-800w.webp"
+      },
+      {
+        "width": 1200,
+        "src": "/explainers/longevity/processed/okinawa-1200w.webp"
+      }
+    ],
+    "blurhash": "CNFXq}xwpItl~AtP%1xu"
+  },
+  {
+    "name": "stress",
+    "width": 2667,
+    "height": 1785,
+    "variants": [
+      {
+        "width": 400,
+        "src": "/explainers/longevity/processed/stress-400w.webp"
+      },
+      {
+        "width": 800,
+        "src": "/explainers/longevity/processed/stress-800w.webp"
+      },
+      {
+        "width": 1200,
+        "src": "/explainers/longevity/processed/stress-1200w.webp"
+      }
+    ],
+    "blurhash": "CADv$T~pV@%gxTxZMxRj"
   }
 ];

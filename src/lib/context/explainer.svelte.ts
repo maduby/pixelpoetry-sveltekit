@@ -37,6 +37,11 @@ export interface ExplainerMetaLike {
 	chapterCount?: number;
 	publishedAt?: string;
 	keywords?: string;
+	editorial?: {
+		title: string;
+		lastUpdated?: string;
+		body: string;
+	};
 }
 
 export interface ActiveExplainer {

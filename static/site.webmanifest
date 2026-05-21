@@ -1,14 +1,1 @@
-{
-  "name": "Ultra-Processed — The food that isn't food",
-  "short_name": "Ultra-Processed",
-  "description": "An immersive, evidence-led investigation into ultra-processed food: what it is, why it dominates our diet, and what it is doing to our bodies, our planet, and our children.",
-  "icons": [
-    { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png" }
-  ],
-  "theme_color": "#fef9ef",
-  "background_color": "#fef9ef",
-  "display": "standalone",
-  "start_url": "/",
-  "lang": "en-GB"
-}
+{"name":"","short_name":"","icons":[{"src":"/android-chrome-192x192.png","sizes":"192x192","type":"image/png"},{"src":"/android-chrome-512x512.png","sizes":"512x512","type":"image/png"}],"theme_color":"#ffffff","background_color":"#ffffff","display":"standalone"}

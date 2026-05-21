@@ -7,7 +7,8 @@
  * To add a new explainer:
  *   1. Run the `scaffold-explainer` skill (or follow its checklist by hand).
  *   2. Append an entry below.
- *   3. Wire the route at `src/routes/explainers/<slug>/+page.svelte`.
+ *   3. Wire the topic hub at `src/routes/<slug>/+page.svelte`.
+ *   4. Wire the canonical essay at `src/routes/<slug>/explainer/+page.svelte`.
  */
 
 export type ExplainerStatus = 'published' | 'in-progress' | 'planned';
@@ -62,7 +63,7 @@ export const explainers: ExplainerSummary[] = [
 			srcset: [
 				'/explainers/ultra-processed/processed/upf-pile-600w.webp 600w',
 				'/explainers/ultra-processed/processed/upf-pile-900w.webp 900w',
-				'/explainers/ultra-processed/processed/upf-pile-1200w.webp 1200w',
+				'/explainers/ultra-processed/processed/upf-pile-1200w.webp 1200w'
 			].join(', '),
 			sizes: '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw',
 			blurhash: 'C3G8ZSuj4=yB~C0JN9-E',
@@ -80,14 +81,28 @@ export const explainers: ExplainerSummary[] = [
 		slug: 'longevity',
 		href: '/longevity/explainer',
 		topicHref: '/longevity',
-		status: 'in-progress',
+		status: 'published',
 		eyebrow: 'Health & ageing',
 		title: 'Longevity',
 		tagline: 'What actually moves the needle on a longer, healthier life.',
 		description:
 			'What does the science actually say about living longer? A chapter-by-chapter investigation into longevity research — separating signal from noise on diet, exercise, sleep, and the biology of ageing.',
+		coverSrcset: {
+			src: '/explainers/longevity/processed/okinawa-800w.webp',
+			srcset: [
+				'/explainers/longevity/processed/okinawa-400w.webp 400w',
+				'/explainers/longevity/processed/okinawa-800w.webp 800w',
+				'/explainers/longevity/processed/okinawa-1200w.webp 1200w'
+			].join(', '),
+			sizes: '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw',
+			blurhash: 'CNFXq}xwpItl~AtP%1xu',
+			width: 2000,
+			height: 1300,
+			alt: 'Three older Japanese women sharing a meal in Okinawa'
+		},
 		readTimeMin: 14,
 		chapterCount: 10,
+		publishedAt: '2026-05-21',
 		accent: 'forest'
 	}
 ];

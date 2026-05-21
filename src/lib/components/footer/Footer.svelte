@@ -10,40 +10,15 @@
 	import { site } from '$lib/data/site';
 </script>
 
-<style>
-	@keyframes rainbow-flow {
-		0%   { background-position: 0% 50%; }
-		100% { background-position: 200% 50%; }
-	}
-	.logo-rainbow {
-		background: linear-gradient(
-			90deg,
-			#f43f5e  0%,
-			#f97316 14%,
-			#eab308 28%,
-			#22c55e 42%,
-			#3b82f6 56%,
-			#a855f7 70%,
-			#f43f5e 84%,
-			#f97316 100%
-		);
-		background-size: 200% auto;
-		background-clip: text;
-		-webkit-background-clip: text;
-		color: transparent;
-		animation: rainbow-flow 20s linear infinite;
-	}
-</style>
-
 <footer class="bg-ink text-cream">
 	<div class="mx-auto max-w-(--container-wide) px-6 py-16 lg:px-8 lg:py-20">
 		<div class="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
 			<!-- Byline -->
 			<div>
 				<p class="mb-1 text-xs font-bold tracking-[0.18em] text-cream/30 uppercase">A project by</p>
-			<a href={site.url} class="logo-rainbow block font-display text-3xl font-black leading-tight">
-				{site.name}
-			</a>
+				<a href="/" class="logo-rainbow block font-display text-3xl leading-tight font-black">
+					{site.name}
+				</a>
 				<p class="mt-2 max-w-md text-sm text-cream/40">
 					{site.tagline}
 				</p>
@@ -68,7 +43,7 @@
 			<!-- Quick links -->
 			<nav aria-label="Footer" class="flex flex-col gap-2 md:items-end">
 				<a
-					href="/#explainers"
+					href="/explainers"
 					class="text-sm font-semibold text-cream/70 transition-colors hover:text-brand-amber"
 				>
 					Explainers
@@ -98,3 +73,32 @@
 		</div>
 	</div>
 </footer>
+
+<style>
+	@keyframes rainbow-flow {
+		0% {
+			background-position: 0% 50%;
+		}
+		100% {
+			background-position: 200% 50%;
+		}
+	}
+	.logo-rainbow {
+		background: linear-gradient(
+			90deg,
+			#f43f5e 0%,
+			#f97316 14%,
+			#eab308 28%,
+			#22c55e 42%,
+			#3b82f6 56%,
+			#a855f7 70%,
+			#f43f5e 84%,
+			#f97316 100%
+		);
+		background-size: 200% auto;
+		background-clip: text;
+		-webkit-background-clip: text;
+		color: transparent;
+		animation: rainbow-flow 20s linear infinite;
+	}
+</style>

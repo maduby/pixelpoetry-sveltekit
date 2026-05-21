@@ -10,6 +10,26 @@ export type { ImageEntry } from '$lib/types/explainer';
 
 export const imageManifest: ImageEntry[] = [
   {
+    "name": "L1040910",
+    "width": 3832,
+    "height": 5757,
+    "variants": [
+      {
+        "width": 400,
+        "src": "/explainers/ultra-processed/processed/L1040910-400w.webp"
+      },
+      {
+        "width": 800,
+        "src": "/explainers/ultra-processed/processed/L1040910-800w.webp"
+      },
+      {
+        "width": 1200,
+        "src": "/explainers/ultra-processed/processed/L1040910-1200w.webp"
+      }
+    ],
+    "blurhash": "mnF=~-%2azof_Nt7aykC9vR*f5ay4.RjjsayaJj@j[js-oofflj["
+  },
+  {
     "name": "chris-van-tulleken",
     "width": 1440,
     "height": 1080,

@@ -138,6 +138,7 @@
 		position regardless of which step is currently active.
 	-->
 	<div
+		data-scrolly-story
 		class={cn(
 			'relative z-10 min-w-0 w-full text-left',
 			vizSide === 'left' ? 'lg:col-start-2' : 'lg:col-start-1'

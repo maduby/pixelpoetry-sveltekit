@@ -9,6 +9,7 @@
 	 */
 	import { setActiveExplainer } from '$lib/context/explainer.svelte';
 	import SEO from '$lib/components/SEO.svelte';
+	import { absoluteUrl } from '$lib/utils/seo';
 	import { reveal } from '$lib/attachments/reveal';
 	import ArrowRight from 'lucide-svelte/icons/arrow-right';
 	import BookOpen from 'lucide-svelte/icons/book-open';
@@ -31,11 +32,31 @@
 		// Future entries e.g.:
 		// { href: '/ultra-processed/scanner', type: 'AI tool', icon: '📷', title: 'Label scanner', … }
 	];
+
+	const topicJsonLd = {
+		'@context': 'https://schema.org',
+		'@type': 'CollectionPage',
+		name: 'Ultra-Processed',
+		description: 'Everything Pixel Poetry has published on ultra-processed food.',
+		url: absoluteUrl('/ultra-processed'),
+		mainEntity: {
+			'@type': 'ItemList',
+			itemListElement: pieces.map((piece, index) => ({
+				'@type': 'ListItem',
+				position: index + 1,
+				name: piece.title,
+				url: absoluteUrl(piece.href),
+				description: piece.description
+			}))
+		}
+	};
 </script>
 
 <SEO
 	title="Ultra-Processed"
 	description="Everything Pixel Poetry has published on ultra-processed food — essays, tools, and data."
+	canonical="/ultra-processed"
+	jsonLd={topicJsonLd}
 />
 
 <section class="bg-cream pt-24 pb-16 md:pt-32 md:pb-20">

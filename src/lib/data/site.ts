@@ -14,13 +14,13 @@ export const site = {
 	 * social previews, and screen-reader page summaries.
 	 */
 	description:
-		'Pixel Poetry is a series of carefully researched scrollytelling essays — one topic at a time, built to hold up under scrutiny.',
+		'Pixel Poetry is a small collection of visual essays by Marc Duby — a place for topics I keep thinking about and want to understand a bit better.',
 	/**
 	 * Extended description for structured data and Open Graph fallback.
 	 */
 	longDescription:
-		'One subject. Months of reading. Every chart earns its place, every claim cites a source. Pixel Poetry is what happens when a data journalist and web engineer gets genuinely alarmed about something and refuses to publish until it\'s right.',
-	url: 'https://pixelpoetry.dev',
+		'Pixel Poetry is a new little corner of the Internet where I turn topics I find interesting, worrying, or strangely sticky into interactive essays. A bit of reporting, a bit of data visualisation, a bit of trying to make sense of things without pretending to have the final word.',
+	url: 'https://www.pixelpoetry.dev',
 	/** Default OG image. Until a dedicated pixelpoetry.dev hero is shipped we
 	 *  reuse the ultra-processed share image so socials don't 404. */
 	ogImage: '/explainers/ultra-processed/share-image.jpg',

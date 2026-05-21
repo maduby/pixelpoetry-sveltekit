@@ -27,9 +27,16 @@
 	 */
 	import type { Snippet } from 'svelte';
 	import { cn } from '$lib/utils/cn';
-	import { openTermSheet } from '$lib/context/sheet';
+	import { openSourceSheet, openTermSheet } from '$lib/context/sheet';
 
 	function handleClick(e: MouseEvent) {
+		const sourceEl = (e.target as HTMLElement).closest('[data-source]') as HTMLElement | null;
+		if (sourceEl?.dataset.source) {
+			e.preventDefault();
+			openSourceSheet(sourceEl.dataset.source);
+			return;
+		}
+
 		const termEl = (e.target as HTMLElement).closest('[data-term]') as HTMLElement | null;
 		if (termEl?.dataset.term) {
 			e.preventDefault();

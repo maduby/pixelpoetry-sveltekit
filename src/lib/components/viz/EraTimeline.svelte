@@ -40,11 +40,27 @@
 		return FIRST_BAR_Y + index * ROW_STRIDE;
 	}
 
-	// Arrowhead: right-pointing triangle capping the ongoing bar
-	function arrowPoints(x: number, midY: number): string {
-		const tip = x + 13;
-		const half = BAR_H / 2;
-		return `${x},${midY - half} ${tip},${midY} ${x},${midY + half}`;
+	/**
+	 * SVG path for an ongoing bar: rounded left corners + integrated
+	 * right-pointing arrowhead. A single element means no gap between
+	 * the bar fill and the arrow (the rx rounding on a separate <rect>
+	 * always created a visible split at the join point).
+	 */
+	const RX = 6;
+	const ARROW_W = 14;
+	function ongoingBarPath(x0: number, x1: number, by: number): string {
+		const midY = by + BAR_H / 2;
+		return [
+			`M ${x0 + RX} ${by}`,
+			`L ${x1} ${by}`,
+			`L ${x1 + ARROW_W} ${midY}`,
+			`L ${x1} ${by + BAR_H}`,
+			`L ${x0 + RX} ${by + BAR_H}`,
+			`Q ${x0} ${by + BAR_H} ${x0} ${by + BAR_H - RX}`,
+			`L ${x0} ${by + RX}`,
+			`Q ${x0} ${by} ${x0 + RX} ${by}`,
+			'Z'
+		].join(' ');
 	}
 
 	// ── Animation ─────────────────────────────────────────────────────────────
@@ -76,7 +92,7 @@
 
 <div class="w-full select-none">
 	{#if title}
-		<p class="mb-3 text-[10px] font-semibold uppercase tracking-widest opacity-40">{title}</p>
+		<h3 class="mb-4 font-display text-xl font-black leading-tight text-ink md:text-2xl">{title}</h3>
 	{/if}
 
 	<svg
@@ -119,24 +135,26 @@
 				font-size="0"
 			/>
 
-			<!-- Main coloured bar -->
-			<rect
-				x={x0}
-				y={by}
-				width={bw}
-				height={BAR_H}
-				rx="6"
-				fill={era.color}
-				opacity="0.88"
-				class="era-bar"
-				class:animate={visible}
-				style="animation-delay: {delay}ms"
-			/>
-
-			<!-- Arrowhead cap on ongoing eras -->
-			{#if !era.endYear}
-				<polygon
-					points={arrowPoints(x1, midY)}
+			<!-- Bar shape:
+				 • Closed eras  → plain rounded <rect>
+				 • Ongoing eras → single <path> with left-rounded corners + built-in
+				                  arrowhead (no separate polygon, no gap at the join) -->
+			{#if era.endYear}
+				<rect
+					x={x0}
+					y={by}
+					width={bw}
+					height={BAR_H}
+					rx={RX}
+					fill={era.color}
+					opacity="0.88"
+					class="era-bar"
+					class:animate={visible}
+					style="animation-delay: {delay}ms"
+				/>
+			{:else}
+				<path
+					d={ongoingBarPath(x0, x1, by)}
 					fill={era.color}
 					opacity="0.88"
 					class="era-bar"

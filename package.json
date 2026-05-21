@@ -4,12 +4,14 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"dev": "vite dev",
+		"dev": "vite dev --host 0.0.0.0",
 		"build": "node scripts/build-images.mjs && vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"editorial:touch": "node scripts/update-editorial-timestamps.mjs",
+		"editorial:touch:changed": "node scripts/update-editorial-timestamps.mjs --changed",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write ."
 	},
@@ -25,6 +27,7 @@
 		"@tailwindcss/typography": "^0.5.19",
 		"@tailwindcss/vite": "^4.2.2",
 		"@types/node": "^24",
+		"@types/topojson-client": "^3.1.5",
 		"blurhash": "^2.0.5",
 		"eslint": "^10.2.0",
 		"eslint-config-prettier": "^10.1.8",
@@ -56,6 +59,7 @@
 		"lottie-web": "^5.13.0",
 		"lucide-svelte": "^1.0.1",
 		"posthog-js": "^1.373.4",
-		"tailwind-merge": "^3.6.0"
+		"tailwind-merge": "^3.6.0",
+		"topojson-client": "^3.1.0"
 	}
 }

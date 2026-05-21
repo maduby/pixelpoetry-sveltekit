@@ -10,16 +10,32 @@
 	import { explainers } from '$lib/data/explainers';
 	import ExplainerCard from '$lib/components/landing/ExplainerCard.svelte';
 	import SEO from '$lib/components/SEO.svelte';
+	import { absoluteUrl } from '$lib/utils/seo';
 	import ArrowDown from 'lucide-svelte/icons/arrow-down';
 	import { reveal } from '$lib/attachments/reveal';
 	import { posthog } from '$lib/analytics/posthog';
 
 	// Ensure no leftover explainer context from a previous navigation.
 	setActiveExplainer(null);
+
+	const publishedCount = $derived(explainers.filter((e) => e.status === 'published').length);
+	const inProgressCount = $derived(explainers.filter((e) => e.status !== 'published').length);
+
+	const homeJsonLd = {
+		'@context': 'https://schema.org',
+		'@type': 'ItemList',
+		name: 'Pixel Poetry explainers',
+		itemListElement: explainers.map((explainer, index) => ({
+			'@type': 'ListItem',
+			position: index + 1,
+			name: explainer.title,
+			url: absoluteUrl(explainer.href),
+			description: explainer.description
+		}))
+	};
 </script>
 
-<SEO />
-
+<SEO jsonLd={homeJsonLd} />
 
 <!-- ============================================================
      HERO
@@ -39,7 +55,7 @@
 			class="font-body text-sm font-bold tracking-[0.25em] text-ink/60 uppercase"
 			{@attach reveal({ y: 16 })}
 		>
-			One topic at a time
+			A small visual essay project
 		</p>
 
 		<h1
@@ -47,12 +63,12 @@
 			class="mt-8 max-w-5xl font-display text-4xl font-bold tracking-tight text-balance sm:text-5xl md:text-[clamp(3.5rem,8vw,8rem)]"
 			{@attach reveal({ y: 32, delay: 100 })}
 		>
-			Stories worth<br />
+			Things I keep<br />
 			<span
 				class="inline-block text-balance"
 				style="background: linear-gradient(90deg, #f43f5e 0%, #f97316 22%, #eab308 44%, #22c55e 66%, #3b82f6 88%, #a855f7 100%); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: 0.12em;"
 			>
-				scrolling through.
+				thinking about.
 			</span>
 		</h1>
 
@@ -76,9 +92,8 @@
 				<ArrowDown size={18} aria-hidden="true" />
 			</a>
 			<p class="text-sm text-ink/60">
-				{explainers.filter((e) => e.status === 'published').length} published · {explainers.filter(
-					(e) => e.status !== 'published'
-				).length} in the works
+				{publishedCount} published so far{#if inProgressCount}
+					· {inProgressCount} in the works{/if}
 			</p>
 		</div>
 	</div>
@@ -102,21 +117,21 @@
 				class="font-body text-sm font-bold tracking-[0.25em] text-brand-amber-deep uppercase"
 				{@attach reveal({ y: 16 })}
 			>
-				The library
+				The small library
 			</p>
 			<h2
-				class="mt-4 max-w-3xl font-display text-4xl font-bold leading-tight tracking-tight text-balance md:text-6xl"
+				class="mt-4 max-w-3xl font-display text-4xl leading-tight font-bold tracking-tight text-balance md:text-6xl"
 				{@attach reveal({ y: 24, delay: 100 })}
 			>
-				One topic at a time. Done properly.
+				Two essays so far. More when I have something worth saying.
 			</h2>
 			<p
 				class="mt-6 max-w-2xl text-lg leading-relaxed text-ink/70 md:text-xl"
 				{@attach reveal({ y: 24, delay: 200 })}
 			>
-				Each explainer takes one big subject — diet, longevity, the systems that quietly shape our
-				lives — and treats it like a chapter book. Researched from primary sources, animated where
-				it earns attention, and respectful of your time.
+				I am starting with topics that kept following me around: ultra-processed food, longevity,
+				and the odd gap between what science says and what everyday life makes possible. The format
+				is still finding itself, which is probably part of the point.
 			</p>
 		</div>
 
@@ -139,34 +154,35 @@
 					class="font-body text-sm font-bold tracking-[0.25em] text-brand-amber uppercase"
 					{@attach reveal({ y: 16 })}
 				>
-					What is this
+					What this is
 				</p>
 				<h2
-					class="mt-6 font-display text-4xl font-bold leading-tight tracking-tight text-balance md:text-5xl"
+					class="mt-6 font-display text-4xl leading-tight font-bold tracking-tight text-balance md:text-5xl"
 					{@attach reveal({ y: 24, delay: 100 })}
 				>
-					Slow journalism,<br />one scroll at a time.
+					A place to<br />think out loud.
 				</h2>
 			</div>
 
 			<div class="space-y-6 text-lg leading-relaxed text-cream/70 md:text-xl lg:col-span-7">
 				<p {@attach reveal({ y: 24, delay: 150 })}>
-					Pixel Poetry is a place to publish the kind of stories that get lost in headlines: the
-					ones that need a chart, a quote, a chapter, and a quiet moment of scroll to land.
-				</p>
-				<p {@attach reveal({ y: 24, delay: 200 })}>
-					Every claim is sourced. Every chart is built from peer-reviewed data. Every animation
-					earns its place — or it doesn't ship.
-				</p>
-				<p {@attach reveal({ y: 24, delay: 250 })}>
-					Made by
+					Pixel Poetry is a small side project by
 					<a
 						href="https://duby.io"
 						class="text-cream underline decoration-dotted underline-offset-4 transition-colors hover:text-brand-amber"
 						target="_blank"
 						rel="noopener noreferrer">Marc Duby</a
-					>
-					 — using SvelteKit, Tailwind, GSAP, and a lot of late nights.
+					>. I use it to turn topics I find hard to stop thinking about into little interactive
+					essays.
+				</p>
+				<p {@attach reveal({ y: 24, delay: 200 })}>
+					The aim is not to explain everything, or to sound like the final authority on anything. It
+					is more modest than that: read a lot, follow the evidence as honestly as I can, and make
+					the result a bit easier to sit with.
+				</p>
+				<p {@attach reveal({ y: 24, delay: 250 })}>
+					There are only two explainers here so far. That feels about right. I would rather let the
+					library grow slowly than fill it with things that did not quite need to exist.
 				</p>
 			</div>
 		</div>

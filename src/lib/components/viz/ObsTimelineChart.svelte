@@ -187,8 +187,9 @@
 			if (cancelled || !containerEl) return;
 
 			const fontPx = _narrow ? 11 : 13;
-			// No inside labels → only a tiny right margin for the final axis tick.
-			const marginRight = _narrow ? 10 : 12;
+			// Right margin: enough room for end-of-line value labels (e.g. "38%",
+			// "157"). Short values at 11–13 px need ~44 px max.
+			const marginRight = _narrow ? 12 : 48;
 
 			const chart = Plot.plot({
 				width: _w,
@@ -235,17 +236,50 @@
 						strokeLinejoin: 'round',
 						curve: 'linear'
 					}),
-					Plot.dot(_flat, {
+				Plot.dot(_flat, {
+					x: 'year',
+					y: 'value',
+					fill: (d: { color: string }) => d.color,
+					stroke: '#fef9ef',
+					strokeWidth: 1.6,
+					r: _narrow ? 3.5 : 4.5
+				}),
+				// End-of-line value annotations — one per series, fine black,
+				// positioned just to the right of the final data point.
+				// Split into two marks (upper vs lower half of the value domain)
+				// so we can nudge them slightly apart without function-valued dy
+				// (Observable Plot's TS types only accept literal numbers for dy).
+				Plot.text(
+					endpoints.filter((d) => d.value > (_yd[0] + _yd[1]) / 2),
+					{
 						x: 'year',
 						y: 'value',
-						fill: (d: { color: string }) => d.color,
-						stroke: '#fef9ef',
-						strokeWidth: 1.6,
-						r: _narrow ? 3.5 : 4.5
-					}),
-					// Tooltip LAST — SVG paint order means last = on top, so the
-					// tip box always renders above country labels and value pills.
-					Plot.tip(
+						text: (d: { value: number }) => `${d.value}${unit}`,
+						dx: 9,
+						dy: -1,
+						textAnchor: 'start' as const,
+						fill: '#0a0a0a',
+						fontWeight: '500',
+						fontSize: fontPx - 1
+					}
+				),
+				Plot.text(
+					endpoints.filter((d) => d.value <= (_yd[0] + _yd[1]) / 2),
+					{
+						x: 'year',
+						y: 'value',
+						text: (d: { value: number }) => `${d.value}${unit}`,
+						dx: 9,
+						dy: 1,
+						textAnchor: 'start' as const,
+						fill: '#0a0a0a',
+						fontWeight: '500',
+						fontSize: fontPx - 1
+					}
+				),
+				// Tooltip LAST — SVG paint order means last = on top, so the
+				// tip box always renders above country labels and value pills.
+				Plot.tip(
 						_flat,
 						Plot.pointer({
 							x: 'year',
@@ -307,29 +341,17 @@
 		aria-label={title ?? 'Timeline chart'}
 	></div>
 
-	<!-- ── Series legend ── colored dot · label · latest value ── -->
 	{#if series.length > 0}
-		<div class="mt-4 flex flex-wrap gap-x-5 gap-y-2">
-			{#each endpoints as ep}
+		<div class="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
+			{#each series as s}
 				<button
 					type="button"
-					class="group flex cursor-pointer items-center gap-2"
-					onmouseenter={() => highlightSeries(ep.label)}
+					class="flex items-center gap-1.5 text-xs font-medium text-ink/60 transition-opacity hover:opacity-100"
+					onmouseenter={() => highlightSeries(s.label)}
 					onmouseleave={() => highlightSeries(null)}
-					onfocus={() => highlightSeries(ep.label)}
-					onblur={() => highlightSeries(null)}
-					aria-label="Highlight {ep.label}"
 				>
-					<span
-						class="h-2.5 w-2.5 shrink-0 rounded-full transition-transform group-hover:scale-125"
-						style="background-color:{ep.color}"
-					></span>
-					<span class="font-body text-sm font-medium text-ink/60 transition-colors group-hover:text-ink"
-						>{ep.label}</span
-					>
-					<span class="font-body text-sm font-bold" style="color:{ep.color}"
-						>{ep.value}{unit}</span
-					>
+					<span class="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style="background:{s.color}"></span>
+					{s.label}
 				</button>
 			{/each}
 		</div>

@@ -200,7 +200,7 @@
 						style:left="{(marker.position * 100).toFixed(2)}%"
 						aria-current={isActive ? 'location' : undefined}
 						aria-label={`${marker.eyebrow}: ${marker.title}`}
-						onclick={() => posthog.capture('progress_bar_chapter_clicked', { chapter_id: marker.id, chapter_number: marker.number, chapter_title: marker.title })}
+						onclick={() => posthog.capture('progress_bar_chapter_clicked', { explainer_slug: explainer?.meta.slug, chapter_id: marker.id, chapter_number: marker.number, chapter_title: marker.title })}
 						onmouseenter={() => (hoveredId = marker.id)}
 						onmouseleave={() => (hoveredId = null)}
 						onfocus={() => (hoveredId = marker.id)}

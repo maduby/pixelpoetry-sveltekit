@@ -104,7 +104,7 @@ export const chapters: Chapter[] = [
 						},
 						{
 							label: 'UK',
-							color: '#b91c1c',
+							color: '#1e3a5f',
 							points: [
 								{ year: 2008, value: 53 },
 								{ year: 2014, value: 57 },
@@ -130,7 +130,7 @@ export const chapters: Chapter[] = [
 						},
 						{
 							label: 'France',
-							color: '#1e3a5f',
+							color: '#374151',
 							points: [
 								{ year: 2020, value: 17 }
 							]

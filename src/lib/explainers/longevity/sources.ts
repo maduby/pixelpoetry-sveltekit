@@ -5,9 +5,9 @@ export type { Source };
 export const sources: Record<string, Source> = {
 	'olp-2026': {
 		id: 'olp-2026',
-		short: 'Oxford Longevity Project (2026)',
-		full: 'Ball, C., Gray, M., Ch\'en, P., Kenny, L. & Noble, D. (2026). Living Longer, Better: The Age-less Report. Oxford Longevity Project.',
-		url: 'https://oxfordlongevity.org',
+		short: 'OLP report',
+		full: "Ball, C., Gray, M., Ch'en, P., Kenny, L. & Noble, D. (2026). Living Longer, Better: The Age-less Report. Oxford Longevity Project.",
+		url: '/explainers/longevity/sources/living-longer-better-olp-report.pdf',
 		year: 2026,
 		references: [
 			{
@@ -16,7 +16,17 @@ export const sources: Record<string, Source> = {
 			},
 			{
 				citation:
-					'Noble, D. (2023). Understanding Living Systems. Cambridge University Press. — The epigenetics chapter underpins the report\'s argument that lifestyle choices reshape gene expression across the life course.',
+					'Website: Oxford Longevity Project — background on the organisation and its longevity work.',
+				url: 'https://oxfordlongevityproject.org/'
+			},
+			{
+				citation:
+					'Programme link: Live Longer Better — the OLP-linked plan referenced in the report.',
+				url: 'https://oxfordlongevityproject.org/live-longer-better'
+			},
+			{
+				citation:
+					"Noble, D. (2023). Understanding Living Systems. Cambridge University Press. — The epigenetics chapter underpins the report's argument that lifestyle choices reshape gene expression across the life course.",
 				url: 'https://www.cambridge.org/core/books/understanding-living-systems/8D7C1CE43FD9DDED0ECAE8A0FF5E60B4'
 			}
 		]
@@ -24,9 +34,23 @@ export const sources: Record<string, Source> = {
 	'guardian-hill-2026': {
 		id: 'guardian-hill-2026',
 		short: 'Guardian / Hill (2026)',
-		full: 'Hill, A. (2026, May). "At least 80% responsibility for ill health in old age down to individual, study says." The Guardian.',
-		url: 'https://www.theguardian.com/society/2026/may/longevity-individual-responsibility',
-		year: 2026
+		full: 'Hill, A. (2026, May 20). "At least 80% responsibility for ill health in old age down to individual, study says." The Guardian.',
+		url: 'https://www.theguardian.com/society/2026/may/20/responsibility-ill-health-old-age-oxford-longevity-project-study',
+		year: 2026,
+		references: [
+			{
+				citation:
+					'Reports the Oxford Longevity Project claim that at least 80% of ill health in old age is attributable to individual responsibility, while noting critics who argue the framing underplays poverty, pollution, food environments, work, healthcare access, and policy choices.'
+			},
+			{
+				citation:
+					'Includes responses from Nancy Krieger, Steven Woolf, Devi Sridhar, and Jay Olshansky; also quotes Sir Christopher Ball defending the report as a hopeful call to action rather than a denial of structural constraints.'
+			},
+			{
+				citation:
+					'The article notes that the report was launched at the Smart Ageing Summit in Oxford and that its recommendations include avoiding processed foods, abstaining from alcohol, prioritising sleep, not eating late, and adopting what it calls a "not-meat mindset".'
+			}
+		]
 	},
 	'landmark-twins-1996': {
 		id: 'landmark-twins-1996',
@@ -113,10 +137,15 @@ export const sources: Record<string, Source> = {
 	'buettner-2023': {
 		id: 'buettner-2023',
 		short: 'Buettner & National Geographic (2023)',
-		full: 'Buettner, D. & Skemp, S. (2016). Blue Zones: Lessons From the World\'s Longest Lived. American Journal of Lifestyle Medicine, 10(5), 318–321. Updated reporting: National Geographic, 2023.',
+		full: "Buettner, D. & Skemp, S. (2016). Blue Zones: Lessons From the World's Longest Lived. American Journal of Lifestyle Medicine, 10(5), 318–321. Updated reporting: National Geographic, 2023.",
 		url: 'https://doi.org/10.1177/1559827616637066',
 		year: 2023,
 		references: [
+			{
+				citation:
+					"Blue Zones (2012). Okinawa's Longevity Lessons. bluezones.com — Ikigai, plant-based diet, moai social networks, daily gardening, and low-furniture floor living: the nine longevity practices observed in Okinawan centenarians.",
+				url: 'https://www.bluezones.com/2012/02/okinawas-longevity-lessons-2/'
+			},
 			{
 				citation:
 					'Newman, S. J. (2023). Supercentenarian and remarkable age records exhibit patterns indicative of clerical errors and pension fraud. PLOS ONE. — Challenges the accuracy of some Blue Zone longevity records, particularly in Sardinia and Okinawa, citing probable record-keeping errors.'
@@ -151,6 +180,63 @@ export const sources: Record<string, Source> = {
 			{
 				citation:
 					'CDC National Health Interview Survey (2020): 35% of US adults routinely sleep fewer than 7 hours per night.'
+			}
+		]
+	},
+	'unsplash-healthy-habit': {
+		id: 'unsplash-healthy-habit',
+		short: 'Dua Gianna / Unsplash',
+		full: 'Dua Gianna. "2 black and gray dumbbells on green grass." Unsplash. Published August 13, 2021.',
+		url: 'https://unsplash.com/photos/2-black-and-gray-dumbbells-on-green-grass-IzdLRdXcNT8',
+		year: 2021,
+		references: [
+			{
+				citation: 'Free to use under the Unsplash License.'
+			}
+		]
+	},
+	'unsplash-lifestyle-pattern': {
+		id: 'unsplash-lifestyle-pattern',
+		short: 'Unsplash lifestyle-pattern photo',
+		full: 'Unsplash. "Woman in yellow and white floral button-up shirt holding yellow banana."',
+		url: 'https://unsplash.com/photos/woman-in-yellow-and-white-floral-button-up-shirt-holding-yellow-banana-E9BR0lNMiQE',
+		year: 2026,
+		references: [
+			{
+				citation:
+					'Used as an editorial illustration of lifestyle patterns: whole foods, ordinary routines, and everyday health behaviour.'
+			}
+		]
+	},
+	'riseyoga-marc-duby-photo': {
+		id: 'riseyoga-marc-duby-photo',
+		short: 'Rise Yoga / Marc Duby',
+		full: 'Rise Yoga. Yoga, movement, and staying active. Photograph by Marc Duby.',
+		url: 'https://riseyoga.co.za',
+		year: 2026,
+		references: [
+			{
+				citation: 'Photo credit: riseyoga.co.za — Photo by Marc Duby.'
+			}
+		]
+	},
+	'balance-composite': {
+		id: 'balance-composite',
+		short: 'Balance composite image',
+		full: 'Composite image by Marc Duby using source images from Unsplash. The image contrasts systemic constraints with personal decisions and everyday opportunities to stay active.',
+		year: 2026,
+		references: [
+			{
+				citation: 'Nonsap Visuals / Unsplash. Woman walks past a blue door on brick building.',
+				url: 'https://unsplash.com/photos/woman-walks-past-a-blue-door-on-brick-building-GY7TYlaF0jw'
+			},
+			{
+				citation:
+					'Getty Images / Unsplash. Rear view of two young interracial male workers in uniform discussing quality of new equipment while moving along aisle in warehouse.',
+				url: 'https://unsplash.com/photos/rear-view-of-two-young-interracial-male-workers-in-uniform-discussing-quality-of-new-equipment-while-moving-along-aisle-in-warehouse-75N_hp1EjEo'
+			},
+			{
+				citation: 'Composite by Marc Duby.'
 			}
 		]
 	},

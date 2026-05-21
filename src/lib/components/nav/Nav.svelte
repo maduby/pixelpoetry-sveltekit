@@ -8,6 +8,7 @@
 	 * every screen size — it replaces the old inline mobile dropdown.
 	 */
 	import { site } from '$lib/data/site';
+	import { page } from '$app/state';
 	import { getActiveExplainer } from '$lib/context/explainer.svelte';
 	import { getTheme } from '$lib/utils/explainer-theme';
 	import { posthog } from '$lib/analytics/posthog';
@@ -17,6 +18,7 @@
 
 	const explainer = $derived(getActiveExplainer());
 	const theme = $derived(getTheme(explainer?.meta.accent));
+	const currentPath = $derived(page.url.pathname);
 
 	let drawerOpen = $state(false);
 
@@ -28,38 +30,10 @@
 
 <NavDrawer bind:open={drawerOpen} />
 
-<style>
-	@keyframes rainbow-flow {
-		0%   { background-position: 0% 50%; }
-		100% { background-position: 200% 50%; }
-	}
-
-	.logo-rainbow {
-		/* Wide gradient so the shift is gradual and smooth */
-		background: linear-gradient(
-			90deg,
-			#f43f5e  0%,
-			#f97316 14%,
-			#eab308 28%,
-			#22c55e 42%,
-			#3b82f6 56%,
-			#a855f7 70%,
-			#f43f5e 84%,
-			#f97316 100%
-		);
-		background-size: 200% auto;
-		background-clip: text;
-		-webkit-background-clip: text;
-		color: transparent;
-		animation: rainbow-flow 20s linear infinite;
-	}
-</style>
-
 <header
 	class="fixed inset-x-0 top-0 z-50 bg-cream/80 backdrop-blur supports-backdrop-filter:bg-cream/60"
 >
 	<div class="mx-auto flex h-16 max-w-(--container-wide) items-center gap-3 px-4 lg:px-8">
-
 		<!-- Hamburger — always on the far left -->
 		<button
 			type="button"
@@ -74,25 +48,22 @@
 		<!-- Logo / essay name — centred between hamburger and right rail -->
 		<div class="flex flex-1 items-center justify-center lg:justify-start">
 			{#if explainer}
-			<a
-				href={explainer.meta.href}
-				class="flex items-baseline gap-2 font-display text-xl font-bold tracking-tight"
-			>
-				<span class={theme.badgeText}>{explainer.meta.shortName}</span>
+				<a
+					href={explainer.meta.href}
+					class="flex items-baseline gap-2 font-display text-xl font-bold tracking-tight"
+				>
+					<span class={theme.badgeText}>{explainer.meta.shortName}</span>
 					<span class="hidden text-ink/70 sm:inline">
 						{#if explainer.meta.emoji}<span aria-hidden="true">{explainer.meta.emoji}</span>{/if}
 						{explainer.meta.name}
 					</span>
 				</a>
 			{:else}
-			<a
-				href="/"
-				class="flex items-baseline gap-2 font-display text-xl font-bold tracking-tight"
-			>
-				<span class="logo-rainbow">
-					{site.name}
-				</span>
-			</a>
+				<a href="/" class="flex items-baseline gap-2 font-display text-xl font-bold tracking-tight">
+					<span class="logo-rainbow">
+						{site.name}
+					</span>
+				</a>
 			{/if}
 		</div>
 
@@ -112,14 +83,22 @@
 				<!-- Landing / static pages: top-level links -->
 				<nav class="hidden items-center gap-1 lg:flex" aria-label="Top navigation">
 					<a
-						href="/#explainers"
-						class="rounded-full px-3 py-2 text-sm font-semibold text-ink/60 transition-colors hover:bg-ink/8 hover:text-ink"
+						href="/explainers"
+						aria-current={currentPath === '/explainers' ? 'page' : undefined}
+						class="rounded-full px-3 py-2 text-sm font-semibold transition-colors {currentPath ===
+						'/explainers'
+							? 'bg-ink/8 text-ink'
+							: 'text-ink/60 hover:bg-ink/8 hover:text-ink'}"
 					>
 						Explainers
 					</a>
 					<a
 						href="/about"
-						class="rounded-full px-3 py-2 text-sm font-semibold text-ink/60 transition-colors hover:bg-ink/8 hover:text-ink"
+						aria-current={currentPath === '/about' ? 'page' : undefined}
+						class="rounded-full px-3 py-2 text-sm font-semibold transition-colors {currentPath ===
+						'/about'
+							? 'bg-ink/8 text-ink'
+							: 'text-ink/60 hover:bg-ink/8 hover:text-ink'}"
 					>
 						About
 					</a>
@@ -127,6 +106,36 @@
 				<ShareMenu />
 			{/if}
 		</div>
-
 	</div>
 </header>
+
+<style>
+	@keyframes rainbow-flow {
+		0% {
+			background-position: 0% 50%;
+		}
+		100% {
+			background-position: 200% 50%;
+		}
+	}
+
+	.logo-rainbow {
+		/* Wide gradient so the shift is gradual and smooth */
+		background: linear-gradient(
+			90deg,
+			#f43f5e 0%,
+			#f97316 14%,
+			#eab308 28%,
+			#22c55e 42%,
+			#3b82f6 56%,
+			#a855f7 70%,
+			#f43f5e 84%,
+			#f97316 100%
+		);
+		background-size: 200% auto;
+		background-clip: text;
+		-webkit-background-clip: text;
+		color: transparent;
+		animation: rainbow-flow 20s linear infinite;
+	}
+</style>

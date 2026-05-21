@@ -31,8 +31,11 @@
 	import ObsTimelineChart from '$lib/components/viz/ObsTimelineChart.svelte';
 	import ImageChart from '$lib/components/viz/ImageChart.svelte';
 	import EraTimeline from '$lib/components/viz/EraTimeline.svelte';
+	import BlueZonesMap from '$lib/components/viz/BlueZonesMap.svelte';
+	import BillionDollarTimeline from '$lib/components/viz/BillionDollarTimeline.svelte';
 	import { cn } from '$lib/utils/cn';
 	import { posthog } from '$lib/analytics/posthog';
+	import { getActiveExplainer } from '$lib/context/explainer.svelte';
 
 	interface Props {
 		chapter: ChapterData;
@@ -66,7 +69,11 @@
 		}[chapter.accent]
 	);
 
+	const explainer = $derived(getActiveExplainer());
+
 	let sectionEl = $state<HTMLElement | undefined>(undefined);
+	let activeStepIndex = $state(0);
+	const isBlackout = $derived(visibleSteps[activeStepIndex]?.blackout === true);
 
 	$effect(() => {
 		if (!sectionEl) return;
@@ -74,6 +81,7 @@
 			(entries) => {
 				if (entries[0].isIntersecting) {
 					posthog.capture('chapter_viewed', {
+						explainer_slug: explainer?.meta.slug,
 						chapter_id: chapter.id,
 						chapter_number: chapter.number,
 						chapter_title: chapter.title
@@ -86,21 +94,47 @@
 		observer.observe(sectionEl);
 		return () => observer.disconnect();
 	});
+
+	/**
+	 * Fire `step_viewed` whenever the active step changes.
+	 * Fires for every step transition, including the first (step 0).
+	 * The step index is relative to `visibleSteps` (closingOnly steps excluded).
+	 */
+	function handleActiveStep(stepIndex: number) {
+		activeStepIndex = stepIndex;
+		const step = visibleSteps[stepIndex];
+		if (!step) return;
+		posthog.capture('step_viewed', {
+			explainer_slug: explainer?.meta.slug,
+			chapter_id: chapter.id,
+			chapter_number: chapter.number,
+			step_id: step.id,
+			step_index: stepIndex,
+			step_count: visibleSteps.length
+		});
+	}
 </script>
 
 <section
 	bind:this={sectionEl}
 	id={chapter.id}
-	class={cn('relative isolate bg-linear-to-b overflow-clip', accentBg, index % 2 === 1 && 'bg-cream-soft')}
+	class={cn(
+		'chapter-section relative isolate overflow-clip bg-linear-to-b',
+		accentBg,
+		index % 2 === 1 && 'bg-cream-soft',
+		isBlackout && 'is-blackout'
+	)}
 	aria-labelledby={`${chapter.id}-title`}
 >
 	<!-- Chapter opener: full-bleed intro before the scrolly kicks in. -->
-	<div class="mx-auto w-full min-w-0 max-w-(--container-wide) px-6 pt-14 pb-8 lg:px-8 lg:pt-32 lg:pb-20">
+	<div
+		class="mx-auto w-full max-w-(--container-wide) min-w-0 px-6 pt-14 pb-8 lg:px-8 lg:pt-32 lg:pb-20"
+	>
 		<Eyebrow emoji={chapter.emoji}>{chapter.eyebrow}</Eyebrow>
 		<h2
 			id={`${chapter.id}-title`}
 			class={cn(
-				'mt-4 max-w-5xl font-display font-bold text-balance leading-[1.05]',
+				'mt-4 max-w-5xl font-display leading-[1.05] font-bold text-balance',
 				'text-[clamp(2.5rem,6vw,5.5rem)]',
 				accentText
 			)}
@@ -140,21 +174,25 @@
 				valueDomain={step.viz.valueDomain}
 				sourceId={step.viz.sourceId}
 			/>
-	{:else if step.viz?.type === 'donut'}
-		<DonutChart data={step.viz.data} label={chapter.title} />
-	{:else if step.viz?.type === 'era-timeline'}
-		<EraTimeline eras={step.viz.eras} title={step.viz.title} />
-	{:else if step.viz?.type === 'image'}
-		<ImageChart
-			name={step.viz.name}
-			alt={step.viz.alt}
-			caption={step.viz.caption}
-			sourceId={step.viz.sourceId}
-			credit={step.viz.credit}
-			fit={step.viz.fit}
-			aspect={step.viz.aspect}
-			imgClass={step.viz.imgClass}
-		/>
+		{:else if step.viz?.type === 'donut'}
+			<DonutChart data={step.viz.data} label={chapter.title} />
+		{:else if step.viz?.type === 'era-timeline'}
+			<EraTimeline eras={step.viz.eras} title={step.viz.title} />
+		{:else if step.viz?.type === 'blue-zones-map'}
+			<BlueZonesMap />
+		{:else if step.viz?.type === 'billion-dollar-timeline'}
+			<BillionDollarTimeline />
+		{:else if step.viz?.type === 'image'}
+			<ImageChart
+				name={step.viz.name}
+				alt={step.viz.alt}
+				caption={step.viz.caption}
+				sourceId={step.viz.sourceId}
+				credit={step.viz.credit}
+				fit={step.viz.fit}
+				aspect={step.viz.aspect}
+				imgClass={step.viz.imgClass}
+			/>
 		{:else if step.stat}
 			<StatCard stat={step.stat} accent={chapter.accent} />
 		{/if}
@@ -163,10 +201,13 @@
 	<!-- Scrollytelling body. -->
 	<Scrolly
 		vizSide="right"
-		class="mx-auto w-full max-w-(--container-wide) px-6 {closingQuotes.length ? 'pb-0' : 'pb-10 lg:pb-24 xl:pb-32'} lg:px-8"
+		onActiveStep={handleActiveStep}
+		class="mx-auto w-full max-w-(--container-wide) px-6 {closingQuotes.length
+			? 'pb-0'
+			: 'pb-10 lg:pb-24 xl:pb-32'} lg:px-8"
 	>
 		{#snippet viz({ activeStep })}
-			{@const step = chapter.steps[activeStep]}
+			{@const step = visibleSteps[activeStep]}
 			<!--
 				`{#key activeStep}` re-mounts the inner block when the
 				active step changes, so the `animate-fade-in` animation
@@ -174,7 +215,9 @@
 				reused and the fade-in only plays once per chapter load.
 			-->
 			{#key activeStep}
-				<div class="animate-fade-in mx-auto flex w-full min-w-0 flex-col items-center justify-center">
+				<div
+					class="animate-fade-in mx-auto flex w-full min-w-0 flex-col items-center justify-center"
+				>
 					{@render stepViz(step)}
 				</div>
 			{/key}
@@ -185,9 +228,11 @@
 				<Step isActive={i === activeStep}>
 					{#if step.accentLetter}
 						<p
-							class="select-none font-display font-black leading-none mb-3 text-[clamp(5rem,14vw,11rem)] {accentText}"
+							class="mb-3 font-display text-[clamp(5rem,14vw,11rem)] leading-none font-black select-none {accentText}"
 							aria-hidden="true"
-						>{step.accentLetter}</p>
+						>
+							{step.accentLetter}
+						</p>
 					{/if}
 					<!--
 						richText uses <strong> for key phrases; safe — it's
@@ -195,7 +240,9 @@
 						measure comfortable for reading even when the
 						column is wide.
 					-->
-					<p class="mx-auto max-w-3xl font-body text-xl leading-relaxed text-pretty text-ink/90 md:text-2xl [&_strong]:font-black [&_strong]:text-ink">
+					<p
+						class="mx-auto max-w-3xl font-body text-xl leading-relaxed text-pretty text-ink/90 md:text-2xl [&_strong]:font-black [&_strong]:text-ink"
+					>
 						{@html step.richText ?? step.text}
 					</p>
 				</Step>
@@ -212,9 +259,7 @@
 					column on the right handles the same content.
 				-->
 				{#if step.viz || step.stat}
-					<div
-						class="flex w-full min-w-0 items-center justify-center py-10 lg:hidden"
-					>
+					<div class="flex w-full min-w-0 items-center justify-center py-10 lg:hidden">
 						<div class="flex w-full min-w-0 flex-col items-center justify-center">
 							{@render stepViz(step)}
 						</div>
@@ -230,13 +275,9 @@
 		end of the scrolly body and the next chapter header.
 	-->
 	{#if closingQuotes.length}
-		<div class="mx-auto w-full max-w-(--container-wide) px-6 pb-10 lg:pb-24 xl:pb-32 lg:px-8">
+		<div class="mx-auto w-full max-w-(--container-wide) px-6 pb-10 lg:px-8 lg:pb-24 xl:pb-32">
 			{#each closingQuotes as step (step.id)}
-				<QuoteBlock
-					quote={step.quote!}
-					variant="closing"
-					accent={chapter.accent}
-				/>
+				<QuoteBlock quote={step.quote!} variant="closing" accent={chapter.accent} />
 			{/each}
 		</div>
 	{/if}
@@ -255,5 +296,53 @@
 	}
 	:global(.animate-fade-in) {
 		animation: fade-in 400ms ease-out;
+	}
+
+	/* ── Blackout step effect ── */
+	.chapter-section {
+		transition:
+			background-color 700ms ease,
+			background-image 700ms ease;
+	}
+	.chapter-section.is-blackout {
+		background: #0a0a0a !important;
+		background-image: none !important;
+	}
+
+	/*
+	 * Flip ALL descendant text to near-white while blacked out.
+	 * — `color` handles regular text
+	 * — `-webkit-text-fill-color` overrides gradient-text classes that
+	 *   set `text-fill-color: transparent` and `background-clip: text`
+	 * — `background-image: none` removes the gradient paint on those spans
+	 * We target the scrolly section and viz column specifically to avoid
+	 * touching chapter header text (title/intro) which sits outside Scrolly.
+	 */
+	.chapter-section.is-blackout :global([data-scrolly-viz] *),
+	.chapter-section.is-blackout :global([data-scrolly-viz] p),
+	.chapter-section.is-blackout :global([data-scrolly-viz] span),
+	.chapter-section.is-blackout :global([data-scrolly-viz] figcaption),
+	.chapter-section.is-blackout :global([data-scrolly-viz] button) {
+		color: rgba(245, 245, 244, 0.9) !important;
+		-webkit-text-fill-color: rgba(245, 245, 244, 0.9) !important;
+		background-image: none !important;
+		transition:
+			color 700ms ease,
+			-webkit-text-fill-color 700ms ease;
+	}
+	.chapter-section.is-blackout :global([data-scrolly-viz] p:last-child),
+	.chapter-section.is-blackout :global([data-scrolly-viz] .text-ink\/60),
+	.chapter-section.is-blackout :global([data-scrolly-viz] .text-ink\/80) {
+		color: rgba(245, 245, 244, 0.55) !important;
+		-webkit-text-fill-color: rgba(245, 245, 244, 0.55) !important;
+	}
+	/* Story column step text */
+	.chapter-section.is-blackout :global([data-scrolly-story] p),
+	.chapter-section.is-blackout :global([data-scrolly-story] strong) {
+		color: rgba(245, 245, 244, 0.9) !important;
+		-webkit-text-fill-color: rgba(245, 245, 244, 0.9) !important;
+		transition:
+			color 700ms ease,
+			-webkit-text-fill-color 700ms ease;
 	}
 </style>

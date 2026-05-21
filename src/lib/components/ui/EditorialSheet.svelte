@@ -22,6 +22,8 @@
 	interface EditorialContent {
 		/** Sheet heading. Defaults to "Why I made this". */
 		title?: string;
+		/** Human-readable timestamp shown at the top of the editorial note. */
+		lastUpdated?: string;
 		/** HTML body — paragraphs, headings, blockquotes, images, links. */
 		body: string;
 	}
@@ -49,7 +51,11 @@
 	onclick={handleOpen}
 	class="group inline-flex cursor-pointer items-center gap-1.5 text-sm text-ink/60 transition-colors hover:text-ink {className}"
 >
-	<PenLine size={13} aria-hidden="true" class="shrink-0 transition-transform group-hover:-rotate-6" />
+	<PenLine
+		size={13}
+		aria-hidden="true"
+		class="shrink-0 transition-transform group-hover:-rotate-6"
+	/>
 	<span>{editorial.title ?? 'Why I made this'}</span>
 </button>
 
@@ -59,7 +65,10 @@
 		All rules are scoped to this element via the <style> block below
 		so they don't leak into the rest of the sheet.
 	-->
-	<article class="editorial-body mx-auto max-w-2xl pb-8">
+	<article class="editorial-body pb-8">
+		{#if editorial.lastUpdated}
+			<p class="editorial-updated">Piece last updated: {editorial.lastUpdated}</p>
+		{/if}
 		{@html editorial.body}
 	</article>
 </Sheet>
@@ -81,11 +90,23 @@
 		text-wrap: pretty;
 	}
 
+	:global(.editorial-body .editorial-updated) {
+		margin-bottom: 1.75rem;
+		font-size: 0.875rem;
+		font-weight: 600;
+		line-height: 1.4;
+		color: color-mix(in oklab, var(--color-ink) 56%, transparent);
+	}
+
+	:global(.editorial-body .editorial-updated + *) {
+		margin-top: 0;
+	}
+
 	:global(.editorial-body h2) {
 		margin-top: 2em;
 		margin-bottom: 0.5em;
 		font-family: var(--font-display);
-		font-size: 1.375rem;
+		font-size: 1.125rem;
 		font-weight: 700;
 		line-height: 1.25;
 		color: var(--color-ink);

@@ -23,26 +23,36 @@ export const meta = {
 	accent: 'forest' as const,
 	readTimeMin: 14,
 	chapterCount: 10,
-	publishedAt: undefined,
+	publishedAt: '2026-05-21',
 	keywords:
 		'longevity, lifespan, healthspan, ageing, hallmarks of aging, blue zones, caloric restriction, exercise longevity, sleep health, evidence-based longevity',
 	editorial: {
 		title: 'Why I made this',
+		lastUpdated: '21 May 2026 at 10:49am',
 		body: `
-<p>Write your motivation, backstory, and caveats here. This is your editorial note to the reader — the part of the essay that sits behind the byline.</p>
+<p>My name is <a href="https://duby.io" target="_blank" rel="noopener">Marc Duby</a>, and I try to boil down stories, articles, and topics that I find interesting and worth reading. I know it is hard to find enough time to read articles, books, or even, imagine, scientific papers. That is why I am trying to explain complex topics with these hopefully easy-to-use and interesting little interactive essays.</p>
 
-<p>You can use full rich text: <strong>bold</strong>, <em>italic</em>, <a href="#">links</a>, blockquotes, images, and lists. Replace this placeholder with your own words.</p>
+<h2>The starting point</h2>
+<p>The starting point for this piece was the Oxford Longevity Project report <em>Living Longer, Better: The Age-less Report</em>. I found it fascinating how longevity has become such a huge thing: part science, part industry, part culture war, part personal hope. I wanted to take some of the claims in the report and bring them to life in a way that felt readable, visual, and a little less breathless.</p>
 
-<blockquote><p>What triggered this piece, what you were trying to understand, what surprised you along the way, and what you are still uncertain about.</p></blockquote>
+<ul class="sources-list">
+  <li><a href="/explainers/longevity/sources/living-longer-better-olp-report.pdf" target="_blank" rel="noopener">Read the report PDF</a></li>
+  <li><a href="https://oxfordlongevityproject.org/" target="_blank" rel="noopener">Oxford Longevity Project website</a></li>
+  <li><a href="https://oxfordlongevityproject.org/live-longer-better" target="_blank" rel="noopener">Live Longer Better plan</a></li>
+</ul>
+
+<h2>What I was trying to do</h2>
+<p>I wanted to separate the signal from the noise. Longevity is full of supplements, protocols, miracle routines, and extremely confident men on podcasts. But underneath all that, there are some surprisingly ordinary, evidence-backed ideas: sleep, movement, food, stress, social connection, mindset, and the environments that make healthy choices easier or harder.</p>
 
 <h2>Caveats</h2>
-<p>What you would add, qualify, or change after writing it. Where the evidence is genuinely contested. What you left out and why.</p>
+<p>I am not claiming that everything in these pieces is always 100% accurate. The stories I choose to tell often start from a paper, article, report, or book, and I mention that starting point here. From there, I try to cross-check, simplify, and visualise. Simplifying always loses some detail, and science keeps moving.</p>
 
-<h2>Sources</h2>
-<p>The primary sources are listed at the bottom of the essay. A few that shaped the thinking most:</p>
-<ul class="sources-list">
-  <li>Oxford Longevity Project — <a href="https://www.ox.ac.uk/longevity" target="_blank" rel="noopener">ox.ac.uk/longevity</a></li>
-</ul>
+<p>This piece is also not medical advice. It is an editorial explainer: a way into the topic, not the final word on it.</p>
+
+<h2>Feedback</h2>
+<p>Any feedback is always welcome: future topics to cover, criticism, corrections, anything. Reach out at <a href="mailto:mail@pixelpoetry.dev">mail@pixelpoetry.dev</a>.</p>
+
+<p>Happy reading.</p>
 `
 	}
 } as const;

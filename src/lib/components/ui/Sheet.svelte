@@ -19,14 +19,22 @@
 	interface Props {
 		open?: boolean;
 		title?: string;
+		resetKey?: string | number | null;
 		children: Snippet;
 		class?: string;
 	}
 
-	let { open = $bindable(false), title, children, class: className }: Props = $props();
+	let {
+		open = $bindable(false),
+		title,
+		resetKey = null,
+		children,
+		class: className
+	}: Props = $props();
 
 	let dialogEl = $state<HTMLDialogElement | undefined>(undefined);
 	let panelEl = $state<HTMLDivElement | undefined>(undefined);
+	let contentEl = $state<HTMLDivElement | undefined>(undefined);
 
 	// isVisible controls the CSS animation — kept separate from dialog.open
 	// so close() isn't called until after the slide-out animation finishes.
@@ -43,9 +51,15 @@
 	let dragStartHeight = 0;
 
 	let prefersReducedMotion = $derived(
-		typeof window !== 'undefined' &&
-			window.matchMedia('(prefers-reduced-motion: reduce)').matches
+		typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 	);
+
+	function resetScroll() {
+		requestAnimationFrame(() => {
+			contentEl?.scrollTo({ top: 0, left: 0 });
+			panelEl?.scrollTo({ top: 0, left: 0 });
+		});
+	}
 
 	// Sync `open` prop → dialog + animation state.
 	$effect(() => {
@@ -59,8 +73,12 @@
 			isVisible = true;
 			panelHeight = defaultHeight;
 			document.body.style.overflow = 'hidden';
-			// Defer so the dialog is fully painted before we steal focus.
-			requestAnimationFrame(() => panelEl?.focus());
+			// Defer so the dialog is fully painted before we steal focus
+			// and reset scroll so re-opening lands at the top.
+			requestAnimationFrame(() => {
+				panelEl?.focus();
+				resetScroll();
+			});
 		} else if (isVisible) {
 			// Close: play slide-out animation, then close dialog after transition.
 			isVisible = false;
@@ -70,6 +88,13 @@
 				document.body.style.overflow = '';
 			}, duration);
 		}
+	});
+
+	// If the sheet stays open while its content changes, reset the inner
+	// scroll container too. Source/annotation sheets reuse one dialog.
+	$effect(() => {
+		resetKey;
+		if (open) resetScroll();
 	});
 
 	function handleClose() {
@@ -134,10 +159,7 @@
 		// Only fired when dialog.close() is called directly (Escape key).
 		open = false;
 	}}
-	class={cn(
-		'sheet-dialog backdrop:bg-ink/40 backdrop:backdrop-blur-sm',
-		className
-	)}
+	class={cn('sheet-dialog backdrop:bg-ink/40 backdrop:backdrop-blur-sm', className)}
 	aria-label={title}
 >
 	<!--
@@ -177,25 +199,25 @@
 
 		<!-- Header -->
 		<div
-			class="flex shrink-0 items-center justify-between gap-4 border-b border-ink/10 px-6 pb-3 lg:px-8"
+			class="flex shrink-0 items-center justify-between gap-4 border-b border-ink/10 px-6 py-3 lg:px-8"
 		>
 			{#if title}
-				<h2 class="font-display text-xl font-bold text-ink">{title}</h2>
+				<h2 class="font-display text-xl font-bold text-ink md:text-2xl">{title}</h2>
 			{:else}
 				<div></div>
 			{/if}
-		<button
-			type="button"
-			onclick={handleClose}
-			aria-label="Close panel"
-			class="flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full p-2.5 text-ink/60 transition-colors hover:bg-ink/8 hover:text-ink"
-		>
-			<X size={22} aria-hidden="true" />
-		</button>
+			<button
+				type="button"
+				onclick={handleClose}
+				aria-label="Close panel"
+				class="flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full p-2.5 text-ink/60 transition-colors hover:bg-ink/8 hover:text-ink"
+			>
+				<X size={22} aria-hidden="true" />
+			</button>
 		</div>
 
 		<!-- Scrollable content -->
-		<div class="safe-area-pb flex-1 overflow-y-auto px-6 py-6 pb-8 lg:px-8">
+		<div bind:this={contentEl} class="safe-area-pb flex-1 overflow-y-auto px-6 py-6 pb-8 lg:px-8">
 			{@render children()}
 		</div>
 	</div>

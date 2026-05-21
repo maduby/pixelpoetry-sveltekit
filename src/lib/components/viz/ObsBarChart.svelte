@@ -141,15 +141,33 @@
 
 	/**
 	 * Compute a responsive row height that fits `numBars` bars within the
-	 * available height (minus fixed overhead for title / subtitle / source).
+	 * available height (minus realistic overhead for every non-SVG element).
+	 *
+	 * Key corrections vs the naive version:
+	 *  - Title can wrap to 2 lines (long titles at ~20px/line → 56 px).
+	 *  - Subtitle can wrap to 2–3 lines (12px text → 44 px).
+	 *  - flex gap-3 (12 px) × up to 3 gaps between elements.
+	 *  - Plot's own marginTop + marginBottom (16 px total) live INSIDE the
+	 *    SVG budget, so they must be subtracted before dividing by numBars.
+	 *    Without this the SVG always overflows the budget by 16 px.
+	 *  - A 16 px comfort cushion so the source button never sits flush
+	 *    against the bottom of the sticky column.
 	 *
 	 * Clamped: [MIN_ROW_H, MAX_ROW_H].
 	 */
 	function calcRowH(numBars: number, defaultH: number): number {
-		const MIN_ROW_H = 28;
+		const MIN_ROW_H = 26;
 		const MAX_ROW_H = defaultH;
 		if (!availableHeight || numBars === 0) return MAX_ROW_H;
-		const overhead = (title ? 30 : 0) + (subtitle ? 22 : 0) + (sourceId ? 24 : 0) + 56;
+
+		const titleH    = title    ? 56 : 0; // up to 2 wrapped lines at text-xl
+		const subtitleH = subtitle ? 44 : 0; // up to 3 wrapped lines at text-xs
+		const sourceH   = sourceId ? 32 : 0;
+		const gaps      = 12 * 3;            // gap-3 × 3 inter-element gaps
+		const svgMargins = 16;               // Plot marginTop:8 + marginBottom:8
+		const cushion   = 16;
+		const overhead  = titleH + subtitleH + sourceH + gaps + svgMargins + cushion;
+
 		const freeH = availableHeight - overhead;
 		const ideal = Math.floor(freeH / numBars);
 		return Math.max(MIN_ROW_H, Math.min(MAX_ROW_H, ideal));
@@ -476,7 +494,8 @@
 					...uniqueLabels.map((l) => data.filter((d) => d.label === l).length)
 				);
 				const totalBars = uniqueLabels.length * maxRowsPerGroup;
-				const rowH = calcRowH(totalBars + uniqueLabels.length, 56);
+				const defaultGroupRowH = Math.max(32, Math.round(320 / Math.max(1, totalBars)));
+			const rowH = calcRowH(totalBars + uniqueLabels.length, defaultGroupRowH);
 				const compact = rowH < 42;
 
 				for (const [i, label] of uniqueLabels.entries()) {
@@ -499,9 +518,12 @@
 				return;
 			}
 
-			// ── Label-left simple mode ─────────────────────────────────
-			// Slightly taller default rows for bolder visual presence.
-			const rowH = calcRowH(data.length, 72);
+		// ── Label-left simple mode ─────────────────────────────────
+		// Cap the default max row height: tall defaults look fine for 2–4
+		// bars but produce an over-sized chart for 7–10 bars. Scale it down
+		// so a 10-bar chart starts at ~44 px per row rather than 72.
+		const defaultRowH = Math.max(38, Math.round(380 / Math.max(1, data.length)));
+		const rowH = calcRowH(data.length, defaultRowH);
 			const compact = rowH < 42;
 			const fontPxSimple = compact ? 11 : 13;
 			const h = data.length * rowH + 32;

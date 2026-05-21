@@ -217,7 +217,8 @@ body {
 /* ── Inline annotation / jargon links ────────────────────────────────────── */
 /* Applied to any [data-term="…"] element — <strong>, <span>, <a> — inside     */
 /* {@html richText} blocks. Click opens the "Annotation" bottom sheet.          */
-[data-term] {
+[data-term],
+[data-source] {
 	font-weight: 600;
 	text-decoration: underline wavy var(--color-brand-amber);
 	text-decoration-thickness: 1.5px;
@@ -227,7 +228,9 @@ body {
 	transition: text-decoration-color 150ms ease;
 }
 [data-term]:hover,
-[data-term]:focus-visible {
+[data-term]:focus-visible,
+[data-source]:hover,
+[data-source]:focus-visible {
 	text-decoration-color: var(--color-brand-red);
 	outline: none;
 }

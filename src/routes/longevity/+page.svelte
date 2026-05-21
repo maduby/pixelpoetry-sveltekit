@@ -1,18 +1,40 @@
 <script lang="ts">
 	/**
 	 * /longevity — topic hub.
-	 * Placeholder while the explainer is in development.
 	 */
 	import { setActiveExplainer } from '$lib/context/explainer.svelte';
+	import { getExplainer } from '$lib/data/explainers';
 	import SEO from '$lib/components/SEO.svelte';
+	import ExplainerCard from '$lib/components/landing/ExplainerCard.svelte';
+	import { absoluteUrl } from '$lib/utils/seo';
 	import { reveal } from '$lib/attachments/reveal';
 
 	setActiveExplainer(null);
+
+	const explainer = getExplainer('longevity');
+	const topicJsonLd = {
+		'@context': 'https://schema.org',
+		'@type': 'CollectionPage',
+		name: 'Longevity',
+		description:
+			'Evidence, tools, and interactive stories on longevity science and healthier ageing.',
+		url: absoluteUrl('/longevity'),
+		mainEntity: explainer
+			? {
+					'@type': 'CreativeWork',
+					name: explainer.title,
+					url: absoluteUrl(explainer.href),
+					description: explainer.description
+				}
+			: undefined
+	};
 </script>
 
 <SEO
 	title="Longevity"
-	description="What actually moves the needle on a longer, healthier life. Coming to Pixel Poetry."
+	description="Evidence, tools, and interactive stories on longevity science and healthier ageing."
+	canonical="/longevity"
+	jsonLd={topicJsonLd}
 />
 
 <section class="bg-cream pt-24 pb-16 md:pt-32 md:pb-20">
@@ -24,7 +46,7 @@
 			Health & ageing
 		</p>
 		<h1
-			class="mt-4 max-w-4xl font-display text-5xl font-bold leading-tight tracking-tight text-balance md:text-7xl"
+			class="mt-4 max-w-4xl font-display text-5xl leading-tight font-bold tracking-tight text-balance md:text-7xl"
 			{@attach reveal({ y: 24, delay: 100 })}
 		>
 			Longevity
@@ -41,22 +63,11 @@
 
 <section class="bg-cream pb-24 md:pb-32">
 	<div class="mx-auto max-w-(--container-wide) px-6 lg:px-8">
-
-		<!-- Coming soon card -->
-		<div
-			class="max-w-2xl rounded-3xl border border-dashed border-brand-forest/30 bg-paper px-10 py-14 text-center"
-			{@attach reveal({ y: 24 })}
-		>
-			<span class="text-4xl" aria-hidden="true">🌿</span>
-			<h2 class="mt-6 font-display text-2xl font-bold text-ink">
-				Explainer in the works
-			</h2>
-			<p class="mt-4 text-base leading-relaxed text-ink/60">
-				A chapter-by-chapter investigation into what the science actually says about living longer —
-				separating signal from noise on diet, exercise, sleep, and the biology of ageing.
-			</p>
-			<p class="mt-6 text-sm font-semibold text-brand-forest/70">Coming soon</p>
-		</div>
+		{#if explainer}
+			<div class="max-w-md">
+				<ExplainerCard {explainer} />
+			</div>
+		{/if}
 
 		<div class="mt-16" {@attach reveal({ y: 16, delay: 100 })}>
 			<a

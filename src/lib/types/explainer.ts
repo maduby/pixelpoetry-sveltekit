@@ -47,6 +47,12 @@ export interface Step {
 	 * editorial pull-quote, not as a small inline text card.
 	 */
 	closingOnly?: boolean;
+	/**
+	 * When true the chapter section fades to a full-black background
+	 * with white text while this step is active, then smoothly
+	 * returns to normal as the next step becomes active.
+	 */
+	blackout?: boolean;
 }
 
 export interface Chapter {
@@ -210,7 +216,9 @@ export type VizConfig =
 	| DonutViz
 	| ObsBarViz
 	| ObsTimelineViz
-	| EraTimelineViz;
+	| EraTimelineViz
+	| { type: 'billion-dollar-timeline' }
+	| { type: 'blue-zones-map' };
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Source / Term / Image — the lookup tables every explainer needs
@@ -239,6 +247,8 @@ export interface Term {
 	long: string;
 	url?: string;
 	urlLabel?: string;
+	/** Optional source links for studies or reports named in the annotation body. */
+	references?: Array<{ label: string; url: string }>;
 }
 
 export interface ImageVariant {

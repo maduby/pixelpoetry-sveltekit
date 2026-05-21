@@ -26,22 +26,34 @@ export const meta = {
 		'ultra-processed food, UPF, NOVA classification, food addiction, obesity, processed food health risks, Chris van Tulleken, food system, junk food, diet and cancer, food inequality',
 	editorial: {
 		title: 'Why I made this',
+		lastUpdated: '21 May 2026 at 9:52am',
 		body: `
-<p>Write your motivation, backstory, and caveats here. This is your editorial note to the reader — the part of the essay that sits behind the byline.</p>
+<p>My name is <a href="https://duby.io" target="_blank" rel="noopener">Marc Duby</a>, and I try to boil down stories, articles, and topics that I find interesting and worth reading. I know it is hard to find enough time to read articles, books, or even, imagine, scientific papers. That is why I am trying to explain complex topics with these hopefully easy-to-use and interesting little interactive essays.</p>
 
-<p>You can use full rich text: <strong>bold</strong>, <em>italic</em>, <a href="#">links</a>, blockquotes, images, and lists. Replace this placeholder with your own words.</p>
+<h2>The starting point</h2>
+<p>The starting point for this piece was Dr Chris van Tulleken's book <em>Ultra-Processed People</em>, alongside the NOVA research that gave the topic its language: Monteiro and colleagues' paper on the food classification and the trouble with ultra-processing.</p>
 
-<blockquote><p>What triggered this piece, what you were trying to understand, what surprised you along the way, and what you are still uncertain about.</p></blockquote>
+<ul class="sources-list">
+  <li><a href="https://www.penguin.co.uk/books/451300/ultra-processed-people-by-tulleken-chris-van/9781529160222" target="_blank" rel="noopener"><em>Ultra-Processed People</em> by Dr Chris van Tulleken</a></li>
+  <li><a href="/explainers/ultra-processed/sources/monteiro-2017-nova.pdf" target="_blank" rel="noopener">Read the Monteiro NOVA paper PDF</a></li>
+  <li><a href="https://www.cambridge.org/core/journals/public-health-nutrition/article/un-decade-of-nutrition-the-nova-food-classification-and-the-trouble-with-ultraprocessing/2A9776922A28F8F757BDA32C3266AC2A" target="_blank" rel="noopener">Monteiro et al. on Cambridge Core</a></li>
+  <li><a href="https://www.bmj.com/content/384/bmj-2023-077310" target="_blank" rel="noopener">BMJ umbrella review on UPF and health outcomes</a></li>
+</ul>
+
+<h2>What I was trying to do</h2>
+<p>I wanted to make the UPF story feel concrete. Not just "junk food is bad", which is easy to say and not very useful, but how the modern food system designs products, markets them, normalises them, and then makes avoiding them feel like a personal test of discipline.</p>
+
+<p>What interested me most was that ultra-processing is not only a nutrition story. It is also a story about convenience, class, addiction, packaging, profit, regulation, and the strange fact that some food is now engineered less like cooking and more like software.</p>
 
 <h2>Caveats</h2>
-<p>What you would add, qualify, or change after writing it. Where the evidence is genuinely contested. What you left out and why.</p>
+<p>I am not claiming that everything in these pieces is always 100% accurate. The stories I choose to tell often start from a paper, article, report, or book, and I mention that starting point here. From there, I try to cross-check, simplify, and visualise. Simplifying always loses some detail, and science keeps moving.</p>
 
-<h2>Sources</h2>
-<p>The primary sources are listed at the bottom of the essay. A few that shaped the thinking most:</p>
-<ul class="sources-list">
-  <li>Chris van Tulleken — <em>Ultra-Processed People</em> (2023)</li>
-  <li>Carlos Monteiro et al. — <a href="https://www.thelancet.com" target="_blank" rel="noopener">NOVA classification, Public Health Nutrition</a></li>
-</ul>
+<p>UPF is also a contested topic. The NOVA framework is useful, but it is not perfect. Some ultra-processed products are worse than others. Some foods that sound "processed" are perfectly sensible. The point of this essay is not purity. It is pattern recognition.</p>
+
+<h2>Feedback</h2>
+<p>Any feedback is always welcome: future topics to cover, criticism, corrections, anything. Reach out at <a href="mailto:mail@pixelpoetry.dev">mail@pixelpoetry.dev</a>.</p>
+
+<p>Happy reading.</p>
 `
 	}
 } as const;
