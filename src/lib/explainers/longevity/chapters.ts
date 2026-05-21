@@ -318,15 +318,16 @@ export const chapters: Chapter[] = [
 				credit: 'Bill Branson / National Cancer Institute (visualsonline.cancer.gov) — Public Domain'
 			}
 		},
-			{
-				id: 'ch1-quote-ball',
-				text: '"It\'s good news if you\'re responsible because then you can do something about it."',
-				quote: {
-					text: 'It\'s good news if you\'re responsible because then you can do something about it.',
-					attribution: 'Sir Christopher Ball — Oxford Longevity Project',
-					sourceId: 'olp-2026'
-				}
+		{
+			id: 'ch1-quote-ball',
+			text: '"It\'s good news if you\'re responsible because then you can do something about it."',
+			closingOnly: true,
+			quote: {
+				text: 'It\'s good news if you\'re responsible because then you can do something about it.',
+				attribution: 'Sir Christopher Ball — Oxford Longevity Project',
+				sourceId: 'olp-2026'
 			}
+		}
 		],
 		sources: ['olp-2026', 'guardian-hill-2026']
 	},
