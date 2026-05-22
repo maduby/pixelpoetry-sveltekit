@@ -4,8 +4,10 @@
 	import { page } from '$app/state';
 	import Nav from '$lib/components/nav/Nav.svelte';
 	import ProgressBar from '$lib/components/nav/ProgressBar.svelte';
+	import ResumeReadingToast from '$lib/components/nav/ResumeReadingToast.svelte';
 	import Footer from '$lib/components/footer/Footer.svelte';
 	import SourceSheet from '$lib/components/ui/SourceSheet.svelte';
+	import { Toaster } from 'svelte-sonner';
 	import { initPostHog, capturePageView } from '$lib/analytics/posthog';
 	import { provideExplainerHolder, type ActiveExplainer } from '$lib/context/explainer.svelte';
 	import { longevity } from '$lib/explainers/longevity';
@@ -54,6 +56,7 @@
 
 <Nav />
 <ProgressBar />
+<ResumeReadingToast />
 
 <main id="main-content" class="overflow-x-clip pt-16">
 	{@render children()}
@@ -62,3 +65,12 @@
 <Footer />
 
 <SourceSheet />
+<Toaster position="top-center" offset="5rem" visibleToasts={1} />
+
+<style>
+	:global([data-sonner-toaster][data-x-position='center'] [data-sonner-toast]) {
+		left: 50%;
+		right: auto;
+		translate: -50% 0;
+	}
+</style>

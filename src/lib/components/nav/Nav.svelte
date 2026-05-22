@@ -13,8 +13,10 @@
 	import { getTheme } from '$lib/utils/explainer-theme';
 	import { posthog } from '$lib/analytics/posthog';
 	import Menu from 'lucide-svelte/icons/menu';
+	import AutoBookmarkStatus from '$lib/components/nav/AutoBookmarkStatus.svelte';
 	import ShareMenu from '$lib/components/nav/ShareMenu.svelte';
 	import NavDrawer from '$lib/components/nav/NavDrawer.svelte';
+	import ResumeReadingControl from '$lib/components/nav/ResumeReadingControl.svelte';
 
 	const explainerHolder = getExplainerHolder();
 	const explainer = $derived(explainerHolder?.current ?? null);
@@ -34,20 +36,41 @@
 <header
 	class="fixed inset-x-0 top-0 z-50 bg-cream/80 backdrop-blur supports-backdrop-filter:bg-cream/60"
 >
-	<div class="relative mx-auto flex h-16 max-w-(--container-wide) items-center justify-between gap-3 px-4 lg:px-8">
-		<!-- Hamburger — always on the far left -->
-		<button
-			type="button"
-			onclick={openDrawer}
-			aria-label="Open navigation"
-			aria-haspopup="dialog"
-			class="flex min-h-10 min-w-10 shrink-0 cursor-pointer items-center justify-center rounded-full text-ink/60 transition-colors hover:bg-ink/8 hover:text-ink"
-		>
-			<Menu size={22} aria-hidden="true" />
-		</button>
+	<div
+		class="relative mx-auto flex h-16 max-w-(--container-wide) items-center justify-between gap-3 px-4 lg:px-8"
+	>
+		<div class="flex shrink-0 items-center gap-2">
+			<!-- Hamburger — always on the far left -->
+			<button
+				type="button"
+				onclick={openDrawer}
+				aria-label="Open navigation"
+				aria-haspopup="dialog"
+				class="flex min-h-10 min-w-10 shrink-0 cursor-pointer items-center justify-center rounded-full text-ink/60 transition-colors hover:bg-ink/8 hover:text-ink"
+			>
+				<Menu size={22} aria-hidden="true" />
+			</button>
+			{#if explainer}
+				<a
+					href={explainer.meta.href}
+					class="font-display text-xl font-bold tracking-tight sm:hidden {theme.badgeText}"
+				>
+					{explainer.meta.shortName}
+				</a>
+				<div class="hidden items-center gap-2 sm:flex">
+					<AutoBookmarkStatus />
+					<ResumeReadingControl variant="desktop" />
+				</div>
+			{/if}
+		</div>
 
 		<!-- Logo / essay name — centred in the nav, independent of side controls -->
-		<div class="pointer-events-none absolute left-1/2 flex max-w-[calc(100%-9rem)] -translate-x-1/2 items-center justify-center text-center sm:max-w-[calc(100%-18rem)]">
+		<div
+			class={[
+				'pointer-events-none absolute left-1/2 max-w-[calc(100%-18rem)] -translate-x-1/2 items-center justify-center text-center',
+				explainer ? 'hidden sm:flex' : 'flex'
+			]}
+		>
 			{#if explainer}
 				<a
 					href={explainer.meta.href}
@@ -60,7 +83,10 @@
 					</span>
 				</a>
 			{:else}
-				<a href="/" class="pointer-events-auto flex items-baseline justify-center gap-2 font-display text-xl font-bold tracking-tight">
+				<a
+					href="/"
+					class="pointer-events-auto flex items-baseline justify-center gap-2 font-display text-xl font-bold tracking-tight"
+				>
 					<span class="logo-rainbow">
 						{site.name}
 					</span>
@@ -72,6 +98,9 @@
 		<div class="ml-auto flex shrink-0 items-center gap-2">
 			{#if explainer}
 				<!-- Essay pages: Share + Sources pill -->
+				<div class="sm:hidden">
+					<AutoBookmarkStatus />
+				</div>
 				<ShareMenu />
 				<a
 					href="#sources"
@@ -107,6 +136,12 @@
 				<ShareMenu />
 			{/if}
 		</div>
+
+		{#if explainer}
+			<div class="absolute top-full left-1/2 mt-2 -translate-x-1/2">
+				<ResumeReadingControl variant="mobile" />
+			</div>
+		{/if}
 	</div>
 </header>
 

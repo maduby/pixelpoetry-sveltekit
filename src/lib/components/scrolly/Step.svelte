@@ -29,7 +29,7 @@
 	import { cn } from '$lib/utils/cn';
 	import { openSourceSheet, openTermSheet } from '$lib/context/sheet';
 
-	function handleClick(e: MouseEvent) {
+	function handleInteraction(e: MouseEvent | KeyboardEvent) {
 		const sourceEl = (e.target as HTMLElement).closest('[data-source]') as HTMLElement | null;
 		if (sourceEl?.dataset.source) {
 			e.preventDefault();
@@ -44,6 +44,11 @@
 		}
 	}
 
+	function handleKeydown(e: KeyboardEvent) {
+		if (e.key !== 'Enter' && e.key !== ' ') return;
+		handleInteraction(e);
+	}
+
 	interface Props {
 		/**
 		 * Whether this step is the currently active beat. Kept for
@@ -52,18 +57,21 @@
 		 * styling needs.
 		 */
 		isActive?: boolean;
+		id?: string;
 		children: Snippet;
 		class?: string;
 	}
 
-	let { isActive = false, children, class: className }: Props = $props();
+	let { isActive = false, id, children, class: className }: Props = $props();
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions a11y_no_noninteractive_element_interactions a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
+	{id}
 	data-scrolly-step
 	data-active={isActive ? 'true' : 'false'}
-	onclick={handleClick}
+	onclick={handleInteraction}
+	onkeydown={handleKeydown}
 	class={cn(
 		// Desktop: 100svh tall gives the sticky viz column enough runway
 		// to sit for one full viewport per beat. Mobile: no sticky column,

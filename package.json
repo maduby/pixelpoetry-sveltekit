@@ -53,6 +53,7 @@
 		"@observablehq/plot": "^0.6.17",
 		"@rodneylab/svelte-social-icons": "^0.0.31",
 		"@types/d3": "^7.4.3",
+		"@use-gesture/vanilla": "^10.3.1",
 		"bits-ui": "^2.18.1",
 		"clsx": "^2.1.1",
 		"d3": "^7.9.0",
@@ -60,6 +61,7 @@
 		"lottie-web": "^5.13.0",
 		"lucide-svelte": "^1.0.1",
 		"posthog-js": "^1.373.4",
+		"svelte-sonner": "^1.1.1",
 		"tailwind-merge": "^3.6.0",
 		"topojson-client": "^3.1.0"
 	}

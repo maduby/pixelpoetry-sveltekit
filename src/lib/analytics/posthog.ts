@@ -5,6 +5,12 @@ import posthog from 'posthog-js';
 const PUBLIC_POSTHOG_KEY = env.PUBLIC_POSTHOG_KEY ?? '';
 const PUBLIC_POSTHOG_HOST = env.PUBLIC_POSTHOG_HOST ?? 'https://eu.i.posthog.com';
 
+export const READER_RESUME_TOAST_FLAG = 'reader-resume-toast-enabled';
+export const READER_RESUME_NAV_FLAG = 'reader-resume-nav-enabled';
+
+const featureFlags: Record<string, boolean> = {};
+let subscribedToFeatureFlags = false;
+
 /**
  * Initialise PostHog in cookie-free mode.
  * Safe to call multiple times — skips if already initialised or on the server.
@@ -47,6 +53,8 @@ export function initPostHog() {
 		capture_pageview: false,
 		capture_pageleave: true
 	});
+
+	ensureFeatureFlagSubscription();
 }
 
 /** Fire a pageview event. Call this inside afterNavigate in +layout.svelte. */
@@ -55,4 +63,36 @@ export function capturePageView() {
 	posthog.capture('$pageview', { $current_url: window.location.href });
 }
 
+export function readFeatureFlag(key: string): boolean {
+	if (!browser || !PUBLIC_POSTHOG_KEY) return false;
+	return featureFlags[key] ?? posthog.isFeatureEnabled(key) === true;
+}
+
+export function subscribeFeatureFlags(callback: () => void): () => void {
+	if (!browser || !PUBLIC_POSTHOG_KEY) return () => {};
+	ensureFeatureFlagSubscription();
+
+	const unsubscribe = posthog.onFeatureFlags(() => {
+		syncKnownFeatureFlags();
+		callback();
+	});
+
+	syncKnownFeatureFlags();
+	posthog.reloadFeatureFlags();
+
+	return unsubscribe;
+}
+
 export { posthog };
+
+function ensureFeatureFlagSubscription() {
+	if (!browser || !PUBLIC_POSTHOG_KEY || subscribedToFeatureFlags) return;
+	subscribedToFeatureFlags = true;
+	posthog.onFeatureFlags(syncKnownFeatureFlags);
+}
+
+function syncKnownFeatureFlags() {
+	featureFlags[READER_RESUME_TOAST_FLAG] =
+		posthog.isFeatureEnabled(READER_RESUME_TOAST_FLAG) === true;
+	featureFlags[READER_RESUME_NAV_FLAG] = posthog.isFeatureEnabled(READER_RESUME_NAV_FLAG) === true;
+}

@@ -31,11 +31,12 @@
 	import ObsTimelineChart from '$lib/components/viz/ObsTimelineChart.svelte';
 	import ImageChart from '$lib/components/viz/ImageChart.svelte';
 	import EraTimeline from '$lib/components/viz/EraTimeline.svelte';
-	import BlueZonesMap from '$lib/components/viz/BlueZonesMap.svelte';
-	import BillionDollarTimeline from '$lib/components/viz/BillionDollarTimeline.svelte';
+	import BlueZonesMap from '$lib/components/viz/longevity/BlueZonesMap.svelte';
+	import BillionDollarTimeline from '$lib/components/viz/longevity/BillionDollarTimeline.svelte';
 	import { cn } from '$lib/utils/cn';
 	import { posthog } from '$lib/analytics/posthog';
 	import { getExplainerHolder } from '$lib/context/explainer.svelte';
+	import { readerPositionElementId, trackReaderPosition } from '$lib/reader-position.svelte';
 
 	interface Props {
 		chapter: ChapterData;
@@ -74,7 +75,51 @@
 
 	let sectionEl = $state<HTMLElement | undefined>(undefined);
 	let activeStepIndex = $state(0);
+	let lastPositionSave = { key: '', at: 0 };
 	const isBlackout = $derived(visibleSteps[activeStepIndex]?.blackout === true);
+
+	function chapterProgress(): number {
+		const chapterCount = explainer?.chapters.length ?? 0;
+		if (chapterCount <= 0) return 0;
+		return chapter.number / chapterCount;
+	}
+
+	function saveChapterPosition() {
+		if (!explainer) return;
+		trackReaderPosition({
+			explainerSlug: explainer.meta.slug,
+			chapterId: chapter.id,
+			chapterNumber: chapter.number,
+			chapterTitle: chapter.title,
+			elementId: chapter.id,
+			href: explainer.meta.href,
+			progress: chapterProgress()
+		});
+	}
+
+	function saveStepPosition(stepIndex: number) {
+		if (!explainer) return;
+		const step = visibleSteps[stepIndex];
+		if (!step) return;
+
+		const elementId = readerPositionElementId(chapter.id, step.id);
+		const key = `${explainer.meta.slug}:${elementId}`;
+		const now = Date.now();
+		if (lastPositionSave.key === key && now - lastPositionSave.at < 750) return;
+		lastPositionSave = { key, at: now };
+
+		trackReaderPosition({
+			explainerSlug: explainer.meta.slug,
+			chapterId: chapter.id,
+			chapterNumber: chapter.number,
+			chapterTitle: chapter.title,
+			stepId: step.id,
+			stepIndex,
+			elementId,
+			href: explainer.meta.href,
+			progress: chapterProgress()
+		});
+	}
 
 	$effect(() => {
 		if (!sectionEl) return;
@@ -87,6 +132,7 @@
 						chapter_number: chapter.number,
 						chapter_title: chapter.title
 					});
+					saveChapterPosition();
 					observer.disconnect();
 				}
 			},
@@ -105,6 +151,7 @@
 		activeStepIndex = stepIndex;
 		const step = visibleSteps[stepIndex];
 		if (!step) return;
+		saveStepPosition(stepIndex);
 		posthog.capture('step_viewed', {
 			explainer_slug: explainer?.meta.slug,
 			chapter_id: chapter.id,
@@ -226,7 +273,7 @@
 
 		{#snippet steps({ activeStep })}
 			{#each visibleSteps as step, i (step.id)}
-				<Step isActive={i === activeStep}>
+				<Step id={readerPositionElementId(chapter.id, step.id)} isActive={i === activeStep}>
 					{#if step.accentLetter}
 						<p
 							class="mb-3 font-display text-[clamp(5rem,14vw,11rem)] leading-none font-black select-none {accentText}"
@@ -260,7 +307,10 @@
 					column on the right handles the same content.
 				-->
 				{#if step.viz || step.stat}
-					<div class="flex w-full min-w-0 items-center justify-center py-10 lg:hidden">
+					<div
+						data-scrolly-mobile-viz
+						class="flex w-full min-w-0 items-center justify-center py-10 lg:hidden"
+					>
 						<div class="flex w-full min-w-0 flex-col items-center justify-center">
 							{@render stepViz(step)}
 						</div>
@@ -310,6 +360,12 @@
 		background-image: none !important;
 	}
 
+	.chapter-section.is-blackout :global([data-scrolly-step] > div) {
+		background: rgba(10, 10, 10, 0.9) !important;
+		border-color: rgba(245, 245, 244, 0.14) !important;
+		box-shadow: none !important;
+	}
+
 	/*
 	 * Flip ALL descendant text to near-white while blacked out.
 	 * — `color` handles regular text
@@ -319,6 +375,11 @@
 	 * We target the scrolly section and viz column specifically to avoid
 	 * touching chapter header text (title/intro) which sits outside Scrolly.
 	 */
+	.chapter-section.is-blackout :global([data-scrolly-mobile-viz] *),
+	.chapter-section.is-blackout :global([data-scrolly-mobile-viz] p),
+	.chapter-section.is-blackout :global([data-scrolly-mobile-viz] span),
+	.chapter-section.is-blackout :global([data-scrolly-mobile-viz] figcaption),
+	.chapter-section.is-blackout :global([data-scrolly-mobile-viz] button),
 	.chapter-section.is-blackout :global([data-scrolly-viz] *),
 	.chapter-section.is-blackout :global([data-scrolly-viz] p),
 	.chapter-section.is-blackout :global([data-scrolly-viz] span),
@@ -331,6 +392,9 @@
 			color 700ms ease,
 			-webkit-text-fill-color 700ms ease;
 	}
+	.chapter-section.is-blackout :global([data-scrolly-mobile-viz] p:last-child),
+	.chapter-section.is-blackout :global([data-scrolly-mobile-viz] .text-ink\/60),
+	.chapter-section.is-blackout :global([data-scrolly-mobile-viz] .text-ink\/80),
 	.chapter-section.is-blackout :global([data-scrolly-viz] p:last-child),
 	.chapter-section.is-blackout :global([data-scrolly-viz] .text-ink\/60),
 	.chapter-section.is-blackout :global([data-scrolly-viz] .text-ink\/80) {
@@ -345,5 +409,18 @@
 		transition:
 			color 700ms ease,
 			-webkit-text-fill-color 700ms ease;
+	}
+
+	.chapter-section.is-blackout :global([data-scrolly-viz] svg text),
+	.chapter-section.is-blackout :global([data-scrolly-mobile-viz] svg text) {
+		fill: rgba(245, 245, 244, 0.9) !important;
+	}
+	.chapter-section.is-blackout :global([data-scrolly-viz] svg [aria-label='grid'] line),
+	.chapter-section.is-blackout :global([data-scrolly-viz] svg [aria-label='rule'] line),
+	.chapter-section.is-blackout :global([data-scrolly-viz] svg [aria-label='rule'] path),
+	.chapter-section.is-blackout :global([data-scrolly-mobile-viz] svg [aria-label='grid'] line),
+	.chapter-section.is-blackout :global([data-scrolly-mobile-viz] svg [aria-label='rule'] line),
+	.chapter-section.is-blackout :global([data-scrolly-mobile-viz] svg [aria-label='rule'] path) {
+		stroke: rgba(245, 245, 244, 0.22) !important;
 	}
 </style>
