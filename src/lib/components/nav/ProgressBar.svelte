@@ -48,6 +48,7 @@
 	let hoveredId = $state<string | null>(null);
 	let scrubMarkerId = $state<string | null>(null);
 	let isScrubbing = $state(false);
+	let isPageScrolling = $state(false);
 	let markers = $state<Marker[]>([]);
 
 	/** Bar element — used to get pixel-accurate left offset and width. */
@@ -64,7 +65,7 @@
 	});
 
 	const visualProgress = $derived(isScrubbing ? scrubProgress.current : progress);
-	const visibleTooltipId = $derived(isScrubbing ? scrubMarkerId : hoveredId);
+	const visibleTooltipId = $derived(isPageScrolling ? null : isScrubbing ? scrubMarkerId : hoveredId);
 
 	// -----------------------------------------------------------------------
 	// Helpers
@@ -218,11 +219,18 @@
 	// Scroll + resize listeners — mounted once, always active.
 	onMount(() => {
 		let rafId = 0;
+		let scrollEndTimer = 0;
 
 		const onScroll = () => {
 			if (!isScrubbing) {
+				isPageScrolling = true;
 				hoveredId = null;
 				scrubMarkerId = null;
+				if (scrollEndTimer) window.clearTimeout(scrollEndTimer);
+				scrollEndTimer = window.setTimeout(() => {
+					isPageScrolling = false;
+					scrollEndTimer = 0;
+				}, 180);
 			}
 			if (rafId) return;
 			rafId = requestAnimationFrame(() => {
@@ -247,6 +255,7 @@
 			window.removeEventListener('scroll', onScroll);
 			window.removeEventListener('resize', onResize);
 			if (rafId) cancelAnimationFrame(rafId);
+			if (scrollEndTimer) window.clearTimeout(scrollEndTimer);
 		};
 	});
 
