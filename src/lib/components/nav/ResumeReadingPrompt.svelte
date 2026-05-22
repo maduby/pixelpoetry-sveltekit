@@ -89,7 +89,7 @@
 			class="inline-flex basis-full cursor-pointer items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold text-brand-red-deep/75 transition-colors hover:bg-brand-red/8 hover:text-brand-red-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-red sm:basis-auto"
 		>
 			<BellOff size={14} strokeWidth={2.25} aria-hidden="true" />
-			<span>Turn off bookmarking</span>
+			<span>Turn bookmarking off</span>
 		</button>
 	</div>
 </div>
