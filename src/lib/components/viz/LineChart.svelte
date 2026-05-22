@@ -77,9 +77,18 @@
 			{#each activeSeries.data as pt (pt.year)}
 				<circle cx={xScale(pt.year)} cy={yScale(pt.value)} r={4} fill={activeSeries.color} />
 				{#if stepProgress > 0.5 || prefersReducedMotion}
-					<text x={xScale(pt.year)} y={yScale(pt.value) - 14} text-anchor="middle" class="fill-ink font-body text-xs font-semibold">{pt.value}%</text>
+					<text x={xScale(pt.year)} y={yScale(pt.value) - 14} text-anchor="middle" class="line-label fill-ink font-body text-xs font-semibold">{pt.value}%</text>
 				{/if}
 			{/each}
 		{/if}
 	</g>
 </ChartContainer>
+
+<style>
+	.line-label {
+		paint-order: stroke;
+		stroke: #fef9ef;
+		stroke-width: 4px;
+		stroke-linejoin: round;
+	}
+</style>

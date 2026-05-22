@@ -68,9 +68,23 @@
 <Toaster position="top-center" offset="5rem" visibleToasts={1} />
 
 <style>
+	:global([data-sonner-toaster][data-x-position='center']) {
+		left: 50% !important;
+		right: auto !important;
+		display: flex !important;
+		width: min(28rem, calc(100vw - 2rem)) !important;
+		max-width: calc(100vw - 2rem) !important;
+		flex-direction: column !important;
+		align-items: center !important;
+		transform: translateX(-50%) !important;
+	}
+
 	:global([data-sonner-toaster][data-x-position='center'] [data-sonner-toast]) {
-		left: 50%;
-		right: auto;
-		translate: -50% 0;
+		left: auto !important;
+		right: auto !important;
+		width: fit-content !important;
+		max-width: 100% !important;
+		margin-inline: auto !important;
+		transform: none !important;
 	}
 </style>

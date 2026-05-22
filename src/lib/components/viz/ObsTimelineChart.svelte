@@ -190,9 +190,10 @@
 			if (cancelled || !containerEl) return;
 
 			const fontPx = _narrow ? 11 : 13;
-			// Right margin: enough room for end-of-line value labels (e.g. "38%",
-			// "157"). Short values at 11–13 px need ~44 px max.
-			const marginRight = _narrow ? 12 : 48;
+			// Reserve room for endpoint labels and place them beyond the final dot.
+			// This keeps labels out of the last line segment instead of relying on
+			// a fixed vertical nudge that can collide with steeply sloped lines.
+			const marginRight = _narrow ? 38 : 50;
 
 			const chart = Plot.plot({
 				width: _w,
@@ -247,39 +248,18 @@
 						strokeWidth: 1.6,
 						r: _narrow ? 3.5 : 4.5
 					}),
-					// End-of-line value annotations — one per series, fine black,
-					// positioned just to the right of the final data point.
-					// Split into two marks (upper vs lower half of the value domain)
-					// so we can nudge them slightly apart without function-valued dy
-					// (Observable Plot's TS types only accept literal numbers for dy).
-					Plot.text(
-						endpoints.filter((d) => d.value > (_yd[0] + _yd[1]) / 2),
-						{
-							x: 'year',
-							y: 'value',
-							text: (d: { value: number }) => `${d.value}${unit}`,
-							dx: 9,
-							dy: -1,
-							textAnchor: 'start' as const,
-							fill: '#0a0a0a',
-							fontWeight: '500',
-							fontSize: fontPx - 1
-						}
-					),
-					Plot.text(
-						endpoints.filter((d) => d.value <= (_yd[0] + _yd[1]) / 2),
-						{
-							x: 'year',
-							y: 'value',
-							text: (d: { value: number }) => `${d.value}${unit}`,
-							dx: 9,
-							dy: 1,
-							textAnchor: 'start' as const,
-							fill: '#0a0a0a',
-							fontWeight: '500',
-							fontSize: fontPx - 1
-						}
-					),
+					Plot.text(endpoints, {
+						x: 'year',
+						y: 'value',
+						text: (d: { value: number }) => `${d.value}${unit}`,
+						dx: _narrow ? 7 : 9,
+						dy: 0,
+						textAnchor: 'start' as const,
+						frameAnchor: 'middle' as const,
+						fill: '#0a0a0a',
+						fontWeight: '700',
+						fontSize: fontPx - 1
+					}),
 					// Tooltip LAST — SVG paint order means last = on top, so the
 					// tip box always renders above country labels and value pills.
 					Plot.tip(
@@ -346,7 +326,7 @@
 
 	{#if series.length > 0}
 		<div class="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
-			{#each series as s}
+			{#each series as s (s.label)}
 				<button
 					type="button"
 					class="flex items-center gap-1.5 text-xs font-medium text-ink/60 transition-opacity hover:opacity-100"
@@ -401,5 +381,12 @@
 	   even when a country label visually overlaps a data point. */
 	.tip-host :global(svg g[aria-label='text']) {
 		pointer-events: none;
+	}
+
+	.tip-host :global(svg g[aria-label='text'] text) {
+		paint-order: stroke;
+		stroke: #fef9ef;
+		stroke-width: 4px;
+		stroke-linejoin: round;
 	}
 </style>
