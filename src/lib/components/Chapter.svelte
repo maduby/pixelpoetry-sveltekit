@@ -45,7 +45,7 @@
 
 	let { chapter, index }: Props = $props();
 
-	const closingQuotes = $derived(chapter.steps.filter((s) => s.quote));
+	const closingSteps = $derived(chapter.steps.filter((s) => s.closingOnly));
 	const visibleSteps = $derived(chapter.steps.filter((s) => !s.closingOnly));
 
 	const accentBg = $derived(
@@ -82,6 +82,13 @@
 		const chapterCount = explainer?.chapters.length ?? 0;
 		if (chapterCount <= 0) return 0;
 		return chapter.number / chapterCount;
+	}
+
+	function stepVizKey(step: ChapterData['steps'][number] | undefined): string {
+		if (!step) return 'empty';
+		if (step.viz) return JSON.stringify(step.viz);
+		if (step.stat) return `stat:${step.stat.value}:${step.stat.unit ?? ''}:${step.stat.label}`;
+		return 'empty';
 	}
 
 	function saveChapterPosition() {
@@ -250,19 +257,19 @@
 	<Scrolly
 		vizSide="right"
 		onActiveStep={handleActiveStep}
-		class="mx-auto w-full max-w-(--container-wide) px-6 {closingQuotes.length
+		class="mx-auto w-full max-w-(--container-wide) px-6 {closingSteps.length
 			? 'pb-0'
 			: 'pb-10 lg:pb-24 xl:pb-32'} lg:px-8"
 	>
 		{#snippet viz({ activeStep })}
 			{@const step = visibleSteps[activeStep]}
+			{@const vizKey = stepVizKey(step)}
 			<!--
-				`{#key activeStep}` re-mounts the inner block when the
-				active step changes, so the `animate-fade-in` animation
-				re-runs on every beat. Without the key, the same DOM is
-				reused and the fade-in only plays once per chapter load.
+				Key by the rendered visual, not the text beat. Adjacent steps can
+				intentionally share one chart; in that case keep it mounted so
+				Observable Plot does not redraw between text screens.
 			-->
-			{#key activeStep}
+			{#key vizKey}
 				<div
 					class="animate-fade-in mx-auto flex w-full min-w-0 flex-col items-center justify-center"
 				>
@@ -321,14 +328,30 @@
 	</Scrolly>
 
 	<!--
-		Closing quotes — lifted out of the scrolly grid and rendered as
-		full-bleed, centred, accent-coloured "curtain drops" between the
-		end of the scrolly body and the next chapter header.
+		Closing beats — lifted out of the scrolly grid and rendered full-width
+		as chapter "curtain drops" between the scrolly body and next header.
 	-->
-	{#if closingQuotes.length}
+	{#if closingSteps.length}
 		<div class="mx-auto w-full max-w-(--container-wide) px-6 pb-10 lg:px-8 lg:pb-24 xl:pb-32">
-			{#each closingQuotes as step (step.id)}
-				<QuoteBlock quote={step.quote!} variant="closing" accent={chapter.accent} />
+			{#each closingSteps as step (step.id)}
+				{#if step.quote}
+					<QuoteBlock quote={step.quote} variant="closing" accent={chapter.accent} />
+				{:else}
+					{@const closingText = step.richText ?? step.text}
+					{@const isLongClosing = step.text.length > 180}
+					<div class="w-full border-t border-ink/8 py-20 lg:py-28">
+						<p
+							class={[
+								'mx-auto px-6 text-center font-display leading-tight font-black text-balance text-ink lg:px-8 [&_strong]:text-brand-pink',
+								isLongClosing
+									? 'max-w-4xl text-[clamp(1.45rem,2.8vw,2.75rem)]'
+									: 'max-w-5xl text-[clamp(1.8rem,4vw,3.75rem)]'
+							]}
+						>
+							{@html closingText}
+						</p>
+					</div>
+				{/if}
 			{/each}
 		</div>
 	{/if}

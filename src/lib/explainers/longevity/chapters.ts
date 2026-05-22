@@ -12,6 +12,7 @@ import type {
 	Chapter,
 	DonutDataPoint,
 	ObsBarDataPoint,
+	ObsBarViz,
 	TimelineSeries
 } from '$lib/types/explainer';
 
@@ -189,6 +190,16 @@ const ch7DeprivationHLE: ObsBarDataPoint[] = [
 	{ label: 'D2', value: 56.3, color: RED },
 	{ label: 'Most deprived (D1)', value: 52.1, color: RED }
 ];
+
+const ch7DeprivationHLEViz: ObsBarViz = {
+	type: 'obs-bar',
+	title: 'Healthy life expectancy at birth by deprivation (England)',
+	subtitle:
+		'Years of healthy life expectancy by deprivation decile — Public Health England, 2017. D1 = most deprived.',
+	unit: ' yrs',
+	sourceId: 'ons-hle-2020',
+	data: ch7DeprivationHLE
+};
 
 // ─── Chapter 8 ───────────────────────────────────────────────────────────────
 // ONS 2018–2020 life vs healthy life expectancy by sex. Grouped obs-bar.
@@ -803,15 +814,7 @@ export const chapters: Chapter[] = [
 				text: 'The data is unambiguous. Where you are born in England predicts how long you will stay healthy — by almost two decades.',
 				richText:
 					'The data is unambiguous. Where you are born in England predicts how long you will stay healthy — <strong>by almost two decades.</strong> <span data-term="deprivation-deciles">What are these categories?</span>',
-				viz: {
-					type: 'obs-bar',
-					title: 'Healthy life expectancy at birth by deprivation (England)',
-					subtitle:
-						'Years of healthy life expectancy by deprivation decile — Public Health England, 2017. D1 = most deprived.',
-					unit: ' yrs',
-					sourceId: 'ons-hle-2020',
-					data: ch7DeprivationHLE
-				}
+				viz: ch7DeprivationHLEViz
 			},
 			{
 				id: 'ch7-krieger-quote',
@@ -827,7 +830,8 @@ export const chapters: Chapter[] = [
 				id: 'ch7-synthesis',
 				text: 'The synthesis is not comfortable: both sides are right. The OLP report is correct that most of the biology of ageing is modifiable. The critics are correct that modifying it is not equally available to everyone. Both things are true simultaneously — which means the honest policy answer is to do both: invest in individual health behaviour AND redesign the food environment, built environment, and housing conditions that constrain it.',
 				richText:
-					'The synthesis is not comfortable: <strong>both sides are right.</strong> The <span data-source="olp-2026">OLP report</span> is correct that most of the biology of ageing is modifiable. The critics are correct that modifying it is not equally available to everyone. The honest policy answer is to do both: invest in individual health behaviour <strong>and</strong> redesign the environments that constrain it.'
+					'The synthesis is not comfortable: <strong>both sides are right.</strong> The <span data-source="olp-2026">OLP report</span> is correct that most of the biology of ageing is modifiable. The critics are correct that modifying it is not equally available to everyone. The honest policy answer is to do both: invest in individual health behaviour <strong>and</strong> redesign the environments that constrain it.',
+				viz: ch7DeprivationHLEViz
 			}
 		],
 		sources: ['ons-hle-2020', 'guardian-hill-2026', 'olp-2026']
@@ -888,7 +892,8 @@ export const chapters: Chapter[] = [
 				id: 'ch8-whi',
 				text: "In 2002, the Women's Health Initiative published findings that were widely interpreted as showing that hormone replacement therapy caused breast cancer and heart disease. The paper generated a wave of prescription cancellations that persisted for a decade. The problem: the interpretation was almost entirely wrong. The WHI study used older synthetic hormones at doses no longer standard — and its results have since been reanalysed, heavily qualified, and in some cases reversed.",
 				richText:
-					"In 2002, the Women's Health Initiative published findings widely interpreted as showing that hormone replacement therapy caused cancer and heart disease. The interpretation was <strong>almost entirely wrong</strong> — but the wave of prescription cancellations it triggered persisted for a decade."
+					"In 2002, the Women's Health Initiative published findings widely interpreted as showing that hormone replacement therapy caused cancer and heart disease. The interpretation was <strong>almost entirely wrong</strong> — but the wave of prescription cancellations it triggered persisted for a decade.",
+				closingOnly: true
 			}
 		],
 		sources: ['ons-hle-2020', 'who-gbd-2022', 'olp-2026']
@@ -910,9 +915,9 @@ export const chapters: Chapter[] = [
 		steps: [
 			{
 				id: 'ch9-37-trillion',
-				text: 'Economists Scott and Ellison calculated that slowing the rate of biological ageing sufficiently to add one year of healthy life expectancy across the US population would generate approximately $37 trillion in economic value. That is enough to spend $1 million every minute for more than 70 years.',
+				text: 'Economists Scott and Ellison calculated that slowing the rate of biological ageing sufficiently to add one year of healthy life expectancy across the US population would generate approximately $37 trillion in economic value overall. That is not an annual budget or a literal pot of money — it is the estimated total social and economic value of healthier, longer lives. To make the scale legible: it is enough to spend $1 million every minute for more than 70 years.',
 				richText:
-					'Economists Scott and Ellison calculated that slowing biological ageing to add <strong>one year of healthy life expectancy</strong> across the US population would generate approximately <strong>$37 trillion</strong> in economic value — enough to spend <strong>$1 million every single minute for more than 70 years.</strong>',
+					'Economists Scott and Ellison calculated that slowing biological ageing to add <strong>one year of healthy life expectancy</strong> across the US population would generate approximately <strong>$37 trillion in total economic value</strong>. That is not an annual budget or a literal pot of money — it is an estimate of the value of healthier, longer lives. To make the scale legible: it is enough to spend <strong>$1 million every single minute for more than 70 years.</strong>',
 				stat: {
 					value: '$37T',
 					label: 'estimated economic value',
