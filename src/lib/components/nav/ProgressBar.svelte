@@ -220,6 +220,10 @@
 		let rafId = 0;
 
 		const onScroll = () => {
+			if (!isScrubbing) {
+				hoveredId = null;
+				scrubMarkerId = null;
+			}
 			if (rafId) return;
 			rafId = requestAnimationFrame(() => {
 				computeProgress();

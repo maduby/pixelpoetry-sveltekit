@@ -167,6 +167,7 @@ export interface ObsBarViz {
 export interface TimelinePoint {
 	year: number;
 	value: number;
+	tooltipLabel?: string;
 }
 export interface TimelineSeries {
 	label: string;

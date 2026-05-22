@@ -142,7 +142,7 @@ const ch4FitnessGap: TimelineSeries[] = [
 			{ year: 50, value: 92 },
 			{ year: 60, value: 86 },
 			{ year: 70, value: 77 },
-			{ year: 80, value: 66 },
+			{ year: 80, value: 66, tooltipLabel: '80 years old: 66%' },
 			{ year: 90, value: 53 },
 			{ year: 100, value: 41 }
 		]

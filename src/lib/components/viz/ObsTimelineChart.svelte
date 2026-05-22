@@ -28,15 +28,7 @@
 		sourceId?: string;
 	}
 
-	let {
-		series = [],
-		title,
-		subtitle,
-		unit = '%',
-		domain,
-		valueDomain,
-		sourceId
-	}: Props = $props();
+	let { series = [], title, subtitle, unit = '%', domain, valueDomain, sourceId }: Props = $props();
 
 	const source = $derived(sourceId ? explainer?.getSource(sourceId) : undefined);
 
@@ -58,15 +50,26 @@
 	 */
 	const chartH = $derived(
 		availableHeight > 0
-			? Math.min(Math.max(isNarrow ? 200 : 240, Math.round(availableHeight * 0.65)), isNarrow ? 320 : 440)
-			: (isNarrow ? 260 : 340)
+			? Math.min(
+					Math.max(isNarrow ? 200 : 240, Math.round(availableHeight * 0.65)),
+					isNarrow ? 320 : 440
+				)
+			: isNarrow
+				? 260
+				: 340
 	);
 
 	// Flatten series into one row per point with the series label attached
 	// so a single Plot.lineY call can colour and connect them by series.
 	const flatData = $derived(
 		series.flatMap((s) =>
-			s.points.map((p) => ({ label: s.label, color: s.color, year: p.year, value: p.value }))
+			s.points.map((p) => ({
+				label: s.label,
+				color: s.color,
+				year: p.year,
+				value: p.value,
+				tooltipLabel: p.tooltipLabel
+			}))
 		)
 	);
 
@@ -122,8 +125,7 @@
 	);
 
 	const prefersReducedMotion =
-		typeof window !== 'undefined' &&
-		window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 	/**
 	 * Gentle fade-in for the data dots on first viewport entry. We do NOT
@@ -176,9 +178,9 @@
 		const _narrow = isNarrow;
 		// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 		availableHeight;
-			const _flat = flatData;
-			const _xd = xDomain;
-			const _yd = yDomain;
+		const _flat = flatData;
+		const _xd = xDomain;
+		const _yd = yDomain;
 
 		let cancelled = false;
 		containerEl.innerHTML = '';
@@ -237,56 +239,56 @@
 						strokeLinejoin: 'round',
 						curve: 'linear'
 					}),
-				Plot.dot(_flat, {
-					x: 'year',
-					y: 'value',
-					fill: (d: { color: string }) => d.color,
-					stroke: '#fef9ef',
-					strokeWidth: 1.6,
-					r: _narrow ? 3.5 : 4.5
-				}),
-				// End-of-line value annotations — one per series, fine black,
-				// positioned just to the right of the final data point.
-				// Split into two marks (upper vs lower half of the value domain)
-				// so we can nudge them slightly apart without function-valued dy
-				// (Observable Plot's TS types only accept literal numbers for dy).
-				Plot.text(
-					endpoints.filter((d) => d.value > (_yd[0] + _yd[1]) / 2),
-					{
+					Plot.dot(_flat, {
 						x: 'year',
 						y: 'value',
-						text: (d: { value: number }) => `${d.value}${unit}`,
-						dx: 9,
-						dy: -1,
-						textAnchor: 'start' as const,
-						fill: '#0a0a0a',
-						fontWeight: '500',
-						fontSize: fontPx - 1
-					}
-				),
-				Plot.text(
-					endpoints.filter((d) => d.value <= (_yd[0] + _yd[1]) / 2),
-					{
-						x: 'year',
-						y: 'value',
-						text: (d: { value: number }) => `${d.value}${unit}`,
-						dx: 9,
-						dy: 1,
-						textAnchor: 'start' as const,
-						fill: '#0a0a0a',
-						fontWeight: '500',
-						fontSize: fontPx - 1
-					}
-				),
-				// Tooltip LAST — SVG paint order means last = on top, so the
-				// tip box always renders above country labels and value pills.
-				Plot.tip(
+						fill: (d: { color: string }) => d.color,
+						stroke: '#fef9ef',
+						strokeWidth: 1.6,
+						r: _narrow ? 3.5 : 4.5
+					}),
+					// End-of-line value annotations — one per series, fine black,
+					// positioned just to the right of the final data point.
+					// Split into two marks (upper vs lower half of the value domain)
+					// so we can nudge them slightly apart without function-valued dy
+					// (Observable Plot's TS types only accept literal numbers for dy).
+					Plot.text(
+						endpoints.filter((d) => d.value > (_yd[0] + _yd[1]) / 2),
+						{
+							x: 'year',
+							y: 'value',
+							text: (d: { value: number }) => `${d.value}${unit}`,
+							dx: 9,
+							dy: -1,
+							textAnchor: 'start' as const,
+							fill: '#0a0a0a',
+							fontWeight: '500',
+							fontSize: fontPx - 1
+						}
+					),
+					Plot.text(
+						endpoints.filter((d) => d.value <= (_yd[0] + _yd[1]) / 2),
+						{
+							x: 'year',
+							y: 'value',
+							text: (d: { value: number }) => `${d.value}${unit}`,
+							dx: 9,
+							dy: 1,
+							textAnchor: 'start' as const,
+							fill: '#0a0a0a',
+							fontWeight: '500',
+							fontSize: fontPx - 1
+						}
+					),
+					// Tooltip LAST — SVG paint order means last = on top, so the
+					// tip box always renders above country labels and value pills.
+					Plot.tip(
 						_flat,
 						Plot.pointer({
 							x: 'year',
 							y: 'value',
-						title: (d: { label: string; year: number; value: number }) =>
-							`${d.label}\n${d.year}: ${d.value}${unit}`
+							title: (d: { label: string; year: number; value: number; tooltipLabel?: string }) =>
+								`${d.label}\n${d.tooltipLabel ?? `${d.year}: ${d.value}${unit}`}`
 						})
 					)
 				]
@@ -330,7 +332,7 @@
 
 <div bind:this={wrapperEl} class="w-full">
 	{#if title}
-		<h3 class="font-display text-xl font-black leading-tight text-ink md:text-2xl">{title}</h3>
+		<h3 class="font-display text-xl leading-tight font-black text-ink md:text-2xl">{title}</h3>
 	{/if}
 	{#if subtitle}
 		<p class="mt-1 font-body text-sm text-ink/60">{subtitle}</p>
@@ -351,7 +353,8 @@
 					onmouseenter={() => highlightSeries(s.label)}
 					onmouseleave={() => highlightSeries(null)}
 				>
-					<span class="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style="background:{s.color}"></span>
+					<span class="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style="background:{s.color}"
+					></span>
 					{s.label}
 				</button>
 			{/each}
@@ -373,8 +376,8 @@
 				stroke="currentColor"
 				stroke-width="2"
 				stroke-linecap="round"
-				stroke-linejoin="round"
-			><path d="M2 10 L10 2 M4 2 H10 V8" /></svg>
+				stroke-linejoin="round"><path d="M2 10 L10 2 M4 2 H10 V8" /></svg
+			>
 		</button>
 	{/if}
 </div>
