@@ -23,10 +23,28 @@
 	const source = $derived(quote.sourceId ? explainer?.getSource(quote.sourceId) : undefined);
 
 	const accentColor = $derived(
-		({ red: 'text-brand-red', amber: 'text-brand-amber', pink: 'text-brand-pink', ink: 'text-ink', forest: 'text-brand-forest', blue: 'text-brand-ocean' } as const)[accent]
+		(
+			{
+				red: 'text-brand-red',
+				amber: 'text-brand-amber',
+				pink: 'text-brand-pink',
+				ink: 'text-ink',
+				forest: 'text-brand-forest',
+				blue: 'text-brand-ocean'
+			} as const
+		)[accent]
 	);
 	const accentBorder = $derived(
-		({ red: 'border-brand-red', amber: 'border-brand-amber', pink: 'border-brand-pink', ink: 'border-ink', forest: 'border-brand-forest', blue: 'border-brand-ocean' } as const)[accent]
+		(
+			{
+				red: 'border-brand-red',
+				amber: 'border-brand-amber',
+				pink: 'border-brand-pink',
+				ink: 'border-ink',
+				forest: 'border-brand-forest',
+				blue: 'border-brand-ocean'
+			} as const
+		)[accent]
 	);
 </script>
 
@@ -39,14 +57,16 @@
 	<div class="w-full border-t border-ink/8 py-20 lg:py-28">
 		<figure class={cn('mx-auto max-w-4xl px-6 text-center lg:px-8', className)}>
 			<blockquote
-				class="font-display text-[clamp(1.75rem,4vw,3.5rem)] font-black leading-tight text-balance text-ink"
+				class="font-display text-[clamp(1.75rem,4vw,3.5rem)] leading-tight font-black text-balance text-ink"
 			>
-				<span aria-hidden="true" class={cn('select-none', accentColor)}>"</span>{quote.text}<span
+				<span aria-hidden="true" class={cn('select-none', accentColor)}>“</span>{quote.text}<span
 					aria-hidden="true"
-					class={cn('select-none', accentColor)}>"</span
+					class={cn('select-none', accentColor)}>”</span
 				>
 			</blockquote>
-			<figcaption class="mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm text-ink/60">
+			<figcaption
+				class="mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm text-ink/60"
+			>
 				<cite class="font-semibold text-ink/70 not-italic">{quote.attribution}</cite>
 				{#if source}
 					<button
@@ -54,11 +74,11 @@
 						onclick={() => openSourceSheet(source.id)}
 						class={cn(
 							'group flex cursor-pointer items-center gap-1 text-ink/40 transition-colors',
-						accent === 'red' && 'hover:text-brand-red',
-						accent === 'amber' && 'hover:text-brand-amber',
-						accent === 'pink' && 'hover:text-brand-pink',
-						accent === 'ink' && 'hover:text-ink',
-						accent === 'forest' && 'hover:text-brand-forest'
+							accent === 'red' && 'hover:text-brand-red',
+							accent === 'amber' && 'hover:text-brand-amber',
+							accent === 'pink' && 'hover:text-brand-pink',
+							accent === 'ink' && 'hover:text-ink',
+							accent === 'forest' && 'hover:text-brand-forest'
 						)}
 					>
 						<span>Source</span>
@@ -70,8 +90,8 @@
 							stroke="currentColor"
 							stroke-width="2"
 							stroke-linecap="round"
-							stroke-linejoin="round"
-						><path d="M2 10 L10 2 M4 2 H10 V8" /></svg>
+							stroke-linejoin="round"><path d="M2 10 L10 2 M4 2 H10 V8" /></svg
+						>
 					</button>
 				{/if}
 			</figcaption>
@@ -86,10 +106,10 @@
 			className
 		)}
 	>
-		<blockquote class="font-display text-3xl font-black leading-tight text-pretty md:text-4xl">
-			<span aria-hidden="true" class={cn('select-none', accentColor)}>"</span>{quote.text}<span
+		<blockquote class="font-display text-3xl leading-tight font-black text-pretty md:text-4xl">
+			<span aria-hidden="true" class={cn('select-none', accentColor)}>“</span>{quote.text}<span
 				aria-hidden="true"
-				class={cn('select-none', accentColor)}>"</span
+				class={cn('select-none', accentColor)}>”</span
 			>
 		</blockquote>
 		<figcaption class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink/60">
@@ -109,8 +129,8 @@
 						stroke="currentColor"
 						stroke-width="2"
 						stroke-linecap="round"
-						stroke-linejoin="round"
-					><path d="M2 10 L10 2 M4 2 H10 V8" /></svg>
+						stroke-linejoin="round"><path d="M2 10 L10 2 M4 2 H10 V8" /></svg
+					>
 				</button>
 			{/if}
 		</figcaption>

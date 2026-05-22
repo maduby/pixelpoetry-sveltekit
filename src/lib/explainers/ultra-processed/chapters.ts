@@ -30,6 +30,7 @@ export const chapters: Chapter[] = [
 		eyebrow: 'Chapter 1',
 		emoji: '🍔',
 		title: 'The New Normal',
+		shortTitle: 'New Normal',
 		intro:
 			'For the first time in human history, most of what we eat is not really food. It is an industrial substance, invented in the last forty years, that just happens to be edible.',
 		accent: 'red',
@@ -45,7 +46,8 @@ export const chapters: Chapter[] = [
 					alt: 'Aisles of ultra-processed packaged food in a supermarket.',
 					caption: 'Ultra-processed food fills the modern supermarket aisle.',
 					sourceId: 'body-coach-upf-guide',
-					credit: 'Via The Body Coach (thebodycoach.com) — editorial illustration, all rights reserved'
+					credit:
+						'Via The Body Coach (thebodycoach.com) — editorial illustration, all rights reserved'
 				}
 			},
 			{
@@ -57,9 +59,11 @@ export const chapters: Chapter[] = [
 					type: 'image',
 					name: 'upf-factory',
 					alt: 'Cookies being mass-produced on an industrial factory line.',
-					caption: 'Most of the food in the modern UK and US diet is now made on production lines like this one.',
+					caption:
+						'Most of the food in the modern UK and US diet is now made on production lines like this one.',
 					sourceId: 'bhf-upf-health',
-					credit: 'Via British Heart Foundation (bhf.org.uk) — editorial illustration, all rights reserved'
+					credit:
+						'Via British Heart Foundation (bhf.org.uk) — editorial illustration, all rights reserved'
 				}
 			},
 			{
@@ -70,10 +74,12 @@ export const chapters: Chapter[] = [
 				viz: {
 					type: 'image',
 					name: 'upf-kellogs',
-					alt: 'Kellogg\'s Coco Pops Chocolate Flavour Multigrain Cereals box.',
-					caption: 'Sugary breakfast cereals like Kellogg\'s Coco Pops are marketed directly to children — and roughly 65% of the average UK child\'s diet is now ultra-processed (BMJ, 2024).',
+					alt: "Kellogg's Coco Pops Chocolate Flavour Multigrain Cereals box.",
+					caption:
+						"Sugary breakfast cereals like Kellogg's Coco Pops are marketed directly to children — and roughly 65% of the average UK child's diet is now ultra-processed (BMJ, 2024).",
 					sourceId: 'kelloggs-coco-pops-sa',
-					credit: '© Kellogg\'s South Africa — official product image, kelloggs.com (2400×2400), reproduced for editorial commentary',
+					credit:
+						"© Kellogg's South Africa — official product image, kelloggs.com (2400×2400), reproduced for editorial commentary",
 					fit: 'contain',
 					aspect: 'square'
 				}
@@ -131,9 +137,7 @@ export const chapters: Chapter[] = [
 						{
 							label: 'France',
 							color: '#374151',
-							points: [
-								{ year: 2020, value: 17 }
-							]
+							points: [{ year: 2020, value: 17 }]
 						},
 						{
 							label: 'Italy',
@@ -150,7 +154,13 @@ export const chapters: Chapter[] = [
 				}
 			}
 		],
-		sources: ['van-tulleken-2023', 'bmj-2024', 'body-coach-upf-guide', 'bhf-upf-health', 'marino-2021-nutrients']
+		sources: [
+			'van-tulleken-2023',
+			'bmj-2024',
+			'body-coach-upf-guide',
+			'bhf-upf-health',
+			'marino-2021-nutrients'
+		]
 	},
 	{
 		id: 'what-is-it',
@@ -158,6 +168,7 @@ export const chapters: Chapter[] = [
 		eyebrow: 'Chapter 2',
 		emoji: '🥯',
 		title: 'What Is It, Actually?',
+		shortTitle: 'What Counts as UPF',
 		intro:
 			'Researchers in Brazil drew the only line that holds up: food becomes ultra-processed when its ingredients leave the kitchen entirely.',
 		accent: 'amber',
@@ -224,9 +235,11 @@ export const chapters: Chapter[] = [
 					type: 'image',
 					name: 'upf-healthy',
 					alt: 'Modern Baker "Superloaf" — a sliced bread positioned by its makers as the "world\'s first healthy UPF".',
-					caption: 'Modern Baker\'s Superloaf — listed in M&S, Sainsbury\'s, Ocado and Morrisons, and marketed as "the world\'s first healthy UPF". By NOVA standards it is still an ultra-processed food.',
+					caption:
+						"Modern Baker's Superloaf — listed in M&S, Sainsbury's, Ocado and Morrisons, and marketed as \"the world's first healthy UPF\". By NOVA standards it is still an ultra-processed food.",
 					sourceId: 'superloaf-listings-2024',
-					credit: '© Modern Baker / Hovis — Superloaf product image via Inside Food & Drink (insidefoodanddrink.com), reproduced for editorial commentary',
+					credit:
+						'© Modern Baker / Hovis — Superloaf product image via Inside Food & Drink (insidefoodanddrink.com), reproduced for editorial commentary',
 					fit: 'contain',
 					aspect: '4/5',
 					imgClass: 'translate-x-4 lg:translate-x-0'
@@ -253,20 +266,21 @@ export const chapters: Chapter[] = [
 					'Dr Chris van Tulleken — physician, virologist, BBC broadcaster — designed a self-experiment. For a month he would eat a diet of <strong>80% ultra-processed food</strong>, the level documented for many <strong>lower-income UK households.</strong>',
 				viz: {
 					type: 'donut',
-				data: [
-					{ label: 'Ultra-processed', value: 80, color: '#be185d' },
-					{ label: 'Whole foods', value: 20, color: '#1e3a5f' }
-				]
-			}
-		},
-		{
-			id: 'portrait',
+					data: [
+						{ label: 'Ultra-processed', value: 80, color: '#be185d' },
+						{ label: 'Whole foods', value: 20, color: '#1e3a5f' }
+					]
+				}
+			},
+			{
+				id: 'portrait',
 				text: 'The face behind the experiment.',
 				viz: {
 					type: 'image',
 					name: 'chris-van-tulleken',
 					alt: 'Dr Chris van Tulleken',
-					caption: 'Dr Chris van Tulleken — physician, virologist, and author of Ultra-Processed People (2023).',
+					caption:
+						'Dr Chris van Tulleken — physician, virologist, and author of Ultra-Processed People (2023).',
 					sourceId: 'van-tulleken-2023',
 					credit: '© Cornerstone Press / Penguin Random House — author portrait'
 				}
@@ -294,10 +308,30 @@ export const chapters: Chapter[] = [
 					subtitle: 'Indexed to pre-diet baseline = 100',
 					unit: '',
 					data: [
-					{ label: 'Leptin (satiety signal)', group: 'Before UPF diet', value: 100, color: '#0a0a0a18' },
-					{ label: 'Leptin (satiety signal)', group: 'After 30 days', value: 40, color: '#be185d' },
-					{ label: 'Ghrelin (hunger signal)', group: 'Before UPF diet', value: 100, color: '#0a0a0a18' },
-					{ label: 'Ghrelin (hunger signal)', group: 'After 30 days', value: 162, color: '#be185d' }
+						{
+							label: 'Leptin (satiety signal)',
+							group: 'Before UPF diet',
+							value: 100,
+							color: '#0a0a0a18'
+						},
+						{
+							label: 'Leptin (satiety signal)',
+							group: 'After 30 days',
+							value: 40,
+							color: '#be185d'
+						},
+						{
+							label: 'Ghrelin (hunger signal)',
+							group: 'Before UPF diet',
+							value: 100,
+							color: '#0a0a0a18'
+						},
+						{
+							label: 'Ghrelin (hunger signal)',
+							group: 'After 30 days',
+							value: 162,
+							color: '#be185d'
+						}
 					],
 					sourceId: 'van-tulleken-2023'
 				}
@@ -313,10 +347,15 @@ export const chapters: Chapter[] = [
 					subtitle: 'Indexed to pre-diet baseline = 100',
 					unit: '',
 					data: [
-					{ label: 'Cholesterol', group: 'Before UPF diet', value: 100, color: '#0a0a0a18' },
-					{ label: 'Cholesterol', group: 'After 30 days', value: 145, color: '#b45309' },
-					{ label: 'CRP (inflammation)', group: 'Before UPF diet', value: 100, color: '#0a0a0a18' },
-					{ label: 'CRP (inflammation)', group: 'After 30 days', value: 160, color: '#be185d' }
+						{ label: 'Cholesterol', group: 'Before UPF diet', value: 100, color: '#0a0a0a18' },
+						{ label: 'Cholesterol', group: 'After 30 days', value: 145, color: '#b45309' },
+						{
+							label: 'CRP (inflammation)',
+							group: 'Before UPF diet',
+							value: 100,
+							color: '#0a0a0a18'
+						},
+						{ label: 'CRP (inflammation)', group: 'After 30 days', value: 160, color: '#be185d' }
 					],
 					sourceId: 'van-tulleken-2023'
 				}
@@ -341,6 +380,7 @@ export const chapters: Chapter[] = [
 		eyebrow: 'Chapter 4',
 		emoji: '🌭',
 		title: 'The Body Under Siege',
+		shortTitle: 'Health Risks',
 		intro:
 			'The largest pooled study ever conducted on UPF set out to find adverse health effects. It found them — across nearly every organ system in the human body.',
 		accent: 'red',
@@ -398,13 +438,13 @@ export const chapters: Chapter[] = [
 					prefix: '+',
 					unit: '%',
 					data: [
-					{ label: 'Mental health disorders', value: 53, color: '#be185d' },
-					{ label: 'Cardiovascular mortality', value: 50, color: '#be185d' },
-					{ label: 'Anxiety disorders', value: 48, color: '#6d28d9' },
-					{ label: 'Type 2 diabetes', value: 40, color: '#6d28d9' },
-					{ label: 'Depression', value: 22, color: '#b45309' },
-					{ label: 'All-cause mortality', value: 21, color: '#b45309' },
-					{ label: 'Cancer mortality', value: 16, color: '#1e3a5f' }
+						{ label: 'Mental health disorders', value: 53, color: '#be185d' },
+						{ label: 'Cardiovascular mortality', value: 50, color: '#be185d' },
+						{ label: 'Anxiety disorders', value: 48, color: '#6d28d9' },
+						{ label: 'Type 2 diabetes', value: 40, color: '#6d28d9' },
+						{ label: 'Depression', value: 22, color: '#b45309' },
+						{ label: 'All-cause mortality', value: 21, color: '#b45309' },
+						{ label: 'Cancer mortality', value: 16, color: '#1e3a5f' }
 					],
 					sourceId: 'bmj-2024'
 				}
@@ -418,6 +458,7 @@ export const chapters: Chapter[] = [
 		eyebrow: 'Chapter 5',
 		emoji: '🧁',
 		title: 'Engineered to Addict',
+		shortTitle: 'Addiction',
 		intro:
 			'The point of UPF — from the perspective of the company that made it — is not nutrition. The point is that you can’t stop eating it.',
 		accent: 'pink',
@@ -433,7 +474,8 @@ export const chapters: Chapter[] = [
 					alt: 'Sliced factory-made white bread — soft, calorie-dense, fast to chew.',
 					caption: 'Mass-produced sliced bread — the archetypal ultra-processed staple.',
 					sourceId: 'daily-record-upf-good',
-					credit: '© Getty Images — via Daily Record (dailyrecord.co.uk), reproduced for editorial commentary'
+					credit:
+						'© Getty Images — via Daily Record (dailyrecord.co.uk), reproduced for editorial commentary'
 				}
 			},
 			{
@@ -444,7 +486,8 @@ export const chapters: Chapter[] = [
 				viz: {
 					type: 'obs-bar',
 					title: 'Adults meeting clinical addiction criteria',
-					subtitle: 'UPF — Nature Medicine (2025); tobacco / alcohol / cannabis — WHO global estimates',
+					subtitle:
+						'UPF — Nature Medicine (2025); tobacco / alcohol / cannabis — WHO global estimates',
 					unit: '% of adults',
 					data: [
 						{ label: 'Ultra-processed food', value: 14, color: '#be185d' },
@@ -484,6 +527,7 @@ export const chapters: Chapter[] = [
 		eyebrow: 'Chapter 6',
 		emoji: '🥪',
 		title: 'The Regulatory Vacuum',
+		shortTitle: 'Regulation',
 		intro:
 			'Most additives in the US food supply are deemed safe by the company that introduced them. There is no requirement to tell the FDA.',
 		accent: 'amber',
@@ -499,9 +543,24 @@ export const chapters: Chapter[] = [
 					subtitle: 'Nat Food, 2025 — global audit of UPF-related regulatory measures',
 					unit: '%',
 					data: [
-						{ label: 'Coverage', group: 'Labelling / food environment only', value: 86, color: '#be185d' },
-						{ label: 'Coverage', group: 'Production or marketing controls', value: 14, color: '#1e3a5f' },
-						{ label: 'Enforceability', group: 'Non-binding (voluntary / consensus)', value: 47, color: '#b45309' },
+						{
+							label: 'Coverage',
+							group: 'Labelling / food environment only',
+							value: 86,
+							color: '#be185d'
+						},
+						{
+							label: 'Coverage',
+							group: 'Production or marketing controls',
+							value: 14,
+							color: '#1e3a5f'
+						},
+						{
+							label: 'Enforceability',
+							group: 'Non-binding (voluntary / consensus)',
+							value: 47,
+							color: '#b45309'
+						},
 						{ label: 'Enforceability', group: 'Legally binding', value: 53, color: '#6d28d9' }
 					],
 					sourceId: 'nat-food-2025'
@@ -536,6 +595,7 @@ export const chapters: Chapter[] = [
 		eyebrow: 'Chapter 7',
 		emoji: '🍟',
 		title: 'A Disease of Inequality',
+		shortTitle: 'Inequality',
 		intro:
 			'The people who eat the most UPF are not the ones who chose it. They are the ones for whom it is, very often, all that is on the shelf.',
 		accent: 'red',
@@ -563,7 +623,7 @@ export const chapters: Chapter[] = [
 				id: 'marketing',
 				text: 'Food companies disproportionately target children and lower-income consumers. UPF becomes not just dinner but a cultural identity, deliberately constructed by marketing departments.',
 				richText:
-					'Food companies disproportionately target children and lower-income consumers. UPF becomes not just dinner but <strong>a cultural identity, deliberately constructed by marketing departments.</strong>',
+					'Food companies disproportionately target children and lower-income consumers. UPF becomes not just dinner but <strong>a cultural identity, deliberately constructed by marketing departments.</strong>'
 			},
 			{
 				id: 'south-africa',
@@ -572,8 +632,9 @@ export const chapters: Chapter[] = [
 					'In South Africa, the pattern is sharper still. By 2024, <strong>nearly half of all adults were overweight or obese</strong> — even as almost two-thirds of households remained food-insecure. The HSRC calls this the <a href="#" data-term="double-burden">double burden of malnutrition</a>: <strong>hunger and obesity living in the same kitchen.</strong>',
 				viz: {
 					type: 'obs-bar',
-					title: 'South Africa\'s double burden',
-					subtitle: 'Adults overweight or obese — HSRC National Food & Nutrition Security Survey (2024)',
+					title: "South Africa's double burden",
+					subtitle:
+						'Adults overweight or obese — HSRC National Food & Nutrition Security Survey (2024)',
 					unit: '% of adults',
 					data: [
 						{ label: 'Women', value: 68, color: '#be185d' },
@@ -586,7 +647,8 @@ export const chapters: Chapter[] = [
 			{
 				id: 'frame',
 				text: 'Van Tulleken argues this means the obesity crisis is misframed as a problem of personal willpower, when it is in fact a problem of who has been given a real choice and who has not.',
-				richText: 'Van Tulleken argues this means the obesity crisis is <strong>misframed as a problem of personal willpower</strong>, when it is in fact a problem of <strong>who has been given a real choice</strong> and who has not.',
+				richText:
+					'Van Tulleken argues this means the obesity crisis is <strong>misframed as a problem of personal willpower</strong>, when it is in fact a problem of <strong>who has been given a real choice</strong> and who has not.',
 				quote: {
 					text: 'Obesity is a commerciogenic disease — driven by a largely unregulated industry.',
 					attribution: 'Dr Chris van Tulleken',
@@ -602,6 +664,7 @@ export const chapters: Chapter[] = [
 		eyebrow: 'Chapter 8',
 		emoji: '🌮',
 		title: 'Eating the Planet',
+		shortTitle: 'Planet Cost',
 		intro:
 			'The cheap commodity ingredients of UPF — soy, corn, palm — are the same crops driving deforestation and the bulk of food-system emissions.',
 		accent: 'amber',
@@ -667,6 +730,7 @@ export const chapters: Chapter[] = [
 		eyebrow: 'Chapter 9',
 		emoji: '🥤',
 		title: 'What Now?',
+		shortTitle: 'What Changes',
 		intro:
 			'There is no clean exit from a food system this large. There are, however, levers — and they begin with what gets counted as food at all.',
 		accent: 'pink',
@@ -728,7 +792,7 @@ export const upfByCountry: BubbleDataPoint[] = [
 	{ label: 'Spain', value: 24, category: 'pink' },
 	{ label: 'Mexico', value: 30, category: 'amber' },
 	{ label: 'India', value: 10, category: 'ink' },
-	{ label: 'Japan', value: 8, category: 'ink' },
+	{ label: 'Japan', value: 8, category: 'ink' }
 ];
 
 // Health impact bars — for BarChart
@@ -736,7 +800,7 @@ export const healthImpacts: BarDataPoint[] = [
 	{ label: 'All-cause mortality', value: 21, category: 'red' },
 	{ label: 'Cardiovascular mortality', value: 50, category: 'red' },
 	{ label: 'Cancer mortality', value: 16, category: 'amber' },
-	{ label: 'Mental health disorders', value: 53, category: 'pink' },
+	{ label: 'Mental health disorders', value: 53, category: 'pink' }
 ];
 
 // UPF % by year — for BarChart (showing UK/USA escalation over time)
@@ -746,7 +810,7 @@ export const upfByYear: BarDataPoint[] = [
 	{ label: 'UK / USA', value: 32, category: 'ink', year: 2000 },
 	{ label: 'UK / USA', value: 45, category: 'ink', year: 2010 },
 	{ label: 'UK / USA', value: 57, category: 'ink', year: 2020 },
-	{ label: 'UK / USA', value: 60, category: 'red', year: 2024 },
+	{ label: 'UK / USA', value: 60, category: 'red', year: 2024 }
 ];
 
 // UPF trend over time — for LineChart
@@ -755,18 +819,24 @@ export const upfTrend: LineSeries[] = [
 		name: 'UK / USA',
 		color: '#be185d',
 		data: [
-			{ year: 1980, value: 10 }, { year: 1990, value: 20 },
-			{ year: 2000, value: 32 }, { year: 2010, value: 45 },
-			{ year: 2020, value: 57 }, { year: 2024, value: 60 }
+			{ year: 1980, value: 10 },
+			{ year: 1990, value: 20 },
+			{ year: 2000, value: 32 },
+			{ year: 2010, value: 45 },
+			{ year: 2020, value: 57 },
+			{ year: 2024, value: 60 }
 		]
 	},
 	{
 		name: 'Brazil',
 		color: '#b45309',
 		data: [
-			{ year: 1980, value: 5 }, { year: 1990, value: 8 },
-			{ year: 2000, value: 13 }, { year: 2010, value: 18 },
-			{ year: 2020, value: 20 }, { year: 2024, value: 22 }
+			{ year: 1980, value: 5 },
+			{ year: 1990, value: 8 },
+			{ year: 2000, value: 13 },
+			{ year: 2010, value: 18 },
+			{ year: 2020, value: 20 },
+			{ year: 2024, value: 22 }
 		]
 	}
 ];
@@ -774,7 +844,7 @@ export const upfTrend: LineSeries[] = [
 // UPF vs whole foods — for DonutChart (80% UPF / 20% whole)
 export const upfVsWhole: DonutDataPoint[] = [
 	{ label: 'Ultra-processed', value: 80, color: '#be185d' },
-	{ label: 'Whole foods', value: 20, color: '#1e3a5f' },
+	{ label: 'Whole foods', value: 20, color: '#1e3a5f' }
 ];
 
 // NOVA groups — for DonutChart
@@ -782,5 +852,5 @@ export const novaBreakdown: DonutDataPoint[] = [
 	{ label: 'Group 1', value: 30, color: '#1e3a5f' },
 	{ label: 'Group 2', value: 5, color: '#6d28d9' },
 	{ label: 'Group 3', value: 10, color: '#b45309' },
-	{ label: 'Group 4', value: 55, color: '#be185d' },
+	{ label: 'Group 4', value: 55, color: '#be185d' }
 ];

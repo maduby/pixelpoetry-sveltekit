@@ -49,6 +49,9 @@
 	let isDragging = $state(false);
 	let dragStartY = 0;
 	let dragStartHeight = 0;
+	let openFrame1 = 0;
+	let openFrame2 = 0;
+	let closeTimer = 0;
 
 	let prefersReducedMotion = $derived(
 		typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -61,31 +64,63 @@
 		});
 	}
 
+	function clearOpenFrames() {
+		if (openFrame1) cancelAnimationFrame(openFrame1);
+		if (openFrame2) cancelAnimationFrame(openFrame2);
+		openFrame1 = 0;
+		openFrame2 = 0;
+	}
+
+	function clearCloseTimer() {
+		if (closeTimer) window.clearTimeout(closeTimer);
+		closeTimer = 0;
+	}
+
+	function focusAndResetScroll() {
+		panelEl?.focus();
+		resetScroll();
+	}
+
 	// Sync `open` prop → dialog + animation state.
 	$effect(() => {
 		if (!dialogEl) return;
 
 		if (open) {
-			// Open: show dialog then trigger slide-in animation.
+			// Open the native dialog first, then flip `isVisible` after Safari
+			// has painted the off-screen state. Without this frame split, iOS
+			// can skip the transform transition and make the sheet pop in.
 			// Focus the panel div (tabindex=-1) instead of the first interactive
 			// child so the drag handle doesn't receive a visible focus ring on open.
+			clearOpenFrames();
+			clearCloseTimer();
 			if (!dialogEl.open) dialogEl.showModal();
-			isVisible = true;
+			isVisible = false;
 			panelHeight = defaultHeight;
 			document.body.style.overflow = 'hidden';
-			// Defer so the dialog is fully painted before we steal focus
-			// and reset scroll so re-opening lands at the top.
-			requestAnimationFrame(() => {
-				panelEl?.focus();
-				resetScroll();
-			});
+
+			if (prefersReducedMotion) {
+				isVisible = true;
+				focusAndResetScroll();
+			} else {
+				openFrame1 = requestAnimationFrame(() => {
+					openFrame2 = requestAnimationFrame(() => {
+						isVisible = true;
+						focusAndResetScroll();
+						openFrame1 = 0;
+						openFrame2 = 0;
+					});
+				});
+			}
 		} else if (isVisible) {
 			// Close: play slide-out animation, then close dialog after transition.
+			clearOpenFrames();
+			clearCloseTimer();
 			isVisible = false;
 			const duration = prefersReducedMotion ? 0 : 300;
-			setTimeout(() => {
+			closeTimer = window.setTimeout(() => {
 				if (dialogEl?.open) dialogEl.close();
 				document.body.style.overflow = '';
+				closeTimer = 0;
 			}, duration);
 		}
 	});
@@ -143,6 +178,14 @@
 			panelHeight = minHeight;
 		}
 	}
+
+	$effect(() => {
+		return () => {
+			clearOpenFrames();
+			clearCloseTimer();
+			document.body.style.overflow = '';
+		};
+	});
 </script>
 
 <!--

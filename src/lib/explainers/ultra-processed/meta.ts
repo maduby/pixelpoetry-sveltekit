@@ -53,7 +53,7 @@ export const meta = {
 	],
 	editorial: {
 		title: 'Why I made this',
-		lastUpdated: '21 May 2026 at 9:52am SAST',
+		lastUpdated: '22 May 2026 at 7:51am SAST',
 		body: `
 <p>My name is <a href="https://duby.io" target="_blank" rel="noopener">Marc Duby</a>, and I try to boil down stories, articles, and topics that I find interesting and worth reading. I know it is hard to find enough time to read articles, books, or even, imagine, scientific papers. That is why I am trying to explain complex topics with these hopefully easy-to-use and interesting little interactive essays.</p>
 

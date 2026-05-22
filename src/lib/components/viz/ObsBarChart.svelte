@@ -87,8 +87,7 @@
 	const RULE_COLOR = '#0a0a0a28';
 
 	const prefersReducedMotion =
-		typeof window !== 'undefined' &&
-		window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 	/**
 	 * Animate bars in the given container using IntersectionObserver.
@@ -161,13 +160,13 @@
 		const MAX_ROW_H = defaultH;
 		if (!availableHeight || numBars === 0) return MAX_ROW_H;
 
-		const titleH    = title    ? 56 : 0; // up to 2 wrapped lines at text-xl
+		const titleH = title ? 56 : 0; // up to 2 wrapped lines at text-xl
 		const subtitleH = subtitle ? 44 : 0; // up to 3 wrapped lines at text-xs
-		const sourceH   = sourceId ? 32 : 0;
-		const gaps      = 12 * 3;            // gap-3 × 3 inter-element gaps
-		const svgMargins = 16;               // Plot marginTop:8 + marginBottom:8
-		const cushion   = 16;
-		const overhead  = titleH + subtitleH + sourceH + gaps + svgMargins + cushion;
+		const sourceH = sourceId ? 32 : 0;
+		const gaps = 12 * 3; // gap-3 × 3 inter-element gaps
+		const svgMargins = 16; // Plot marginTop:8 + marginBottom:8
+		const cushion = 16;
+		const overhead = titleH + subtitleH + sourceH + gaps + svgMargins + cushion;
 
 		const freeH = availableHeight - overhead;
 		const ideal = Math.floor(freeH / numBars);
@@ -187,6 +186,14 @@
 	/** Standardised colour pick for a bar, with the before/after heuristic. */
 	function colorFor(d: ObsBarDataPoint): string {
 		return d.color ?? (d.group?.toLowerCase().includes('after') ? AFTER_COLOR : BEFORE_COLOR);
+	}
+
+	function valueLabel(d: ObsBarDataPoint): string {
+		return `${prefix}${d.value}${unit}`;
+	}
+
+	function estimateValueLabelWidth(text: string, fontSize: number): number {
+		return Math.ceil(text.length * fontSize * 0.62) + 18;
 	}
 
 	/**
@@ -209,12 +216,66 @@
 
 	const MOBILE_METRIC_TIERS: MobileMetrics[] = [
 		// Roomy — default desktop-equivalent feel
-		{ rowH: 32, labelFontSize: 13, labelMarginTop: 10, labelMarginBottom: 4, valueFontSize: 14, sectionFontSize: 15, sectionMarginTop: 18, sectionMarginBottom: 6 },
-		{ rowH: 28, labelFontSize: 13, labelMarginTop: 8, labelMarginBottom: 3, valueFontSize: 13, sectionFontSize: 14, sectionMarginTop: 14, sectionMarginBottom: 5 },
-		{ rowH: 24, labelFontSize: 12, labelMarginTop: 6, labelMarginBottom: 2, valueFontSize: 12, sectionFontSize: 14, sectionMarginTop: 12, sectionMarginBottom: 4 },
-		{ rowH: 22, labelFontSize: 12, labelMarginTop: 4, labelMarginBottom: 2, valueFontSize: 12, sectionFontSize: 13, sectionMarginTop: 10, sectionMarginBottom: 4 },
-		{ rowH: 20, labelFontSize: 11, labelMarginTop: 3, labelMarginBottom: 1, valueFontSize: 11, sectionFontSize: 13, sectionMarginTop: 8, sectionMarginBottom: 3 },
-		{ rowH: 18, labelFontSize: 11, labelMarginTop: 2, labelMarginBottom: 1, valueFontSize: 11, sectionFontSize: 12, sectionMarginTop: 6, sectionMarginBottom: 2 }
+		{
+			rowH: 32,
+			labelFontSize: 13,
+			labelMarginTop: 10,
+			labelMarginBottom: 4,
+			valueFontSize: 14,
+			sectionFontSize: 15,
+			sectionMarginTop: 18,
+			sectionMarginBottom: 6
+		},
+		{
+			rowH: 28,
+			labelFontSize: 13,
+			labelMarginTop: 8,
+			labelMarginBottom: 3,
+			valueFontSize: 13,
+			sectionFontSize: 14,
+			sectionMarginTop: 14,
+			sectionMarginBottom: 5
+		},
+		{
+			rowH: 24,
+			labelFontSize: 12,
+			labelMarginTop: 6,
+			labelMarginBottom: 2,
+			valueFontSize: 12,
+			sectionFontSize: 14,
+			sectionMarginTop: 12,
+			sectionMarginBottom: 4
+		},
+		{
+			rowH: 22,
+			labelFontSize: 12,
+			labelMarginTop: 4,
+			labelMarginBottom: 2,
+			valueFontSize: 12,
+			sectionFontSize: 13,
+			sectionMarginTop: 10,
+			sectionMarginBottom: 4
+		},
+		{
+			rowH: 20,
+			labelFontSize: 11,
+			labelMarginTop: 3,
+			labelMarginBottom: 1,
+			valueFontSize: 11,
+			sectionFontSize: 13,
+			sectionMarginTop: 8,
+			sectionMarginBottom: 3
+		},
+		{
+			rowH: 18,
+			labelFontSize: 11,
+			labelMarginTop: 2,
+			labelMarginBottom: 1,
+			valueFontSize: 11,
+			sectionFontSize: 12,
+			sectionMarginTop: 6,
+			sectionMarginBottom: 2
+		}
 	];
 
 	function calcMobileMetrics(numItems: number, numSections: number): MobileMetrics {
@@ -256,12 +317,12 @@
 			containerW >= 400
 				? Math.min(52, Math.round(metrics.rowH * (1 + (containerW - 400) / 800)))
 				: metrics.rowH;
-		// Only reserve right margin for bars that won't get an inside label.
-		// Bars whose pixel width ≥ INSIDE_MIN_PX will carry their value label
-		// inside (white text), so they don't need right-margin space.
-		const MARGIN_RIGHT_OUTSIDE = Math.round(metrics.valueFontSize * 6);
-		const barPxW = (item.value / domainMax) * containerW;
-		const insideLabel = barPxW >= 52;
+		const label = valueLabel(item);
+		const labelW = estimateValueLabelWidth(label, metrics.valueFontSize);
+		const MARGIN_RIGHT_OUTSIDE = Math.min(Math.round(containerW * 0.44), labelW + 10);
+		const plotW = containerW - MARGIN_RIGHT_OUTSIDE;
+		const barPxW = (item.value / domainMax) * plotW;
+		const insideLabel = barPxW >= labelW;
 		const MARGIN_RIGHT = insideLabel ? 8 : MARGIN_RIGHT_OUTSIDE;
 		return Plot.plot({
 			width: containerW,
@@ -288,7 +349,7 @@
 				Plot.text([item], {
 					x: 'value',
 					y: () => '',
-					text: (d: ObsBarDataPoint) => `${prefix}${d.value}${unit}`,
+					text: valueLabel,
 					dx: insideLabel ? -8 : 8,
 					textAnchor: insideLabel ? 'end' : 'start',
 					fill: insideLabel ? 'white' : '#0a0a0a',
@@ -353,6 +414,8 @@
 		const marginRight = 56;
 		const chartAreaW = chartWidth - marginLeft - marginRight;
 		const h = rows.length * rowH + 20;
+		const fitsInside = (d: ObsBarDataPoint) =>
+			(d.value / domainMax) * chartAreaW >= estimateValueLabelWidth(valueLabel(d), valueFontSize);
 		return Plot.plot({
 			width: chartWidth,
 			height: h,
@@ -377,10 +440,10 @@
 					rx: compact ? 4 : 7
 				}),
 				// Inside labels (wide bars — white text)
-				Plot.text(rows.filter((d) => (d.value / domainMax) * chartAreaW >= 52), {
+				Plot.text(rows.filter(fitsInside), {
 					x: 'value',
 					y: 'group',
-					text: (d: ObsBarDataPoint) => `${prefix}${d.value}${unit}`,
+					text: valueLabel,
 					dx: -8,
 					textAnchor: 'end',
 					fill: 'white',
@@ -388,16 +451,19 @@
 					fontSize: valueFontSize
 				}),
 				// Outside labels (narrow bars — dark text)
-				Plot.text(rows.filter((d) => (d.value / domainMax) * chartAreaW < 52), {
-					x: 'value',
-					y: 'group',
-					text: (d: ObsBarDataPoint) => `${prefix}${d.value}${unit}`,
-					dx: 8,
-					textAnchor: 'start',
-					fill: '#0a0a0a',
-					fontWeight: '700',
-					fontSize: valueFontSize
-				}),
+				Plot.text(
+					rows.filter((d) => !fitsInside(d)),
+					{
+						x: 'value',
+						y: 'group',
+						text: valueLabel,
+						dx: 8,
+						textAnchor: 'start',
+						fill: '#0a0a0a',
+						fontWeight: '700',
+						fontSize: valueFontSize
+					}
+				),
 				Plot.ruleX([0], { stroke: RULE_COLOR, strokeWidth: 1.5 })
 			]
 		});
@@ -431,9 +497,6 @@
 			// bars (white text) and outside narrow bars, so we no longer need the
 			// 30% "reserved for label" headroom.
 			const domainMax = maxValue ?? actualMax * 1.08;
-			// Bar pixel width helper used to decide inside vs outside label placement.
-			const INSIDE_MIN_PX = 52;
-
 			containerEl.innerHTML = '';
 
 			// ── Decide layout: label-left (desktop) vs label-above (stacked) ──
@@ -446,7 +509,10 @@
 			const longestForLayout = hasGroups
 				? data.reduce((m, d) => (d.group && d.group.length > m.length ? d.group : m), '')
 				: data.reduce((m, d) => (d.label.length > m.length ? d.label : m), '');
-			const estimatedLeftMargin = Math.min(320, Math.max(140, estimateLabelWidth(longestForLayout, 13)));
+			const estimatedLeftMargin = Math.min(
+				320,
+				Math.max(140, estimateLabelWidth(longestForLayout, 13))
+			);
 			const projectedBarArea = chartWidth - estimatedLeftMargin - 88;
 			const useStackedLayout = narrow || projectedBarArea < 200;
 
@@ -468,21 +534,25 @@
 							if (item.group) {
 								appendMobileLabel(containerEl, item.group, metrics, { firstItem });
 							}
-						containerEl.appendChild(buildMobileSingleBar(Plot, item, domainMax, metrics, measuredWidth));
-						firstItem = false;
+							containerEl.appendChild(
+								buildMobileSingleBar(Plot, item, domainMax, metrics, measuredWidth)
+							);
+							firstItem = false;
+						}
+					}
+				} else {
+					// Sort by value descending so the biggest bar reads first
+					const sorted = [...data].sort((a, b) => b.value - a.value);
+					for (const [i, item] of sorted.entries()) {
+						appendMobileLabel(containerEl, item.label, metrics, {
+							strong: true,
+							firstItem: i === 0
+						});
+						containerEl.appendChild(
+							buildMobileSingleBar(Plot, item, domainMax, metrics, measuredWidth)
+						);
 					}
 				}
-			} else {
-				// Sort by value descending so the biggest bar reads first
-				const sorted = [...data].sort((a, b) => b.value - a.value);
-				for (const [i, item] of sorted.entries()) {
-					appendMobileLabel(containerEl, item.label, metrics, {
-						strong: true,
-						firstItem: i === 0
-					});
-					containerEl.appendChild(buildMobileSingleBar(Plot, item, domainMax, metrics, measuredWidth));
-				}
-			}
 
 				setupBarAnimation(containerEl);
 				return;
@@ -496,7 +566,7 @@
 				);
 				const totalBars = uniqueLabels.length * maxRowsPerGroup;
 				const defaultGroupRowH = Math.max(32, Math.round(320 / Math.max(1, totalBars)));
-			const rowH = calcRowH(totalBars + uniqueLabels.length, defaultGroupRowH);
+				const rowH = calcRowH(totalBars + uniqueLabels.length, defaultGroupRowH);
 				const compact = rowH < 42;
 
 				for (const [i, label] of uniqueLabels.entries()) {
@@ -519,12 +589,12 @@
 				return;
 			}
 
-		// ── Label-left simple mode ─────────────────────────────────
-		// Cap the default max row height: tall defaults look fine for 2–4
-		// bars but produce an over-sized chart for 7–10 bars. Scale it down
-		// so a 10-bar chart starts at ~44 px per row rather than 72.
-		const defaultRowH = Math.max(38, Math.round(380 / Math.max(1, data.length)));
-		const rowH = calcRowH(data.length, defaultRowH);
+			// ── Label-left simple mode ─────────────────────────────────
+			// Cap the default max row height: tall defaults look fine for 2–4
+			// bars but produce an over-sized chart for 7–10 bars. Scale it down
+			// so a 10-bar chart starts at ~44 px per row rather than 72.
+			const defaultRowH = Math.max(38, Math.round(380 / Math.max(1, data.length)));
+			const rowH = calcRowH(data.length, defaultRowH);
 			const compact = rowH < 42;
 			const fontPxSimple = compact ? 11 : 13;
 			const h = data.length * rowH + 32;
@@ -540,6 +610,10 @@
 			// Wide bars carry the label inside (white text), so no extra space needed.
 			const simpleMarginRight = 56;
 			const simpleChartAreaW = chartWidth - simpleMarginLeft - simpleMarginRight;
+			const simpleValueFontSize = compact ? 12 : 15;
+			const simpleFitsInside = (d: ObsBarDataPoint) =>
+				(d.value / domainMax) * simpleChartAreaW >=
+				estimateValueLabelWidth(valueLabel(d), simpleValueFontSize);
 
 			const chart = Plot.plot({
 				width: chartWidth,
@@ -566,27 +640,30 @@
 						sort: { y: '-x' }
 					}),
 					// Inside labels for wide bars (white text sits within the bar)
-				Plot.text(data.filter((d) => (d.value / domainMax) * simpleChartAreaW >= INSIDE_MIN_PX), {
+					Plot.text(data.filter(simpleFitsInside), {
 						x: 'value',
 						y: 'label',
-						text: (d: ObsBarDataPoint) => `${prefix}${d.value}${unit}`,
+						text: valueLabel,
 						dx: -9,
 						textAnchor: 'end',
 						fill: 'white',
 						fontWeight: '700',
-						fontSize: compact ? 12 : 15
+						fontSize: simpleValueFontSize
 					}),
 					// Outside labels for narrow bars (dark text after the bar)
-					Plot.text(data.filter((d) => (d.value / domainMax) * simpleChartAreaW < INSIDE_MIN_PX), {
-						x: 'value',
-						y: 'label',
-						text: (d: ObsBarDataPoint) => `${prefix}${d.value}${unit}`,
-						dx: 8,
-						textAnchor: 'start',
-						fill: '#0a0a0a',
-						fontWeight: '700',
-						fontSize: compact ? 12 : 15
-					}),
+					Plot.text(
+						data.filter((d) => !simpleFitsInside(d)),
+						{
+							x: 'value',
+							y: 'label',
+							text: valueLabel,
+							dx: 8,
+							textAnchor: 'start',
+							fill: '#0a0a0a',
+							fontWeight: '700',
+							fontSize: simpleValueFontSize
+						}
+					),
 					Plot.ruleX([0], { stroke: RULE_COLOR, strokeWidth: 1.5 })
 				]
 			});
@@ -629,9 +706,9 @@
 	});
 </script>
 
-<div bind:this={wrapperEl} class="flex w-full min-w-0 max-w-full flex-col items-start gap-3">
+<div bind:this={wrapperEl} class="flex w-full max-w-full min-w-0 flex-col items-start gap-3">
 	{#if title}
-		<p class="font-display text-lg font-bold leading-tight text-ink md:text-xl">{title}</p>
+		<p class="font-display text-lg leading-tight font-bold text-ink md:text-xl">{title}</p>
 	{/if}
 	<!--
 		The Plot-generated SVG has an explicit `width` attribute. During the
@@ -640,7 +717,10 @@
 		respect its parent's width and prevents it from ever pushing the grid
 		track wider than the viewport.
 	-->
-	<div bind:this={containerEl} class="w-full min-w-0 max-w-full [&_svg]:max-w-full! [&_svg]:h-auto"></div>
+	<div
+		bind:this={containerEl}
+		class="w-full max-w-full min-w-0 [&_svg]:h-auto [&_svg]:max-w-full!"
+	></div>
 	{#if subtitle}
 		<p class="font-body text-xs text-ink/50">{subtitle}</p>
 	{/if}

@@ -18,6 +18,8 @@
 	 * already collapses the bar's width transition; nothing else to do.
 	 */
 	import { onMount } from 'svelte';
+	import { Spring, prefersReducedMotion } from 'svelte/motion';
+	import { DragGesture } from '@use-gesture/vanilla';
 	import { getExplainerHolder } from '$lib/context/explainer.svelte';
 	import { getTheme } from '$lib/utils/explainer-theme';
 	import { cn } from '$lib/utils/cn';
@@ -44,12 +46,25 @@
 	let progress = $state(0);
 	let activeId = $state<string | null>(null);
 	let hoveredId = $state<string | null>(null);
+	let scrubMarkerId = $state<string | null>(null);
+	let isScrubbing = $state(false);
 	let markers = $state<Marker[]>([]);
 
 	/** Bar element — used to get pixel-accurate left offset and width. */
 	let barEl = $state<HTMLElement | undefined>(undefined);
 	let barLeft = $state(0);
 	let barWidth = $state(0);
+	let viewportWidth = $state(0);
+	let suppressClickUntil = 0;
+
+	const scrubProgress = new Spring(0, {
+		stiffness: 0.34,
+		damping: 0.72,
+		precision: 0.001
+	});
+
+	const visualProgress = $derived(isScrubbing ? scrubProgress.current : progress);
+	const visibleTooltipId = $derived(isScrubbing ? scrubMarkerId : hoveredId);
 
 	// -----------------------------------------------------------------------
 	// Helpers
@@ -90,11 +105,110 @@
 		const rect = barEl.getBoundingClientRect();
 		barLeft = rect.left;
 		barWidth = rect.width;
+		viewportWidth = window.innerWidth;
 	}
 
 	/** Returns the pixel x-position of the dot center on screen. */
 	function dotCenterPx(marker: Marker): number {
 		return barLeft + marker.position * barWidth;
+	}
+
+	function progressFromClientX(clientX: number): number {
+		if (barWidth <= 0) return progress;
+		return Math.min(1, Math.max(0, (clientX - barLeft) / barWidth));
+	}
+
+	function markerNearestProgress(nextProgress: number): Marker | null {
+		if (markers.length === 0) return null;
+		return markers.reduce((nearest, marker) =>
+			Math.abs(marker.position - nextProgress) < Math.abs(nearest.position - nextProgress)
+				? marker
+				: nearest
+		);
+	}
+
+	function updateScrub(nextProgress: number) {
+		const marker = markerNearestProgress(nextProgress);
+		scrubMarkerId = marker?.id ?? null;
+		void scrubProgress.set(nextProgress, { instant: prefersReducedMotion.current });
+	}
+
+	function scrollToMarker(marker: Marker) {
+		const el = document.getElementById(marker.id);
+		if (!el) return;
+
+		activeId = marker.id;
+		el.scrollIntoView({ behavior: prefersReducedMotion.current ? 'auto' : 'smooth', block: 'start' });
+		history.replaceState(null, '', `#${marker.id}`);
+
+		posthog.capture('progress_bar_chapter_clicked', {
+			explainer_slug: explainer?.meta.slug,
+			chapter_id: marker.id,
+			chapter_number: marker.number,
+			chapter_title: marker.title,
+			source: 'scrub'
+		});
+	}
+
+	function tooltipCenterPx(marker: Marker): number {
+		const rawCenter = isScrubbing ? barLeft + scrubProgress.current * barWidth : dotCenterPx(marker);
+		const tooltipWidth = Math.min(256, Math.max(0, viewportWidth - 24));
+		const half = tooltipWidth / 2;
+		const min = half + 12;
+		const max = viewportWidth - half - 12;
+
+		if (max <= min) return viewportWidth / 2;
+		return Math.min(max, Math.max(min, rawCenter));
+	}
+
+	function tooltipLocalLeftPx(marker: Marker): number {
+		return tooltipCenterPx(marker) - barLeft;
+	}
+
+	function progressScrub(node: HTMLElement) {
+		const gesture = new DragGesture(
+			node,
+			({ active, elapsedTime, event, first, last, movement, tap, xy }) => {
+				if (markers.length === 0) return;
+				if (event.cancelable && active) event.preventDefault();
+
+				if (first) {
+					measureBar();
+					hoveredId = null;
+					isScrubbing = true;
+					void scrubProgress.set(progressFromClientX(xy[0]), { instant: true });
+				}
+
+				updateScrub(progressFromClientX(xy[0]));
+
+				if (last) {
+					const marker = scrubMarkerId ? markers.find((m) => m.id === scrubMarkerId) : null;
+					const travelled = Math.hypot(movement[0], movement[1]);
+					const shouldDrop = Boolean(marker) && (!tap || travelled > 4 || elapsedTime > 180);
+
+					isScrubbing = false;
+					scrubMarkerId = null;
+
+					if (shouldDrop || travelled > 4) suppressClickUntil = Date.now() + 350;
+					if (shouldDrop && marker) scrollToMarker(marker);
+				}
+			},
+			{
+				axis: 'x',
+				eventOptions: { passive: false },
+				pointer: { capture: true, touch: true },
+				preventScroll: 120,
+				preventScrollAxis: 'y',
+				threshold: [2, 6],
+				triggerAllEvents: true
+			}
+		);
+
+		return {
+			destroy() {
+				gesture.destroy();
+			}
+		};
 	}
 
 	// -----------------------------------------------------------------------
@@ -143,6 +257,9 @@
 		if (chapters.length === 0) {
 			markers = [];
 			activeId = null;
+			hoveredId = null;
+			scrubMarkerId = null;
+			isScrubbing = false;
 			return;
 		}
 
@@ -192,15 +309,33 @@
 				<!-- Fill: percentage of the bar element (not viewport) -->
 				<div
 					class="absolute inset-y-0 left-0 rounded-full transition-[width] duration-150 ease-out {theme.barGradient}"
-					style:width="{(progress * 100).toFixed(2)}%"
+					style:width="{(visualProgress * 100).toFixed(2)}%"
 				></div>
 
 				<!-- Markers — nav is absolute/inset-0 so % left = % of bar width -->
-				<nav aria-label="Chapter progress" class="pointer-events-auto absolute inset-0">
+				<nav
+					use:progressScrub
+					aria-label="Chapter progress"
+					class={cn(
+						'pointer-events-auto absolute inset-x-0 top-1/2 h-11 -translate-y-1/2 touch-pan-y cursor-grab',
+						isScrubbing && 'cursor-grabbing'
+					)}
+				>
+					{#if isScrubbing}
+						<span
+							class={cn(
+								'pointer-events-none absolute top-1/2 z-20 block size-7 -translate-x-1/2 -translate-y-1/2 rounded-full border-[5px] transition-transform duration-150',
+								theme.activeDot
+							)}
+							style:left="{(scrubProgress.current * 100).toFixed(2)}%"
+							aria-hidden="true"
+						></span>
+					{/if}
+
 					{#each markers as marker (marker.id)}
-						{@const reached = progress >= marker.position - 0.005}
-						{@const isActive = activeId === marker.id}
-						{@const isHovered = hoveredId === marker.id}
+						{@const reached = visualProgress >= marker.position - 0.005}
+						{@const isActive = (isScrubbing ? scrubMarkerId : activeId) === marker.id}
+						{@const isHovered = visibleTooltipId === marker.id}
 
 						<!-- Dot anchor — left is a % of the nav (which = bar width) -->
 						<a
@@ -209,13 +344,20 @@
 							style:left="{(marker.position * 100).toFixed(2)}%"
 							aria-current={isActive ? 'location' : undefined}
 							aria-label={`${marker.eyebrow}: ${marker.title}`}
-							onclick={() =>
+							onclick={(event) => {
+								if (Date.now() < suppressClickUntil) {
+									event.preventDefault();
+									return;
+								}
+
 								posthog.capture('progress_bar_chapter_clicked', {
 									explainer_slug: explainer?.meta.slug,
 									chapter_id: marker.id,
 									chapter_number: marker.number,
-									chapter_title: marker.title
-								})}
+									chapter_title: marker.title,
+									source: 'click'
+								});
+							}}
 							onmouseenter={() => (hoveredId = marker.id)}
 							onmouseleave={() => (hoveredId = null)}
 							onfocus={() => (hoveredId = marker.id)}
@@ -238,9 +380,10 @@
 						<!-- Tooltip — shown only on hover/focus, perfectly centered under the dot -->
 						{#if isHovered}
 							<span
-								class="pointer-events-none fixed z-50 w-64 -translate-x-1/2 rounded-md bg-ink px-3 py-2 text-left text-[11px] font-semibold tracking-wide text-cream shadow-lg"
-								style:left="{dotCenterPx(marker)}px"
-								style:top="80px"
+								class="pointer-events-none absolute z-50 -translate-x-1/2 rounded-md bg-ink px-3 py-2 text-left text-[11px] font-semibold tracking-wide text-cream shadow-lg"
+								style:width="min(16rem, calc(100vw - 1.5rem))"
+								style:left="{tooltipLocalLeftPx(marker)}px"
+								style:top="30px"
 								aria-hidden="true"
 							>
 								<span class="block whitespace-nowrap">

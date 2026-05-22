@@ -20,6 +20,7 @@
 	const explainerHolder = getExplainerHolder();
 	const explainer = $derived(explainerHolder?.current ?? null);
 	const source = $derived(explainer?.getSource(SOURCE_ID));
+	const numberFormatter = new Intl.NumberFormat('en-US');
 
 	let chartEl = $state<HTMLElement | undefined>(undefined);
 	let progress = $state(0);
@@ -28,13 +29,16 @@
 	const animatedYears = $derived(Math.round(progress * YEAR_COUNT));
 	const animatedMillionMinutes = $derived(Math.round(progress * TOTAL_MILLION_DOLLAR_MINUTES));
 	const animatedTrillions = $derived(progress * TOTAL_TRILLIONS);
+	const animatedMillionMinutesCompact = $derived(
+		animatedMillionMinutes >= 1000000
+			? `${Math.round(animatedMillionMinutes / 1000000)}M`
+			: numberFormatter.format(animatedMillionMinutes)
+	);
 	const animatedTrillionLabel = $derived(
 		progress >= 0.995
 			? '~$37T'
 			: `~$${animatedTrillions < 10 ? animatedTrillions.toFixed(1) : Math.round(animatedTrillions)}T`
 	);
-
-	const numberFormatter = new Intl.NumberFormat('en-US');
 
 	function easeOutCubic(t: number) {
 		return 1 - Math.pow(1 - t, 3);
@@ -83,7 +87,7 @@
 
 <div
 	bind:this={chartEl}
-	class="mx-auto flex w-full max-w-xl flex-col gap-5 rounded-sm bg-cream/30"
+	class="mx-auto flex w-full max-w-xl min-w-0 flex-col gap-4 overflow-hidden rounded-sm bg-cream/30 sm:gap-5"
 	role="img"
 	aria-label="$37 trillion is enough to spend one million dollars every minute for more than 70 years"
 >
@@ -101,7 +105,7 @@
 	</div>
 
 	<div
-		class="relative overflow-hidden rounded-lg border border-ink/10 bg-linear-to-b from-white/70 to-brand-amber/8 p-4"
+		class="relative min-w-0 overflow-hidden rounded-lg border border-ink/10 bg-linear-to-b from-white/75 to-brand-amber/8 p-4 shadow-[0_12px_30px_rgba(58,38,12,0.05)] sm:p-5"
 	>
 		<div class="mb-3 flex items-center justify-between font-body text-xs font-bold text-ink/55">
 			<span>2026</span>
@@ -110,10 +114,10 @@
 
 		<div class="relative">
 			<div class="absolute top-1/2 right-0 left-0 h-px -translate-y-1/2 bg-ink/15"></div>
-			<div class="grid grid-cols-[repeat(70,minmax(3px,1fr))] gap-[2px]">
+			<div class="grid grid-cols-[repeat(70,minmax(2px,1fr))] gap-px sm:gap-[2px]">
 				{#each DOTS as year, i (year)}
 					<span
-						class="relative z-10 h-10 origin-bottom rounded-full bg-brand-amber shadow-[0_0_10px_rgba(180,83,9,0.28)] transition-transform duration-300"
+						class="relative z-10 h-8 origin-bottom rounded-full bg-brand-amber shadow-[0_0_10px_rgba(180,83,9,0.24)] transition-transform duration-300 sm:h-10"
 						title={`${year}: another ${numberFormatter.format(MILLION_DOLLAR_MINUTES_PER_YEAR)} million-dollar minutes`}
 						aria-hidden="true"
 						style:opacity={progress >= (i + 1) / YEAR_COUNT ? 0.34 + (i / YEAR_COUNT) * 0.58 : 0.12}
@@ -123,22 +127,37 @@
 			</div>
 		</div>
 
-		<div class="mt-4 grid grid-cols-3 gap-3 border-t border-ink/10 pt-4">
-			<div>
-				<p class="font-display text-2xl font-black text-brand-amber-deep">
+		<div class="mt-4 grid min-w-0 grid-cols-1 gap-2 border-t border-ink/10 pt-4 sm:grid-cols-3 sm:gap-3">
+			<div
+				class="flex min-w-0 items-baseline justify-between gap-3 rounded-md bg-white/45 px-3 py-2 sm:block sm:bg-transparent sm:p-0"
+			>
+				<p class="shrink-0 font-display text-xl leading-none font-black text-brand-amber-deep sm:text-2xl">
 					{numberFormatter.format(MILLION_DOLLAR_MINUTES_PER_YEAR)}
 				</p>
-				<p class="text-xs leading-snug text-ink/55">million-dollar minutes per year</p>
-			</div>
-			<div>
-				<p class="font-display text-2xl font-black text-brand-amber-deep">
-					{numberFormatter.format(animatedMillionMinutes)}
+				<p class="max-w-[12rem] text-right text-xs leading-snug text-ink/55 sm:text-left">
+					525,600 minutes × $1M
 				</p>
-				<p class="text-xs leading-snug text-ink/55">million-dollar minutes in total</p>
 			</div>
-			<div>
-				<p class="font-display text-2xl font-black text-brand-amber-deep">{animatedTrillionLabel}</p>
-				<p class="text-xs leading-snug text-ink/55">estimated economic value</p>
+			<div
+				class="flex min-w-0 items-baseline justify-between gap-3 rounded-md bg-white/45 px-3 py-2 sm:block sm:bg-transparent sm:p-0"
+			>
+				<p class="shrink-0 font-display text-xl leading-none font-black text-brand-amber-deep sm:text-2xl">
+					<span class="sm:hidden">{animatedMillionMinutesCompact}</span>
+					<span class="hidden sm:inline">{numberFormatter.format(animatedMillionMinutes)}</span>
+				</p>
+				<p class="max-w-[12rem] text-right text-xs leading-snug text-ink/55 sm:text-left">
+					{animatedYears || 0} years = {animatedMillionMinutesCompact} minutes
+				</p>
+			</div>
+			<div
+				class="flex min-w-0 items-baseline justify-between gap-3 rounded-md bg-white/45 px-3 py-2 sm:block sm:bg-transparent sm:p-0"
+			>
+				<p class="shrink-0 font-display text-xl leading-none font-black text-brand-amber-deep sm:text-2xl">
+					{animatedTrillionLabel}
+				</p>
+				<p class="max-w-[12rem] text-right text-xs leading-snug text-ink/55 sm:text-left">
+					{animatedMillionMinutesCompact} × $1M = {animatedTrillionLabel}
+				</p>
 			</div>
 		</div>
 	</div>

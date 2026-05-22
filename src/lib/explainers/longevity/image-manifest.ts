@@ -370,6 +370,26 @@ export const imageManifest: ImageEntry[] = [
     "blurhash": "CNFXq}xwpItl~AtP%1xu"
   },
   {
+    "name": "share-image--longevity",
+    "width": 1200,
+    "height": 630,
+    "variants": [
+      {
+        "width": 400,
+        "src": "/explainers/longevity/processed/share-image--longevity-400w.webp"
+      },
+      {
+        "width": 800,
+        "src": "/explainers/longevity/processed/share-image--longevity-800w.webp"
+      },
+      {
+        "width": 1200,
+        "src": "/explainers/longevity/processed/share-image--longevity-1200w.webp"
+      }
+    ],
+    "blurhash": "CEPQm8-.^*?u~poKt7t7"
+  },
+  {
     "name": "stress",
     "width": 2667,
     "height": 1785,

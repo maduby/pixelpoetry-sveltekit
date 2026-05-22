@@ -54,7 +54,7 @@
 </script>
 
 {#if explainer}
-	<section bind:this={footerEl} id="sources" class="bg-cream-soft text-ink border-t border-ink/10">
+	<section bind:this={footerEl} id="sources" class="border-t border-ink/10 bg-cream-soft text-ink">
 		<div class="mx-auto max-w-(--container-wide) px-6 py-20 lg:px-8 lg:py-28">
 			<div class="grid gap-16 lg:grid-cols-12">
 				<div class="lg:col-span-5">
@@ -63,9 +63,9 @@
 						& methodology
 					</h2>
 					<p class="mt-6 max-w-md text-ink/70">
-						Every statistic shown in this essay is drawn from a peer-reviewed paper, an international
-						research review, or the published account of an independent investigation. The full
-						citation list is to the right.
+						Every statistic shown in this essay is drawn from a peer-reviewed paper, an
+						international research review, or the published account of an independent investigation.
+						The full citation list is to the right.
 					</p>
 				</div>
 
@@ -118,18 +118,34 @@
 
 			<!-- Chapter quick nav -->
 			<nav aria-label="Chapters" class="mt-16 border-t border-ink/10 pt-10">
-				<p class="mb-4 text-xs font-bold tracking-[0.18em] text-ink/40 uppercase">Chapters</p>
-				<ul class="flex flex-wrap gap-x-2 gap-y-2">
+				<div class="mb-5 flex flex-wrap items-end justify-between gap-3">
+					<div>
+						<p class="text-xs font-bold tracking-[0.18em] text-ink/40 uppercase">Chapters</p>
+						<h3 class="mt-1 font-display text-2xl font-bold text-ink">Go to a section</h3>
+					</div>
+				</div>
+				<ul class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
 					{#each explainer.chapters as chapter (chapter.id)}
 						<li>
 							<a
 								href={`#${chapter.id}`}
-								class="inline-flex items-center gap-1.5 rounded-full border border-ink/10 px-3 py-1 text-xs font-semibold text-ink/60 transition-colors hover:border-brand-amber/50 hover:text-brand-amber-deep"
+								class="group flex h-full items-center gap-3 rounded-lg border border-ink/10 bg-cream/60 px-3 py-3 text-left transition-colors hover:border-brand-amber/50 hover:bg-cream hover:text-brand-amber-deep"
 							>
 								{#if chapter.emoji}
-									<span aria-hidden="true">{chapter.emoji}</span>
+									<span aria-hidden="true" class="text-lg leading-none">{chapter.emoji}</span>
 								{/if}
-								<span>{chapter.eyebrow}</span>
+								<span class="min-w-0">
+									<span
+										class="block text-[0.65rem] font-bold tracking-[0.14em] text-ink/35 uppercase"
+									>
+										Chapter {chapter.number}
+									</span>
+									<span
+										class="block truncate text-sm font-bold text-ink/70 group-hover:text-brand-amber-deep"
+									>
+										{chapter.shortTitle ?? chapter.title}
+									</span>
+								</span>
 							</a>
 						</li>
 					{/each}

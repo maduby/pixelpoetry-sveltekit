@@ -7,7 +7,7 @@
 	import { browser } from '$app/environment';
 	import { getExplainerHolder } from '$lib/context/explainer.svelte';
 	import { openSourceSheet } from '$lib/context/sheet';
-	import { CHART_W, CHART_H } from './chart-constants';
+	import { CHART_W, CHART_H } from '../chart-constants';
 
 	const BLUE_ZONES = [
 		{ name: 'Okinawa, Japan', lat: 26.5, lon: 127.9, value: 41, labelDx: 0, labelDy: 18 },

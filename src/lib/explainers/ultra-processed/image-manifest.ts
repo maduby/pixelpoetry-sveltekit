@@ -50,6 +50,26 @@ export const imageManifest: ImageEntry[] = [
     "blurhash": "LcLDoi0fbH$L~q%2j[W;yEV?ayo#"
   },
   {
+    "name": "share-image--upf",
+    "width": 1200,
+    "height": 630,
+    "variants": [
+      {
+        "width": 400,
+        "src": "/explainers/ultra-processed/processed/share-image--upf-400w.webp"
+      },
+      {
+        "width": 800,
+        "src": "/explainers/ultra-processed/processed/share-image--upf-800w.webp"
+      },
+      {
+        "width": 1200,
+        "src": "/explainers/ultra-processed/processed/share-image--upf-1200w.webp"
+      }
+    ],
+    "blurhash": "CFS5I*%d?u~C~Wk9s:oz"
+  },
+  {
     "name": "upf-bread",
     "width": 1200,
     "height": 801,
