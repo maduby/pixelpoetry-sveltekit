@@ -78,7 +78,7 @@
 		// so steps only need to be tall enough to read — 0 min-height,
 		// natural padding only.
 		'flex w-full min-w-0 items-start pb-[6svh]',
-		'pt-8 lg:min-h-svh lg:pt-[14svh]',
+		'pt-8 lg:min-h-svh lg:pt-[clamp(8rem,20svh,12rem)]',
 		className
 	)}
 >

@@ -26,6 +26,7 @@
 	import StatCard from '$lib/components/ui/StatCard.svelte';
 	import QuoteBlock from '$lib/components/ui/QuoteBlock.svelte';
 	import Eyebrow from '$lib/components/ui/Eyebrow.svelte';
+	import KeyTakeaways from '$lib/components/ui/KeyTakeaways.svelte';
 	import DonutChart from '$lib/components/viz/DonutChart.svelte';
 	import ObsBarChart from '$lib/components/viz/ObsBarChart.svelte';
 	import ObsTimelineChart from '$lib/components/viz/ObsTimelineChart.svelte';
@@ -72,6 +73,7 @@
 
 	const explainerHolder = getExplainerHolder();
 	const explainer = $derived(explainerHolder?.current ?? null);
+	const takeawaysAccent = $derived(explainer?.meta.accent === 'forest' ? 'forest' : 'warning');
 
 	let sectionEl = $state<HTMLElement | undefined>(undefined);
 	let activeStepIndex = $state(0);
@@ -89,6 +91,28 @@
 		if (step.viz) return JSON.stringify(step.viz);
 		if (step.stat) return `stat:${step.stat.value}:${step.stat.unit ?? ''}:${step.stat.label}`;
 		return 'empty';
+	}
+
+	function hasStepViz(step: ChapterData['steps'][number] | undefined): boolean {
+		return !!step?.viz || !!step?.stat;
+	}
+
+	function repeatsPreviousViz(stepIndex: number): boolean {
+		const step = visibleSteps[stepIndex];
+		const previousStep = visibleSteps[stepIndex - 1];
+		if (!hasStepViz(step) || !hasStepViz(previousStep)) return false;
+		return stepVizKey(step) === stepVizKey(previousStep);
+	}
+
+	function sharesAdjacentViz(stepIndex: number): boolean {
+		const step = visibleSteps[stepIndex];
+		if (!hasStepViz(step)) return false;
+		const key = stepVizKey(step);
+		return (
+			(hasStepViz(visibleSteps[stepIndex - 1]) &&
+				stepVizKey(visibleSteps[stepIndex - 1]) === key) ||
+			(hasStepViz(visibleSteps[stepIndex + 1]) && stepVizKey(visibleSteps[stepIndex + 1]) === key)
+		);
 	}
 
 	function saveChapterPosition() {
@@ -168,13 +192,22 @@
 			step_count: visibleSteps.length
 		});
 	}
+
+	function handleChapterTldrOpen() {
+		posthog.capture('chapter_tldr_opened', {
+			explainer_slug: explainer?.meta.slug,
+			chapter_id: chapter.id,
+			chapter_number: chapter.number,
+			chapter_title: chapter.title
+		});
+	}
 </script>
 
 <section
 	bind:this={sectionEl}
 	id={chapter.id}
 	class={cn(
-		'chapter-section relative isolate overflow-clip bg-linear-to-b',
+		'chapter-section relative overflow-clip bg-linear-to-b',
 		accentBg,
 		index % 2 === 1 && 'bg-cream-soft',
 		isBlackout && 'is-blackout'
@@ -185,7 +218,22 @@
 	<div
 		class="mx-auto w-full max-w-(--container-wide) min-w-0 px-6 pt-14 pb-8 lg:px-8 lg:pt-32 lg:pb-20"
 	>
-		<Eyebrow emoji={chapter.emoji}>{chapter.eyebrow}</Eyebrow>
+		<div class="flex flex-wrap items-center gap-x-4 gap-y-3">
+			<Eyebrow emoji={chapter.emoji}>{chapter.eyebrow}</Eyebrow>
+			{#if chapter.summary || chapter.keyTakeaways?.length}
+				<KeyTakeaways
+					items={chapter.keyTakeaways ?? []}
+					variant="chapter"
+					accent={takeawaysAccent}
+					slug={`${explainer?.meta.slug ?? 'explainer'}-${chapter.id}`}
+					summary={chapter.summary}
+					eyebrow={`Chapter ${chapter.number} takeaways`}
+					title={chapter.title}
+					buttonAriaLabel={`Open TL;DR for Chapter ${chapter.number}: ${chapter.title}`}
+					onOpen={handleChapterTldrOpen}
+				/>
+			{/if}
+		</div>
 		<h2
 			id={`${chapter.id}-title`}
 			class={cn(
@@ -209,7 +257,7 @@
 		Keeping a single source of truth here means a new viz type only
 		has to be added in ONE place; both rendering paths pick it up.
 	-->
-	{#snippet stepViz(step: ChapterData['steps'][number])}
+	{#snippet stepViz(step: ChapterData['steps'][number], animate = true)}
 		{#if step.viz?.type === 'obs-bar'}
 			<ObsBarChart
 				data={step.viz.data}
@@ -217,6 +265,8 @@
 				subtitle={step.viz.subtitle}
 				unit={step.viz.unit}
 				prefix={step.viz.prefix}
+				layout={step.viz.layout}
+				{animate}
 				sourceId={step.viz.sourceId}
 			/>
 		{:else if step.viz?.type === 'obs-timeline'}
@@ -273,7 +323,7 @@
 				<div
 					class="animate-fade-in mx-auto flex w-full min-w-0 flex-col items-center justify-center"
 				>
-					{@render stepViz(step)}
+					{@render stepViz(step, !sharesAdjacentViz(activeStep))}
 				</div>
 			{/key}
 		{/snippet}
@@ -313,13 +363,13 @@
 					On desktop (lg+) this is hidden; the sticky viz
 					column on the right handles the same content.
 				-->
-				{#if step.viz || step.stat}
+				{#if hasStepViz(step) && !repeatsPreviousViz(i)}
 					<div
 						data-scrolly-mobile-viz
 						class="flex w-full min-w-0 items-center justify-center py-10 lg:hidden"
 					>
 						<div class="flex w-full min-w-0 flex-col items-center justify-center">
-							{@render stepViz(step)}
+							{@render stepViz(step, !sharesAdjacentViz(i))}
 						</div>
 					</div>
 				{/if}
@@ -338,15 +388,9 @@
 					<QuoteBlock quote={step.quote} variant="closing" accent={chapter.accent} />
 				{:else}
 					{@const closingText = step.richText ?? step.text}
-					{@const isLongClosing = step.text.length > 180}
-					<div class="w-full border-t border-ink/8 py-20 lg:py-28">
+					<div class="w-full border-t border-ink/8 py-14 lg:py-18">
 						<p
-							class={[
-								'mx-auto px-6 text-center font-display leading-tight font-black text-balance text-ink lg:px-8 [&_strong]:text-brand-pink',
-								isLongClosing
-									? 'max-w-4xl text-[clamp(1.45rem,2.8vw,2.75rem)]'
-									: 'max-w-5xl text-[clamp(1.8rem,4vw,3.75rem)]'
-							]}
+							class="mx-auto max-w-4xl px-6 text-center font-display text-[clamp(1.55rem,2.15vw,2.3rem)] leading-[1.18] font-black text-pretty text-ink lg:px-8 [&_strong]:text-brand-pink"
 						>
 							{@html closingText}
 						</p>

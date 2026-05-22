@@ -12,6 +12,7 @@
 	 * Falls back to a plain <img> on the server (SSR) so there's always
 	 * a visible image even before JS hydrates.
 	 */
+	import { browser } from '$app/environment';
 	import { decode } from 'blurhash';
 	import type { ImageEntry } from '$lib/types/explainer';
 	import { getExplainerHolder } from '$lib/context/explainer.svelte';
@@ -81,7 +82,9 @@
 
 	// Canvas element for blurhash placeholder
 	let canvasEl = $state<HTMLCanvasElement | undefined>(undefined);
+	let wrapperEl = $state<HTMLElement | undefined>(undefined);
 	let containerEl = $state<HTMLElement | undefined>(undefined);
+	let availableHeight = $state(0);
 
 	// True once the real image has finished loading
 	let loaded = $state(false);
@@ -90,6 +93,18 @@
 	let visible = $state(false);
 
 	let loadedImageName = $state('');
+
+	const captionReserve = $derived(
+		(caption ? 52 : 0) + (credit ? 30 : 0) + (sourceId ? 28 : 0) + 32
+	);
+	const stickyImageMaxHeight = $derived(
+		availableHeight > 0 ? Math.max(140, Math.floor(availableHeight - captionReserve)) : 0
+	);
+	const imageFrameStyle = $derived(
+		stickyImageMaxHeight > 0
+			? `max-height: ${stickyImageMaxHeight}px;`
+			: 'max-height: min(60svh, 420px);'
+	);
 
 	// IntersectionObserver for lazy loading. This is intentionally reactive:
 	// on direct hash loads the explainer context can arrive after this
@@ -138,9 +153,26 @@
 		observer.observe(containerEl);
 		return () => observer.disconnect();
 	});
+
+	$effect(() => {
+		if (!browser || !wrapperEl) return;
+		const stickyAncestor = wrapperEl.closest<HTMLElement>('[data-viz-sticky]');
+		if (!stickyAncestor) {
+			availableHeight = 0;
+			return;
+		}
+		const ro = new ResizeObserver(([e]) => {
+			availableHeight = e.contentRect.height || 0;
+		});
+		ro.observe(stickyAncestor);
+		return () => ro.disconnect();
+	});
 </script>
 
-<div class="mx-auto flex h-full w-full max-w-md flex-col items-center justify-center gap-4 {className}">
+<div
+	bind:this={wrapperEl}
+	class="mx-auto flex h-full w-full max-w-md flex-col items-center justify-center gap-4 {className}"
+>
 	<!--
 		Image area — bounded by max-h-[60svh] so portrait images don't fill the
 		entire sticky column and dwarf the surrounding text. aspect-[4/5] gives
@@ -150,6 +182,7 @@
 		bind:this={containerEl}
 		class="relative flex max-h-[60svh] w-full items-center justify-center overflow-hidden rounded-2xl {aspectClass} {transparent ? '' : 'bg-ink/5'}"
 		data-image={name}
+		style={imageFrameStyle}
 	>
 		<!--
 			Blurhash placeholder canvas (shown until image loads).

@@ -41,15 +41,28 @@
 		unit?: string;
 		prefix?: string;
 		maxValue?: number;
+		layout?: 'bar' | 'column';
+		animate?: boolean;
 		sourceId?: string;
 	}
 
-	let { data = [], title, subtitle, unit = '%', prefix = '', maxValue, sourceId }: Props = $props();
+	let {
+		data = [],
+		title,
+		subtitle,
+		unit = '%',
+		prefix = '',
+		maxValue,
+		layout = 'bar',
+		animate = true,
+		sourceId
+	}: Props = $props();
 
 	const source = $derived(sourceId ? explainer?.getSource(sourceId) : undefined);
 
 	let wrapperEl = $state<HTMLDivElement | undefined>(undefined);
 	let containerEl = $state<HTMLDivElement | undefined>(undefined);
+	let inStickySlot = $state(false);
 
 	/**
 	 * Raw measured container width. Used directly by the mobile layout
@@ -80,6 +93,7 @@
 	 * 0 means "not yet measured" → fall back to default row heights.
 	 */
 	let availableHeight = $state(0);
+	let animatedChartSignature = $state('');
 
 	// Color-blind-safe brand palette (all WCAG AA on cream #fef9ef)
 	const AFTER_COLOR = '#be185d'; // brand raspberry — deuteranopia-safe vs navy/amber
@@ -100,7 +114,7 @@
 	 *  4. Fade text in after the last bar finishes.
 	 */
 	function setupBarAnimation(container: HTMLElement) {
-		if (prefersReducedMotion) return;
+		if (prefersReducedMotion || !animate) return;
 
 		const rects = Array.from(container.querySelectorAll<SVGRectElement>('svg rect'));
 		const texts = Array.from(container.querySelectorAll<SVGTextElement>('svg text'));
@@ -113,7 +127,7 @@
 		const STAGGER = 60; // ms per bar
 		const DURATION = 520; // ms bar growth
 
-		const animate = () => {
+		const runAnimation = () => {
 			rects.forEach((rect, i) => {
 				rect.style.transition = `width ${DURATION}ms cubic-bezier(0.25,0.46,0.45,0.94) ${i * STAGGER}ms`;
 				rect.style.width = `${finalWidths[i]}px`;
@@ -130,7 +144,7 @@
 		const io = new IntersectionObserver(
 			([entry]) => {
 				if (entry.isIntersecting) {
-					requestAnimationFrame(() => requestAnimationFrame(animate));
+					requestAnimationFrame(() => requestAnimationFrame(runAnimation));
 					io.disconnect();
 				}
 			},
@@ -192,8 +206,32 @@
 		return `${prefix}${d.value}${unit}`;
 	}
 
+	function columnValueLabel(d: ObsBarDataPoint): string {
+		return `${prefix}${d.value}`;
+	}
+
 	function estimateValueLabelWidth(text: string, fontSize: number): number {
 		return Math.ceil(text.length * fontSize * 0.62) + 18;
+	}
+
+	function shortLabel(label: string): string {
+		return label.match(/D\d+/)?.[0] ?? label;
+	}
+
+	function chartSignature(): string {
+		return JSON.stringify({
+			data,
+			layout,
+			maxValue,
+			prefix,
+			unit
+		});
+	}
+
+	function setupBarAnimationOnce(container: HTMLElement, signature: string) {
+		if (animatedChartSignature === signature) return;
+		animatedChartSignature = signature;
+		setupBarAnimation(container);
 	}
 
 	/**
@@ -392,6 +430,75 @@
 		parent.appendChild(p);
 	}
 
+	function buildColumnChart(
+		Plot: typeof import('@observablehq/plot'),
+		rows: ObsBarDataPoint[],
+		domainMax: number
+	): Element {
+		const sorted = [...rows].sort((a, b) => {
+			const ai = Number(shortLabel(a.label).replace('D', ''));
+			const bi = Number(shortLabel(b.label).replace('D', ''));
+			return (Number.isFinite(ai) ? ai : 0) - (Number.isFinite(bi) ? bi : 0);
+		});
+		const yMin = 0;
+		const yMax = Math.ceil(domainMax / 5) * 5;
+		const chartH =
+			availableHeight > 0
+				? Math.min(Math.max(isNarrow ? 220 : 260, Math.round(availableHeight * 0.54)), 340)
+				: isNarrow
+					? 240
+					: 300;
+		const valueFontSize = isNarrow ? 12 : 13;
+
+		return Plot.plot({
+			width: chartWidth,
+			height: chartH,
+			marginTop: 22,
+			marginRight: 8,
+			marginBottom: 34,
+			marginLeft: isNarrow ? 28 : 36,
+			style: {
+				background: 'transparent',
+				fontFamily: '"Lato", system-ui, sans-serif',
+				color: '#0a0a0a',
+				overflow: 'visible',
+				fontSize: isNarrow ? '10px' : '11px'
+			},
+			x: {
+				label: null,
+				tickSize: 0,
+				tickPadding: 7,
+				domain: sorted.map((d) => shortLabel(d.label))
+			},
+			y: {
+				label: null,
+				domain: [yMin, yMax],
+				ticks: 4,
+				grid: true,
+				tickFormat: (d: number) => `${d}`
+			},
+			marks: [
+				Plot.barY(sorted, {
+					x: (d: ObsBarDataPoint) => shortLabel(d.label),
+					y: 'value',
+					y1: yMin,
+					fill: colorFor,
+					rx: 4
+				}),
+				Plot.text(sorted, {
+					x: (d: ObsBarDataPoint) => shortLabel(d.label),
+					y: 'value',
+					text: columnValueLabel,
+					dy: -8,
+					fill: '#0a0a0a',
+					fontWeight: '800',
+					fontSize: valueFontSize
+				}),
+				Plot.ruleY([yMin], { stroke: RULE_COLOR, strokeWidth: 1.5 })
+			]
+		});
+	}
+
 	/** Desktop layout: horizontal-bar chart for `rows` with y-axis labels. */
 	function buildMiniChart(
 		Plot: typeof import('@observablehq/plot'),
@@ -479,6 +586,8 @@
 		// mount and never re-render when `measuredWidth` (and therefore
 		// `isNarrow` / `chartWidth`) updates on resize.
 		const narrow = isNarrow;
+		const chartLayout = layout;
+		const animationKey = chartSignature();
 		// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 		measuredWidth;
 		// eslint-disable-next-line @typescript-eslint/no-unused-expressions
@@ -498,6 +607,11 @@
 			// 30% "reserved for label" headroom.
 			const domainMax = maxValue ?? actualMax * 1.08;
 			containerEl.innerHTML = '';
+
+			if (chartLayout === 'column' && !hasGroups) {
+				containerEl.appendChild(buildColumnChart(Plot, data, domainMax));
+				return;
+			}
 
 			// ── Decide layout: label-left (desktop) vs label-above (stacked) ──
 			//
@@ -554,7 +668,7 @@
 					}
 				}
 
-				setupBarAnimation(containerEl);
+				setupBarAnimationOnce(containerEl, animationKey);
 				return;
 			}
 
@@ -585,7 +699,7 @@
 					containerEl.appendChild(chart);
 				}
 
-				setupBarAnimation(containerEl);
+				setupBarAnimationOnce(containerEl, animationKey);
 				return;
 			}
 
@@ -669,7 +783,7 @@
 			});
 
 			containerEl.appendChild(chart);
-			setupBarAnimation(containerEl);
+			setupBarAnimationOnce(containerEl, animationKey);
 		});
 
 		return () => {
@@ -696,8 +810,10 @@
 		const stickyAncestor = wrapperEl.closest<HTMLElement>('[data-viz-sticky]');
 		if (!stickyAncestor) {
 			availableHeight = 0;
+			inStickySlot = false;
 			return;
 		}
+		inStickySlot = true;
 		const ro = new ResizeObserver(([e]) => {
 			availableHeight = e.contentRect.height || 0;
 		});
@@ -706,7 +822,11 @@
 	});
 </script>
 
-<div bind:this={wrapperEl} class="flex w-full max-w-full min-w-0 flex-col items-start gap-3">
+<div
+	bind:this={wrapperEl}
+	class="flex w-full max-w-full min-w-0 flex-col items-start gap-3"
+	class:translate-y-4={inStickySlot}
+>
 	{#if title}
 		<p class="font-display text-lg leading-tight font-bold text-ink md:text-xl">{title}</p>
 	{/if}

@@ -25,7 +25,7 @@ export const meta = {
 	chapterCount: 10,
 	publishedAt: '2026-05-21',
 	keywords:
-		'longevity, lifespan, healthspan, ageing, hallmarks of aging, blue zones, caloric restriction, exercise longevity, sleep health, evidence-based longevity',
+		'longevity, lifespan, healthspan, ageing, hallmarks of ageing, blue zones, caloric restriction, exercise longevity, sleep health, evidence-based longevity',
 	keyTakeaways: [
 		{
 			text: 'In 2025, you study the exposome — the full weight of everything your body has ever been exposed to.',

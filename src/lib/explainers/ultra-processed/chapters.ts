@@ -33,6 +33,25 @@ export const chapters: Chapter[] = [
 		shortTitle: 'New Normal',
 		intro:
 			'For the first time in human history, most of what we eat is not really food. It is an industrial substance, invented in the last forty years, that just happens to be edible.',
+		summary:
+			'Ultra-processed food has moved from novelty to default. In countries like the UK and US, a majority of daily calories now come from industrial formulations rather than foods a person could plausibly cook.',
+		keyTakeaways: [
+			{
+				text: 'Most supermarket food now contains ingredients that would not exist in a home kitchen.',
+				href: '#the-new-normal--opening',
+				linkLabel: 'Read the opener'
+			},
+			{
+				text: 'Adults in the UK and US get roughly 60% of daily calories from formulated products.',
+				href: '#the-new-normal--share-of-calories',
+				linkLabel: 'Read the number'
+			},
+			{
+				text: 'For children, the share is higher still, shaping taste before habits are fully formed.',
+				href: '#the-new-normal--children',
+				linkLabel: 'Read the child diet point'
+			}
+		],
 		accent: 'red',
 		steps: [
 			{
@@ -171,6 +190,25 @@ export const chapters: Chapter[] = [
 		shortTitle: 'What Counts as UPF',
 		intro:
 			'Researchers in Brazil drew the only line that holds up: food becomes ultra-processed when its ingredients leave the kitchen entirely.',
+		summary:
+			'NOVA separates ordinary processing from industrial formulation. The key test is not whether food has been changed, but whether it has been rebuilt from extracts, additives, and techniques that belong to factories.',
+		keyTakeaways: [
+			{
+				text: 'UPF is NOVA Group 4: products made from industrial ingredients, not normal cooking.',
+				href: '#what-is-it--nova',
+				linkLabel: 'Read NOVA'
+			},
+			{
+				text: 'The kitchen test is practical: if you cannot buy the ingredients or reproduce the method, it is probably UPF.',
+				href: '#what-is-it--kitchen-test',
+				linkLabel: 'Read the test'
+			},
+			{
+				text: 'Processed is not automatically bad; the problem is when food is engineered into a new category.',
+				href: '#what-is-it--misconception',
+				linkLabel: 'Read the distinction'
+			}
+		],
 		accent: 'amber',
 		steps: [
 			{
@@ -257,6 +295,25 @@ export const chapters: Chapter[] = [
 		shortTitle: 'The Experiment',
 		intro:
 			'To understand what UPF does, an infectious disease doctor agreed to eat it — and almost nothing else — for thirty days.',
+		summary:
+			'Van Tulleken’s self-experiment turns abstract diet research into a body-level story: weight gain, appetite disruption, inflammation, and cravings after a month dominated by UPF.',
+		keyTakeaways: [
+			{
+				text: 'The experiment pushed UPF to 80% of calories for 30 days.',
+				href: '#one-month--setup',
+				linkLabel: 'Read the setup'
+			},
+			{
+				text: 'Weight rose quickly, but the more telling shifts were hunger, satiety, and biomarkers.',
+				href: '#one-month--weight',
+				linkLabel: 'Read the change'
+			},
+			{
+				text: 'The point is not one man as proof; it is one body making the mechanism legible.',
+				href: '#one-month--conclusion',
+				linkLabel: 'Read the conclusion'
+			}
+		],
 		accent: 'pink',
 		steps: [
 			{
@@ -383,6 +440,25 @@ export const chapters: Chapter[] = [
 		shortTitle: 'Health Risks',
 		intro:
 			'The largest pooled study ever conducted on UPF set out to find adverse health effects. It found them — across nearly every organ system in the human body.',
+		summary:
+			'The health evidence has broadened beyond obesity. Large reviews associate high UPF intake with higher risks across cardiovascular disease, diabetes, mental health, cancer mortality, and all-cause mortality.',
+		keyTakeaways: [
+			{
+				text: 'The scale of the evidence is now population-level, not just anecdotal or experimental.',
+				href: '#body-under-siege--scale',
+				linkLabel: 'Read the scale'
+			},
+			{
+				text: 'Cardiovascular and metabolic risks show up repeatedly in the research.',
+				href: '#body-under-siege--cvd',
+				linkLabel: 'Read the risk'
+			},
+			{
+				text: 'The BMJ umbrella review found adverse associations across many organ systems.',
+				href: '#body-under-siege--health-risks',
+				linkLabel: 'Read the chart'
+			}
+		],
 		accent: 'red',
 		steps: [
 			{
@@ -461,6 +537,25 @@ export const chapters: Chapter[] = [
 		shortTitle: 'Addiction',
 		intro:
 			'The point of UPF — from the perspective of the company that made it — is not nutrition. The point is that you can’t stop eating it.',
+		summary:
+			'UPF is built for repeat consumption: soft textures, calorie density, speed, reward, and aggressive palatability. The chapter frames addiction as design pressure, not individual weakness.',
+		keyTakeaways: [
+			{
+				text: 'The design target is speed: food that is easy to chew, fast to eat, and slow to satisfy.',
+				href: '#engineered-to-addict--thesis',
+				linkLabel: 'Read the thesis'
+			},
+			{
+				text: 'Clinical addiction criteria are met by a meaningful minority of adults for UPF.',
+				href: '#engineered-to-addict--dopamine',
+				linkLabel: 'Read the comparison'
+			},
+			{
+				text: 'Young people are especially exposed because habits, reward loops, and marketing arrive together.',
+				href: '#engineered-to-addict--youth',
+				linkLabel: 'Read the youth point'
+			}
+		],
 		accent: 'pink',
 		steps: [
 			{
@@ -530,6 +625,25 @@ export const chapters: Chapter[] = [
 		shortTitle: 'Regulation',
 		intro:
 			'Most additives in the US food supply are deemed safe by the company that introduced them. There is no requirement to tell the FDA.',
+		summary:
+			'Regulation has not caught up with formulation. Most rules focus on labels, advice, or single nutrients, while the industrial category itself remains loosely governed.',
+		keyTakeaways: [
+			{
+				text: 'Many additives and formulations entered the food supply through systems built for a different era.',
+				href: '#regulatory-vacuum--gras',
+				linkLabel: 'Read the regulatory gap'
+			},
+			{
+				text: 'A global audit found many UPF policies, but fewer legally binding interventions.',
+				href: '#regulatory-vacuum--measures',
+				linkLabel: 'Read the audit'
+			},
+			{
+				text: 'Changing labels is easier than changing the food environment people actually live in.',
+				href: '#regulatory-vacuum--environment',
+				linkLabel: 'Read the environment point'
+			}
+		],
 		accent: 'amber',
 		steps: [
 			{
@@ -598,6 +712,25 @@ export const chapters: Chapter[] = [
 		shortTitle: 'Inequality',
 		intro:
 			'The people who eat the most UPF are not the ones who chose it. They are the ones for whom it is, very often, all that is on the shelf.',
+		summary:
+			'UPF exposure follows money, time, geography, and marketing. The chapter argues that the diet problem is inseparable from inequality: cheap calories, constrained choices, and targeted persuasion.',
+		keyTakeaways: [
+			{
+				text: 'People in deprived areas can face much higher UPF exposure than wealthier groups.',
+				href: '#inequality--access',
+				linkLabel: 'Read the access point'
+			},
+			{
+				text: 'Marketing does not land evenly; it follows attention, vulnerability, and profit.',
+				href: '#inequality--marketing',
+				linkLabel: 'Read the marketing point'
+			},
+			{
+				text: 'The fairest frame is not purity or discipline. It is the food environment people are given.',
+				href: '#inequality--frame',
+				linkLabel: 'Read the frame'
+			}
+		],
 		accent: 'red',
 		steps: [
 			{
@@ -667,6 +800,25 @@ export const chapters: Chapter[] = [
 		shortTitle: 'Planet Cost',
 		intro:
 			'The cheap commodity ingredients of UPF — soy, corn, palm — are the same crops driving deforestation and the bulk of food-system emissions.',
+		summary:
+			'UPF is not only a health category. It is tied to industrial crops, supply chains, packaging, energy, and land use, making the diet story part of the climate and biodiversity story too.',
+		keyTakeaways: [
+			{
+				text: 'Commercial crop systems are part of the same industrial food machine that feeds UPF.',
+				href: '#eating-the-planet--crops',
+				linkLabel: 'Read the land-use point'
+			},
+			{
+				text: 'The footprint is distributed through supply chains, packaging, refrigeration, and transport.',
+				href: '#eating-the-planet--supply-chain',
+				linkLabel: 'Read the footprint'
+			},
+			{
+				text: 'The environmental question is not only what we eat, but what system must exist to produce it.',
+				href: '#eating-the-planet--frame',
+				linkLabel: 'Read the frame'
+			}
+		],
 		accent: 'amber',
 		steps: [
 			{
@@ -733,6 +885,25 @@ export const chapters: Chapter[] = [
 		shortTitle: 'What Changes',
 		intro:
 			'There is no clean exit from a food system this large. There are, however, levers — and they begin with what gets counted as food at all.',
+		summary:
+			'The closing chapter turns from diagnosis to leverage. Small dietary shifts matter, but lasting change also needs policy, defaults, marketing limits, and a food environment that does not make the unhealthy choice the easiest one.',
+		keyTakeaways: [
+			{
+				text: 'A 10% reduction is a realistic starting point: less perfection, more direction.',
+				href: '#what-now--ten-percent',
+				linkLabel: 'Read the practical lever'
+			},
+			{
+				text: 'Policy can change defaults faster than individual willpower can change a whole market.',
+				href: '#what-now--policy',
+				linkLabel: 'Read the policy lever'
+			},
+			{
+				text: 'The goal is not purity. It is making real food easier to choose more often.',
+				href: '#what-now--close',
+				linkLabel: 'Read the close'
+			}
+		],
 		accent: 'pink',
 		steps: [
 			{

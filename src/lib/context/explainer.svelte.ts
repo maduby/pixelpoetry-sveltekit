@@ -17,13 +17,8 @@
  *     `$state`.
  */
 import { getContext, setContext } from 'svelte';
-import type { Chapter, ImageEntry, Source, Term } from '$lib/types/explainer';
-
-export interface KeyTakeaway {
-	text: string;
-	href?: `#${string}`;
-	linkLabel?: string;
-}
+import type { Chapter, ImageEntry, KeyTakeaway, Source, Term } from '$lib/types/explainer';
+export type { KeyTakeaway } from '$lib/types/explainer';
 
 export interface ExplainerMetaLike {
 	slug: string;

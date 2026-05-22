@@ -55,6 +55,12 @@ export interface Step {
 	blackout?: boolean;
 }
 
+export interface KeyTakeaway {
+	text: string;
+	href?: `#${string}`;
+	linkLabel?: string;
+}
+
 export interface Chapter {
 	id: string;
 	number: number;
@@ -65,6 +71,10 @@ export interface Chapter {
 	/** Shorter title for compact contexts like the mobile nav. Falls back to `title`. */
 	shortTitle?: string;
 	intro: string;
+	/** Optional concise chapter TL;DR shown in the right-side takeaways sheet. */
+	summary?: string;
+	/** Optional chapter-specific TL;DR bullets. */
+	keyTakeaways?: readonly KeyTakeaway[];
 	accent: AccentColor;
 	steps: Step[];
 	sources?: string[];
@@ -160,6 +170,8 @@ export interface ObsBarViz {
 	unit?: string;
 	/** Prefix prepended to value labels (e.g. "+" for risk increases). */
 	prefix?: string;
+	/** Optional compact layout for ordinal short-label data, e.g. D1 → D10 deciles. */
+	layout?: 'bar' | 'column';
 	/** Source ID to show as a bottom-sheet link below the chart. */
 	sourceId?: string;
 }

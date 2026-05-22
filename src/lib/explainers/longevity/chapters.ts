@@ -193,10 +193,11 @@ const ch7DeprivationHLE: ObsBarDataPoint[] = [
 
 const ch7DeprivationHLEViz: ObsBarViz = {
 	type: 'obs-bar',
-	title: 'Healthy life expectancy at birth by deprivation (England)',
+	title: 'Healthy life expectancy at birth by deprivation (England), in years',
 	subtitle:
 		'Years of healthy life expectancy by deprivation decile — Public Health England, 2017. D1 = most deprived.',
 	unit: ' yrs',
+	layout: 'column',
 	sourceId: 'ons-hle-2020',
 	data: ch7DeprivationHLE
 };
@@ -273,6 +274,25 @@ export const chapters: Chapter[] = [
 		shortTitle: 'The Claim',
 		intro:
 			'A landmark report says you are 80% responsible for whether you reach old age in good health. Critics say that framing is dangerous. Both are looking at the same evidence.',
+		summary:
+			'The opening chapter sets up the central tension: much of late-life health is modifiable, but saying "it is down to you" can blur the line between agency and blame.',
+		keyTakeaways: [
+			{
+				text: 'The Oxford Longevity Project frames most poor health in old age as lifestyle and environment, not genetics.',
+				href: '#the-80-percent-claim--ch1-stat-80',
+				linkLabel: 'Read the 80% claim'
+			},
+			{
+				text: 'Critics are not rejecting prevention; they are challenging a framing that can let policy off the hook.',
+				href: '#the-80-percent-claim--ch1-critics',
+				linkLabel: 'Read the critique'
+			},
+			{
+				text: 'The useful reading is both/and: choices matter, and the conditions around those choices matter too.',
+				href: '#the-80-percent-claim',
+				linkLabel: 'Read the chapter'
+			}
+		],
 		accent: 'red',
 		steps: [
 			{
@@ -346,6 +366,25 @@ export const chapters: Chapter[] = [
 		shortTitle: 'Three Eras',
 		intro:
 			'19th-century medicine fought infection. 20th-century medicine fought genetics. 21st-century medicine is fighting choices — and our understanding of what "choices" even means has fundamentally shifted.',
+		summary:
+			'Medicine has moved from sewers to chromosomes to the exposome: the accumulated effect of food, air, stress, movement, sleep, and environment across a lifetime.',
+		keyTakeaways: [
+			{
+				text: 'The 21st-century lens is the exposome: everything the body has been exposed to.',
+				href: '#three-eras-of-medicine--ch2-paradigms',
+				linkLabel: 'Read the paradigm shift'
+			},
+			{
+				text: 'Genetics matters, but for many chronic diseases it is not the dominant share of risk.',
+				href: '#three-eras-of-medicine--ch2-genetics-share',
+				linkLabel: 'Read genetics vs environment'
+			},
+			{
+				text: 'The strongest modern evidence points to modifiable risks without pretending they are always freely chosen.',
+				href: '#three-eras-of-medicine--ch2-biobank',
+				linkLabel: 'Read the evidence'
+			}
+		],
 		accent: 'amber',
 		steps: [
 			{
@@ -447,6 +486,25 @@ export const chapters: Chapter[] = [
 		shortTitle: 'Six Diseases',
 		intro:
 			'Heart disease. Cancer. Dementia. "Diabesity." Falls. Autoimmune conditions. These are the six diseases the Oxford Longevity Project names as the drivers of shortened healthspan — and none of them are primarily genetic.',
+		summary:
+			'Healthy longevity is not mainly about exotic biomarkers. It is about delaying or preventing the chronic diseases that dominate death, disability, and years lived in poor health.',
+		keyTakeaways: [
+			{
+				text: 'A small set of chronic diseases accounts for much of the burden of ageing.',
+				href: '#six-diseases--ch3-intro',
+				linkLabel: 'Read the setup'
+			},
+			{
+				text: 'Heart disease, cancer, and dementia do the largest share of damage.',
+				href: '#six-diseases--ch3-chart',
+				linkLabel: 'Read the chart'
+			},
+			{
+				text: 'Diabetes and obesity are not side issues; they amplify the whole late-life disease pattern.',
+				href: '#six-diseases--ch3-diabesity',
+				linkLabel: 'Read the metabolic point'
+			}
+		],
 		accent: 'ink',
 		steps: [
 			{
@@ -525,6 +583,25 @@ export const chapters: Chapter[] = [
 		shortTitle: 'Fitness Gap',
 		intro:
 			'There is a best-possible rate at which the body declines with age — and then there is the rate most of us are actually declining. Sir Muir Gray calls the distance between them the fitness gap. It is enormous, and it is largely reversible.',
+		summary:
+			'The fitness gap is the space between the health most people currently get and the health they could plausibly keep. Prevention is about narrowing that gap before illness arrives.',
+		keyTakeaways: [
+			{
+				text: 'The chapter reframes longevity as the gap between possible health and typical health.',
+				href: '#fitness-gap--ch4-concept',
+				linkLabel: 'Read the concept'
+			},
+			{
+				text: 'The gap is large enough to matter at the population level, not just for biohackers.',
+				href: '#fitness-gap--ch4-chart',
+				linkLabel: 'Read the chart'
+			},
+			{
+				text: 'Poor health is not just shorter life; it is more years lived with limitation.',
+				href: '#fitness-gap--ch4-stat-poor-health',
+				linkLabel: 'Read the healthspan point'
+			}
+		],
 		accent: 'forest',
 		steps: [
 			{
@@ -617,6 +694,25 @@ export const chapters: Chapter[] = [
 		shortTitle: 'S-MEDs',
 		intro:
 			'The Oxford Longevity Project distils the evidence into five domains where the science is strong enough to act on: Sleep, Mindset, Exercise, Diet, and Stress. Not a lifestyle blog. A framework built from the evidence up.',
+		summary:
+			'S-MEDs translates longevity evidence into five ordinary domains: sleep, mindset, exercise, diet, and stress. They are boring because they are foundational.',
+		keyTakeaways: [
+			{
+				text: 'Sleep is not optional recovery; it is one of the core longevity inputs.',
+				href: '#smeds-framework--ch5-sleep',
+				linkLabel: 'Read sleep'
+			},
+			{
+				text: 'Mindset shows up in the evidence, but it is strongest when treated seriously, not magically.',
+				href: '#smeds-framework--ch5-mindset',
+				linkLabel: 'Read mindset'
+			},
+			{
+				text: 'Exercise, diet, and stress management are the practical backbone of the framework.',
+				href: '#smeds-framework--ch5-exercise',
+				linkLabel: 'Read the framework'
+			}
+		],
 		accent: 'amber',
 		steps: [
 			{
@@ -721,6 +817,25 @@ export const chapters: Chapter[] = [
 		shortTitle: 'Blue Zones',
 		intro:
 			'Five places in the world where healthy longevity is unremarkable. Where people routinely reach 90 and 100 in good health. What they share is not a supplement or a secret. It is a way of living.',
+		summary:
+			'Blue Zones are not proof of a secret longevity hack. They are places where healthy defaults are built into daily life: movement, food, purpose, community, and lower chronic stress.',
+		keyTakeaways: [
+			{
+				text: 'The best-known Blue Zones produce unusually high rates of healthy old age.',
+				href: '#blue-zones--ch6-intro',
+				linkLabel: 'Read the places'
+			},
+			{
+				text: 'The shared pattern is a way of living, not a single supplement, food, or protocol.',
+				href: '#blue-zones--ch6-shared-patterns',
+				linkLabel: 'Read the pattern'
+			},
+			{
+				text: 'Some centenarian counts are contested, but the underlying lifestyle evidence still holds up.',
+				href: '#blue-zones--ch6-caveats',
+				linkLabel: 'Read the caveat'
+			}
+		],
 		accent: 'blue',
 		steps: [
 			{
@@ -793,6 +908,25 @@ export const chapters: Chapter[] = [
 		shortTitle: 'The Critics',
 		intro:
 			'The OLP report frames its evidence at the level of the individual. The same evidence supports a very different reading. Both are correct — and that is the whole problem.',
+		summary:
+			'The critics are right that health does not happen in a vacuum. If healthy life expectancy varies by nearly two decades across deprivation, prevention must include housing, work, pollution, food systems, and access to care.',
+		keyTakeaways: [
+			{
+				text: 'The deprivation gap in healthy life expectancy is too large to explain as personal discipline.',
+				href: '#what-critics-get-right--ch7-structural',
+				linkLabel: 'Read the structural point'
+			},
+			{
+				text: 'Where you are born in England predicts healthy life expectancy by almost two decades.',
+				href: '#what-critics-get-right--ch7-chart',
+				linkLabel: 'Read the chart'
+			},
+			{
+				text: 'The honest answer is both individual support and environmental redesign.',
+				href: '#what-critics-get-right--ch7-synthesis',
+				linkLabel: 'Read the synthesis'
+			}
+		],
 		accent: 'ink',
 		steps: [
 			{
@@ -849,6 +983,25 @@ export const chapters: Chapter[] = [
 		shortTitle: "Women's Health",
 		intro:
 			'Women live longer than men but spend more of those extra years in poor health. They are the majority of the over-65s and roughly 80% of centenarians. And they are the demographic most consistently underserved by the healthcare system.',
+		summary:
+			'Women are longevity’s paradox: biologically more likely to reach very old age, but more likely to spend those extra years in poor health and to be underserved by healthcare built around male defaults.',
+		keyTakeaways: [
+			{
+				text: 'UK women live longer than men, but spend almost 19 years in poor health.',
+				href: '#womens-health-gap--ch8-the-numbers',
+				linkLabel: 'Read the numbers'
+			},
+			{
+				text: 'Women make up roughly 80% of centenarians, so the issue is not fragility.',
+				href: '#womens-health-gap--ch8-centenarians',
+				linkLabel: 'Read the centenarian point'
+			},
+			{
+				text: 'The healthcare gap is especially visible across hormonal ageing and the legacy of HRT confusion.',
+				href: '#womens-health-gap--ch8-whi',
+				linkLabel: 'Read the HRT point'
+			}
+		],
 		accent: 'pink',
 		steps: [
 			{
@@ -911,6 +1064,25 @@ export const chapters: Chapter[] = [
 		shortTitle: 'The Economics',
 		intro:
 			'Prevention is not just better than cure — it is extraordinarily cheaper. The economic value of slowing ageing by a single year across the US population has been estimated at $37 trillion. We are spending the equivalent of that on the consequences of not doing it.',
+		summary:
+			'The economics are brutally simple: prevention is cheaper than repair. Health systems spend ever more treating chronic disease while healthy life expectancy barely moves.',
+		keyTakeaways: [
+			{
+				text: 'One extra healthy year across the US population has been valued at about $37 trillion.',
+				href: '#economics-of-longevity--ch9-37-trillion',
+				linkLabel: 'Read the estimate'
+			},
+			{
+				text: 'NHS spending has risen while healthy life expectancy has stayed almost flat.',
+				href: '#economics-of-longevity--ch9-chart',
+				linkLabel: 'Read the chart'
+			},
+			{
+				text: 'The strongest return comes from prevention before expensive illness arrives.',
+				href: '#economics-of-longevity--ch9-policy',
+				linkLabel: 'Read prevention ROI'
+			}
+		],
 		accent: 'amber',
 		steps: [
 			{
@@ -992,6 +1164,25 @@ export const chapters: Chapter[] = [
 		shortTitle: 'Monday',
 		intro:
 			'Sir Christopher Ball is 91 years old. He wrote the chapter in the OLP report about what he actually does. Here is what the evidence says — separated from what it does not say.',
+		summary:
+			'The final chapter ranks what is worth doing now. The best-supported interventions are familiar, cheap, and repeatable: movement, strength, sleep, not smoking, connection, and mostly minimally processed food.',
+		keyTakeaways: [
+			{
+				text: 'Ball’s routine is eccentric, but many pieces map onto real evidence.',
+				href: '#what-do-you-do-on-monday--ch10-ball-routine',
+				linkLabel: 'Read the routine'
+			},
+			{
+				text: 'The strongest evidence is for exercise, strength work, sleep, not smoking, and social ties.',
+				href: '#what-do-you-do-on-monday--ch10-evidence-chart',
+				linkLabel: 'Read the ranking'
+			},
+			{
+				text: 'The honest close: you have meaningful control, but not total control.',
+				href: '#what-do-you-do-on-monday--ch10-honest-close',
+				linkLabel: 'Read the close'
+			}
+		],
 		accent: 'forest',
 		steps: [
 			{

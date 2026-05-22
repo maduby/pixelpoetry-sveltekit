@@ -124,10 +124,15 @@
 		data-viz-sticky
 		class={cn(
 			'hidden min-w-0 items-center justify-center overflow-hidden',
-			'lg:sticky lg:top-(--nav-h) lg:z-0 lg:flex',
-			'lg:h-[calc(100svh-var(--nav-h,4rem))]',
+			'lg:sticky lg:z-0 lg:flex',
+			// The sticky slot is centred within the readable viewport below
+			// the fixed nav/progress chrome, not the raw browser viewport.
+			'lg:top-(--scrolly-viz-safe-top)',
+			'lg:h-[calc(100svh-var(--scrolly-viz-safe-top)-var(--scrolly-viz-safe-bottom))]',
 			vizSide === 'left' ? 'lg:col-start-1' : 'lg:col-start-2'
 		)}
+		style:--scrolly-viz-safe-top="calc(var(--nav-h, 4rem) + clamp(4.5rem, 9svh, 6rem))"
+		style:--scrolly-viz-safe-bottom="1.5rem"
 	>
 		{@render viz({ progress, activeStep, stepProgress })}
 	</div>
