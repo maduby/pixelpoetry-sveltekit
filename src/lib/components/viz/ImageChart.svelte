@@ -12,7 +12,6 @@
 	 * Falls back to a plain <img> on the server (SSR) so there's always
 	 * a visible image even before JS hydrates.
 	 */
-	import { onMount } from 'svelte';
 	import { decode } from 'blurhash';
 	import type { ImageEntry } from '$lib/types/explainer';
 	import { getExplainerHolder } from '$lib/context/explainer.svelte';
@@ -82,6 +81,7 @@
 
 	// Canvas element for blurhash placeholder
 	let canvasEl = $state<HTMLCanvasElement | undefined>(undefined);
+	let containerEl = $state<HTMLElement | undefined>(undefined);
 
 	// True once the real image has finished loading
 	let loaded = $state(false);
@@ -89,26 +89,53 @@
 	// True when the image is in the viewport (triggers lazy load)
 	let visible = $state(false);
 
-	// IntersectionObserver for lazy loading
-	onMount(() => {
+	let loadedImageName = $state('');
+
+	// IntersectionObserver for lazy loading. This is intentionally reactive:
+	// on direct hash loads the explainer context can arrive after this
+	// component mounts, so a one-shot onMount observer can miss valid images.
+	$effect(() => {
 		if (!entry) return;
+		if (!containerEl) return;
+
+		if (loadedImageName !== name) {
+			loadedImageName = name;
+			loaded = false;
+			visible = false;
+		}
 
 		// Pre-populate the blurhash canvas immediately
 		if (entry.blurhash && canvasEl) {
-			const pixels = decode(entry.blurhash, 32, 32);
-			const ctx = canvasEl.getContext('2d')!;
-			const imageData = ctx.createImageData(32, 32);
-			imageData.data.set(pixels);
-			ctx.putImageData(imageData, 0, 0);
+			try {
+				const pixels = decode(entry.blurhash, 32, 32);
+				const ctx = canvasEl.getContext('2d');
+				if (ctx) {
+					const imageData = ctx.createImageData(32, 32);
+					imageData.data.set(pixels);
+					ctx.putImageData(imageData, 0, 0);
+				}
+			} catch {
+				// A broken blurhash should not prevent the real image from loading.
+			}
+		}
+
+		if (visible) return;
+		if (typeof IntersectionObserver === 'undefined') {
+			visible = true;
+			return;
 		}
 
 		const observer = new IntersectionObserver(
-			([e]) => { if (e.isIntersecting) { visible = true; observer.disconnect(); } },
-			{ rootMargin: '200px' }
+			([e]) => {
+				if (e.isIntersecting) {
+					visible = true;
+					observer.disconnect();
+				}
+			},
+			{ rootMargin: '600px' }
 		);
-		// Observe the image container
-		const container = canvasEl?.parentElement ?? document.querySelector(`[data-image="${name}"]`);
-		if (container) observer.observe(container);
+
+		observer.observe(containerEl);
 		return () => observer.disconnect();
 	});
 </script>
@@ -120,6 +147,7 @@
 		a balanced editorial frame regardless of source ratio.
 	-->
 	<div
+		bind:this={containerEl}
 		class="relative flex max-h-[60svh] w-full items-center justify-center overflow-hidden rounded-2xl {aspectClass} {transparent ? '' : 'bg-ink/5'}"
 		data-image={name}
 	>
