@@ -318,7 +318,6 @@
 		deleteConfirmInsightId = '';
 		if (deleteConfirmSummaryId !== summaryId) {
 			deleteConfirmSummaryId = summaryId;
-			actionMessage = 'Click delete again to confirm.';
 			return;
 		}
 		void deleteSummary(summaryId);
@@ -579,7 +578,7 @@
 										type="button"
 										onclick={() => requestDeleteInsight(insight.id)}
 										disabled={deletingInsightId === insight.id || data.migrationPending}
-										class={`inline-flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${
+										class={`group relative inline-flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${
 											deleteConfirmInsightId === insight.id
 												? 'bg-brand-red/10 text-brand-red-deep ring-1 ring-brand-red/25'
 												: 'text-ink/35 hover:bg-brand-red/10 hover:text-brand-red-deep'
@@ -591,6 +590,13 @@
 											<LoaderCircle class="animate-spin" size={15} aria-hidden="true" />
 										{:else}
 											<Trash2 size={15} aria-hidden="true" />
+										{/if}
+										{#if deleteConfirmInsightId === insight.id}
+											<span
+												class="pointer-events-none absolute top-full right-0 z-20 mt-2 rounded-full bg-ink px-3 py-1.5 text-[11px] font-black whitespace-nowrap text-cream shadow-lg shadow-ink/10"
+											>
+												Click again
+											</span>
 										{/if}
 									</button>
 								</div>
@@ -721,7 +727,7 @@
 											type="button"
 											onclick={() => requestDeleteSummary(summary.id)}
 											disabled={deletingSummaryId === summary.id || data.migrationPending}
-											class={`inline-flex min-h-9 min-w-9 cursor-pointer items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${
+											class={`relative inline-flex min-h-9 min-w-9 cursor-pointer items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${
 												deleteConfirmSummaryId === summary.id
 													? 'bg-brand-red/10 text-brand-red-deep ring-1 ring-brand-red/30'
 													: 'text-ink/45 hover:bg-brand-red/10 hover:text-brand-red-deep'
@@ -733,6 +739,13 @@
 												<LoaderCircle class="animate-spin" size={16} aria-hidden="true" />
 											{:else}
 												<Trash2 size={16} aria-hidden="true" />
+											{/if}
+											{#if deleteConfirmSummaryId === summary.id}
+												<span
+													class="pointer-events-none absolute top-full right-0 z-20 mt-2 rounded-full bg-ink px-3 py-1.5 text-[11px] font-black whitespace-nowrap text-cream shadow-lg shadow-ink/10"
+												>
+													Click again
+												</span>
 											{/if}
 										</button>
 									</div>
@@ -808,7 +821,7 @@
 						type="button"
 						onclick={() => requestDeleteSummary(activeSummary.id)}
 						disabled={deletingSummaryId === activeSummary.id || data.migrationPending}
-						class={`inline-flex size-10 cursor-pointer items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${
+						class={`relative inline-flex size-10 cursor-pointer items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${
 							deleteConfirmSummaryId === activeSummary.id
 								? 'bg-brand-red/10 text-brand-red-deep ring-1 ring-brand-red/25'
 								: 'text-brand-red-deep/75 hover:bg-brand-red/10 hover:text-brand-red-deep'
@@ -822,6 +835,13 @@
 							<Trash2 size={15} aria-hidden="true" />
 						{:else}
 							<Trash2 size={15} aria-hidden="true" />
+						{/if}
+						{#if deleteConfirmSummaryId === activeSummary.id}
+							<span
+								class="pointer-events-none absolute top-full right-0 z-20 mt-2 rounded-full bg-ink px-3 py-1.5 text-[11px] font-black whitespace-nowrap text-cream shadow-lg shadow-ink/10"
+							>
+								Click again
+							</span>
 						{/if}
 					</button>
 				</div>
