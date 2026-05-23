@@ -79,6 +79,7 @@
 	const ogImageType = $derived(
 		resolvedOgImage.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg'
 	);
+	const scriptTag = 'script';
 
 	const baseJsonLd = $derived.by(() => {
 		const common = {
@@ -138,7 +139,7 @@
 	const schemaScripts = $derived.by(() => {
 		const extra = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
 		return [siteJsonLd, baseJsonLd, breadcrumbJsonLd(canonicalPath), ...extra].map((schema) =>
-			JSON.stringify(schema)
+			JSON.stringify(schema).replace(/</g, '\\u003c')
 		);
 	});
 </script>
@@ -184,6 +185,6 @@
 
 	<meta name="theme-color" content="#fef9ef" />
 	{#each schemaScripts as schema, i (`schema-${i}`)}
-		<script type="application/ld+json">{@html schema}</script>
+		<svelte:element this={scriptTag} type="application/ld+json">{schema}</svelte:element>
 	{/each}
 </svelte:head>
