@@ -584,7 +584,7 @@
 												: 'text-ink/35 hover:bg-brand-red/10 hover:text-brand-red-deep'
 										}`}
 										aria-label={deleteConfirmInsightId === insight.id ? 'Confirm delete takeaway' : 'Delete takeaway'}
-										title={deleteConfirmInsightId === insight.id ? 'Click again to delete' : 'Delete takeaway'}
+										title={deleteConfirmInsightId === insight.id ? 'Sure?' : 'Delete takeaway'}
 									>
 										{#if deletingInsightId === insight.id}
 											<LoaderCircle class="animate-spin" size={15} aria-hidden="true" />
@@ -593,9 +593,9 @@
 										{/if}
 										{#if deleteConfirmInsightId === insight.id}
 											<span
-												class="pointer-events-none absolute top-full right-0 z-20 mt-2 rounded-full bg-ink px-3 py-1.5 text-[11px] font-black whitespace-nowrap text-cream shadow-lg shadow-ink/10"
+												class="pointer-events-none absolute top-1/2 right-6 z-0 flex h-8 -translate-y-1/2 items-center rounded-l-full border border-r-0 border-brand-red/20 bg-brand-red/10 pr-4 pl-3 text-[11px] font-bold whitespace-nowrap text-brand-red-deep"
 											>
-												Click again
+												Sure?
 											</span>
 										{/if}
 									</button>
@@ -733,7 +733,7 @@
 													: 'text-ink/45 hover:bg-brand-red/10 hover:text-brand-red-deep'
 											}`}
 											aria-label={deleteConfirmSummaryId === summary.id ? 'Confirm delete recap' : 'Delete recap'}
-											title={deleteConfirmSummaryId === summary.id ? 'Click again to delete' : 'Delete recap'}
+											title={deleteConfirmSummaryId === summary.id ? 'Sure?' : 'Delete recap'}
 										>
 											{#if deletingSummaryId === summary.id}
 												<LoaderCircle class="animate-spin" size={16} aria-hidden="true" />
@@ -742,9 +742,9 @@
 											{/if}
 											{#if deleteConfirmSummaryId === summary.id}
 												<span
-													class="pointer-events-none absolute top-full right-0 z-20 mt-2 rounded-full bg-ink px-3 py-1.5 text-[11px] font-black whitespace-nowrap text-cream shadow-lg shadow-ink/10"
+													class="pointer-events-none absolute top-1/2 right-7 z-0 flex h-9 -translate-y-1/2 items-center rounded-l-full border border-r-0 border-brand-red/20 bg-brand-red/10 pr-4 pl-3 text-[11px] font-bold whitespace-nowrap text-brand-red-deep"
 												>
-													Click again
+													Sure?
 												</span>
 											{/if}
 										</button>
@@ -827,7 +827,7 @@
 								: 'text-brand-red-deep/75 hover:bg-brand-red/10 hover:text-brand-red-deep'
 						}`}
 						aria-label={deleteConfirmSummaryId === activeSummary.id ? 'Confirm delete recap' : 'Delete recap'}
-						title={deleteConfirmSummaryId === activeSummary.id ? 'Confirm delete' : 'Delete'}
+						title={deleteConfirmSummaryId === activeSummary.id ? 'Sure?' : 'Delete'}
 					>
 						{#if deletingSummaryId === activeSummary.id}
 							<LoaderCircle class="animate-spin" size={15} aria-hidden="true" />
@@ -838,9 +838,9 @@
 						{/if}
 						{#if deleteConfirmSummaryId === activeSummary.id}
 							<span
-								class="pointer-events-none absolute top-full right-0 z-20 mt-2 rounded-full bg-ink px-3 py-1.5 text-[11px] font-black whitespace-nowrap text-cream shadow-lg shadow-ink/10"
+								class="pointer-events-none absolute top-1/2 right-8 z-0 flex h-10 -translate-y-1/2 items-center rounded-l-full border border-r-0 border-brand-red/20 bg-brand-red/10 pr-5 pl-3 text-[11px] font-bold whitespace-nowrap text-brand-red-deep"
 							>
-								Click again
+								Sure?
 							</span>
 						{/if}
 					</button>
