@@ -80,6 +80,35 @@
 			.filter(Boolean);
 	}
 
+	function sourceFromNode(node: Node | null): HTMLElement | null {
+		const element =
+			node?.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node?.parentElement;
+		const source = element?.closest('[data-insight-source="true"]') as HTMLElement | null;
+		return source?.dataset.insightExplainer &&
+			source.dataset.insightChapter &&
+			source.dataset.insightStep
+			? source
+			: null;
+	}
+
+	function sourcesFromRange(range: Range): HTMLElement[] {
+		const sources = new Set<HTMLElement>();
+		const startSource = sourceFromNode(range.startContainer);
+		const endSource = sourceFromNode(range.endContainer);
+		if (startSource) sources.add(startSource);
+		if (endSource) sources.add(endSource);
+
+		for (const element of document.querySelectorAll<HTMLElement>('[data-insight-source="true"]')) {
+			try {
+				if (range.intersectsNode(element)) sources.add(element);
+			} catch {
+				// Detached or browser-internal nodes can throw here; ignore them.
+			}
+		}
+
+		return Array.from(sources);
+	}
+
 	function setPayload(next: SelectionPayload) {
 		const selectionKey = [next.explainerSlug, next.chapterId, next.stepId, next.selectedText].join(
 			'\n'
@@ -104,18 +133,9 @@
 		if (!selection || selectedText.length < 3 || selection.rangeCount === 0) return null;
 
 		const range = selection.getRangeAt(0);
-		const container =
-			range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
-				? (range.commonAncestorContainer as HTMLElement)
-				: range.commonAncestorContainer.parentElement;
-		const source = container?.closest('[data-insight-source="true"]') as HTMLElement | null;
-		if (
-			!source?.dataset.insightExplainer ||
-			!source.dataset.insightChapter ||
-			!source.dataset.insightStep
-		) {
-			return null;
-		}
+		const sources = sourcesFromRange(range);
+		const source = sources[0];
+		if (!source) return null;
 
 		const rect = selectionAnchorRect(range);
 		if (rect.width === 0 && rect.height === 0) return null;
@@ -124,7 +144,25 @@
 		const combinedText = Array.from(new Set([selectedText, ...visualTexts]))
 			.filter(Boolean)
 			.join('\n\n');
-		return sourcePayload(source, combinedText);
+		const next = sourcePayload(source, combinedText);
+		if (!next) return null;
+
+		const sourceContext = sources
+			.map(
+				(item) =>
+					item.dataset.insightSurroundingText ||
+					item.textContent?.replace(/\s+/g, ' ').trim() ||
+					''
+			)
+			.filter(Boolean)
+			.join('\n\n');
+
+		return {
+			...next,
+			surroundingText: Array.from(new Set([sourceContext, next.surroundingText]))
+				.filter(Boolean)
+				.join('\n\n')
+		};
 	}
 
 	function updateSelection() {
@@ -182,6 +220,10 @@
 
 	function hideFloatingTakeaway() {
 		if (saving || saved) return;
+		if (browser && document.getSelection()?.toString().trim()) {
+			scheduleSelectionUpdate();
+			return;
+		}
 		payload = null;
 		lastSelectionKey = '';
 	}
