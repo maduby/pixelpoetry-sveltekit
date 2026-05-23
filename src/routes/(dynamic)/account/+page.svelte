@@ -6,6 +6,7 @@
 	import Sheet from '$lib/components/ui/Sheet.svelte';
 	import BookOpen from 'lucide-svelte/icons/book-open';
 	import Brain from 'lucide-svelte/icons/brain';
+	import Check from 'lucide-svelte/icons/check';
 	import CheckCircle2 from 'lucide-svelte/icons/check-circle-2';
 	import Eye from 'lucide-svelte/icons/eye';
 	import ExternalLink from 'lucide-svelte/icons/external-link';
@@ -323,6 +324,17 @@
 		void deleteSummary(summaryId);
 	}
 
+	function clearDeleteConfirm() {
+		deleteConfirmInsightId = '';
+		deleteConfirmSummaryId = '';
+	}
+
+	function clearDeleteConfirmOnOutsidePointer(event: PointerEvent) {
+		const target = event.target as HTMLElement | null;
+		if (target?.closest('[data-delete-confirm-control="true"]')) return;
+		clearDeleteConfirm();
+	}
+
 	async function deleteSummary(summaryId: string) {
 		actionMessage = '';
 		actionError = '';
@@ -387,6 +399,8 @@
 	}
 
 </script>
+
+<svelte:document onpointerdown={clearDeleteConfirmOnOutsidePointer} />
 
 <svelte:head>
 	<title>Account | Pixel Poetry</title>
@@ -576,6 +590,7 @@
 									</div>
 									<button
 										type="button"
+										data-delete-confirm-control="true"
 										onclick={() => requestDeleteInsight(insight.id)}
 										disabled={deletingInsightId === insight.id || data.migrationPending}
 										class={`group relative inline-flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${
@@ -584,19 +599,13 @@
 												: 'text-ink/35 hover:bg-brand-red/10 hover:text-brand-red-deep'
 										}`}
 										aria-label={deleteConfirmInsightId === insight.id ? 'Confirm delete takeaway' : 'Delete takeaway'}
-										title={deleteConfirmInsightId === insight.id ? 'Sure?' : 'Delete takeaway'}
 									>
 										{#if deletingInsightId === insight.id}
 											<LoaderCircle class="relative z-10 animate-spin" size={15} aria-hidden="true" />
+										{:else if deleteConfirmInsightId === insight.id}
+											<Check class="relative z-10" size={16} aria-hidden="true" />
 										{:else}
 											<Trash2 class="relative z-10" size={15} aria-hidden="true" />
-										{/if}
-										{#if deleteConfirmInsightId === insight.id}
-											<span
-												class="pointer-events-none absolute top-1/2 right-6 z-0 flex h-8 -translate-y-1/2 items-center rounded-l-full border border-r-0 border-brand-red/20 bg-brand-red/10 pr-4 pl-3 text-[11px] font-bold whitespace-nowrap text-brand-red-deep"
-											>
-												Sure?
-											</span>
 										{/if}
 									</button>
 								</div>
@@ -725,6 +734,7 @@
 										</button>
 										<button
 											type="button"
+											data-delete-confirm-control="true"
 											onclick={() => requestDeleteSummary(summary.id)}
 											disabled={deletingSummaryId === summary.id || data.migrationPending}
 											class={`relative inline-flex min-h-9 min-w-9 cursor-pointer items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${
@@ -733,19 +743,13 @@
 													: 'text-ink/45 hover:bg-brand-red/10 hover:text-brand-red-deep'
 											}`}
 											aria-label={deleteConfirmSummaryId === summary.id ? 'Confirm delete recap' : 'Delete recap'}
-											title={deleteConfirmSummaryId === summary.id ? 'Sure?' : 'Delete recap'}
 										>
 											{#if deletingSummaryId === summary.id}
 												<LoaderCircle class="relative z-10 animate-spin" size={16} aria-hidden="true" />
+											{:else if deleteConfirmSummaryId === summary.id}
+												<Check class="relative z-10" size={17} aria-hidden="true" />
 											{:else}
 												<Trash2 class="relative z-10" size={16} aria-hidden="true" />
-											{/if}
-											{#if deleteConfirmSummaryId === summary.id}
-												<span
-													class="pointer-events-none absolute top-1/2 right-7 z-0 flex h-9 -translate-y-1/2 items-center rounded-l-full border border-r-0 border-brand-red/20 bg-brand-red/10 pr-4 pl-3 text-[11px] font-bold whitespace-nowrap text-brand-red-deep"
-												>
-													Sure?
-												</span>
 											{/if}
 										</button>
 									</div>
@@ -819,6 +823,7 @@
 					</button>
 					<button
 						type="button"
+						data-delete-confirm-control="true"
 						onclick={() => requestDeleteSummary(activeSummary.id)}
 						disabled={deletingSummaryId === activeSummary.id || data.migrationPending}
 						class={`relative inline-flex size-10 cursor-pointer items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${
@@ -827,21 +832,13 @@
 								: 'text-brand-red-deep/75 hover:bg-brand-red/10 hover:text-brand-red-deep'
 						}`}
 						aria-label={deleteConfirmSummaryId === activeSummary.id ? 'Confirm delete recap' : 'Delete recap'}
-						title={deleteConfirmSummaryId === activeSummary.id ? 'Sure?' : 'Delete'}
 					>
 						{#if deletingSummaryId === activeSummary.id}
 							<LoaderCircle class="relative z-10 animate-spin" size={15} aria-hidden="true" />
 						{:else if deleteConfirmSummaryId === activeSummary.id}
-							<Trash2 class="relative z-10" size={15} aria-hidden="true" />
+							<Check class="relative z-10" size={16} aria-hidden="true" />
 						{:else}
 							<Trash2 class="relative z-10" size={15} aria-hidden="true" />
-						{/if}
-						{#if deleteConfirmSummaryId === activeSummary.id}
-							<span
-								class="pointer-events-none absolute top-1/2 right-8 z-0 flex h-10 -translate-y-1/2 items-center rounded-l-full border border-r-0 border-brand-red/20 bg-brand-red/10 pr-5 pl-3 text-[11px] font-bold whitespace-nowrap text-brand-red-deep"
-							>
-								Sure?
-							</span>
 						{/if}
 					</button>
 				</div>
