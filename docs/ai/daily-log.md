@@ -4,14 +4,59 @@
 
 ---
 
+## 2026-05-23 — Source-grounded saved takeaways
+
+**Started:** 2026-05-23T09:38:48Z / 11:38 SAST
+
+**Goal:** Add a source-grounding layer so saved takeaways and AI recaps can be backed by Pixel Poetry's own explainer evidence base.
+
+**What got done**
+
+- Added source-grounding schema: `source_document`, `source_chunk`, `saved_insight_source_match`, and `insight_summary_source`.
+- Added `pgvector` readiness through a nullable `vector(1536)` source chunk column, with embeddings disabled until a compatible provider is configured.
+- Added `src/lib/explainers/registry.ts` as the single place future explainers must register for source ingestion.
+- Added `pnpm sources:ingest`, which ingested 36 canonical source documents and 191 source chunks locally for Longevity and Ultra-Processed.
+- Wired saved takeaways to attach best matching source chunks server-side.
+- Updated recap generation to receive `allowedSources` and output optional source citations without inventing references.
+- Updated account and email recap views to show source links/support notes when the model uses grounded sources.
+- Added `docs/ai/source-grounding.md` and a repo-local Codex skill for future source-grounding work.
+
+**Decisions made**
+
+- Use retrieval as the citation authority. The recap model can cite only source IDs that the server provides.
+- Keep embeddings provider-swappable and off by default; lexical/context retrieval keeps the feature stable while MiniMax embedding support remains separate from MiniMax chat support.
+- Do not delete stale source chunks during ingestion; ingestion is append/update only so future manually added source records are not accidentally removed.
+
+**Verification**
+
+- `pnpm db:generate`
+- `pnpm db:migrate`
+- `pnpm sources:ingest`
+- Neon disposable staging branch migration, real staging migration, and staging source ingestion
+- `pnpm check` passes with the existing `StatCard.svelte` warning only.
+
+**Next session — start here**
+
+1. Test a fresh save + recap in `/account` and confirm source chips appear when retrieved snippets are relevant.
+2. Configure embeddings only after choosing a 1536-dimensional OpenAI-compatible embedding endpoint.
+3. Before production, repeat this disposable-branch flow from the production branch.
+
+---
+
 ## 2026-05-23 — Saved insights AI layer
 
 **Goal:** Implement the logged-in saved-insights MVP with AI recaps and Resend email-to-self.
 
 **What got done**
 
+- Re-ran migration flow for testing: Drizzle found no new schema changes, local migrations applied successfully, a fresh disposable Neon branch from `staging` applied cleanly, and real Neon `staging` applied cleanly.
+- Added recap backlinks: summaries now persist the saved takeaway IDs used for generation, `/account` links to Pixel Poetry, the explainer, and each recapped passage, and recap emails include the same source-piece links.
+- Applied the recap-link migration locally, on a disposable Neon branch copied from `staging`, and on the real Neon `staging` branch.
+- Added direct MiniMax support via the AI SDK OpenAI-compatible provider (`AI_PROVIDER=minimax`, `MINIMAX_API_KEY`, `MINIMAX_MODEL=MiniMax-M2.7`) while keeping Vercel AI Gateway as an alternative.
+- Verified the local MiniMax key against `MiniMax-M2.7` and updated `.env.local` to use the direct MiniMax provider path without exposing the secret.
+- Adjusted recap generation for MiniMax reasoning output by requesting `reasoning_split` and validating JSON from the text channel.
 - Added AI SDK v6, Zod, and Resend dependencies.
-- Chose Vercel AI Gateway for v1 with `AI_GATEWAY_MODEL=minimax/minimax-m2.7`; avoided the young direct MiniMax provider package.
+- Kept Vercel AI Gateway available with `AI_GATEWAY_MODEL=minimax/minimax-m2.7`; avoided the young direct MiniMax provider package.
 - Added Drizzle tables and migration for saved insights, structured AI summaries, and email deliveries.
 - Added authenticated SvelteKit API routes for saving highlights, generating recaps, emailing recaps, and smoke-testing Resend.
 - Added a client highlight-to-save layer for explainer prose only.
@@ -28,6 +73,8 @@
 - Hardened `SavedInsightLayer` for SSR and selection performance by guarding browser globals, clearing pending timers on teardown, and deduping repeated selection events.
 - Changed saved-takeaway API failures for missing AI tables from raw 500s to an intentional migration-pending response with clearer UI copy.
 - Applied the saved-takeaways Drizzle migration locally, verified on a disposable Neon branch copied from `staging`, then applied and verified on the real Neon `staging` branch.
+- Added account-page takeaway search, select all/clear/select-results controls, per-takeaway recap checkboxes, and selected-ID summary generation.
+- Returned a clear AI-unavailable response when recap generation cannot reach/configure the provider, instead of surfacing a generic 500.
 - Updated `/account` with saved takeaways, latest recap, email-to-self, and email test controls.
 - Added PostHog events that track behavior without sending selected text, notes, summaries, prompts, or email addresses.
 - Added a safe Neon migration workflow script for local → disposable staging duplicate → staging → disposable main duplicate → main.
@@ -36,7 +83,7 @@
 **Decisions made**
 
 - Saved-insights-first beats generic AI chat for v1 → logged in `decisions.md`.
-- Vercel AI Gateway is the v1 provider path; OpenRouter stays a future option → logged in `decisions.md`.
+- Direct MiniMax is the active local provider path; Vercel AI Gateway and OpenRouter stay available alternatives → logged in `decisions.md`.
 - Private email-to-self is the first sharing/export path → logged in `decisions.md`.
 - Neon production migrations must be verified on a disposable branch copied from the target branch first → logged in `decisions.md`.
 - Takeaway recap prompt version is now `saved-takeaways-summary-v1`.
@@ -45,7 +92,7 @@
 
 **Next session — start here**
 
-1. Add `AI_GATEWAY_API_KEY`, `AI_GATEWAY_MODEL`, `RESEND_API_KEY`, and `RESEND_FROM_EMAIL` in Vercel env vars.
+1. Add `AI_PROVIDER`, `MINIMAX_API_KEY`, `MINIMAX_MODEL`, `RESEND_API_KEY`, and `RESEND_FROM_EMAIL` in Vercel env vars.
 2. Log in locally, save a takeaway, generate a recap, and send the Resend smoke email.
 3. Before production, repeat the disposable-branch verification flow from `main`, then apply with `ALLOW_PRODUCTION_MIGRATION=true`.
 

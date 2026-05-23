@@ -1,5 +1,5 @@
 import { redirect } from '@sveltejs/kit';
-import { desc, eq } from 'drizzle-orm';
+import { and, desc, eq, inArray } from 'drizzle-orm';
 import { db, schema } from '$lib/server/db';
 import type { PageServerLoad } from './$types';
 
@@ -36,6 +36,22 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		}
 		throw err;
 	});
+	const latestSummaryInsightIds = summaries[0]?.insightIds ?? [];
+	const latestSummaryInsights =
+		latestSummaryInsightIds.length && !migrationPending
+			? await db
+					.select()
+					.from(schema.savedInsight)
+					.where(
+						and(
+							eq(schema.savedInsight.userId, locals.user.id),
+							inArray(schema.savedInsight.id, latestSummaryInsightIds)
+						)
+					)
+			: [];
+	const latestSummaryInsightById = new Map(
+		latestSummaryInsights.map((insight) => [insight.id, insight])
+	);
 
 	return {
 		user: {
@@ -54,6 +70,14 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			...summary,
 			createdAt: summary.createdAt.toISOString()
 		})),
+		latestSummaryInsights: latestSummaryInsightIds
+			.map((id) => latestSummaryInsightById.get(id))
+			.filter((insight) => insight != null)
+			.map((insight) => ({
+				...insight,
+				createdAt: insight.createdAt.toISOString(),
+				updatedAt: insight.updatedAt.toISOString()
+			})),
 		deliveries: deliveries.map((delivery) => ({
 			...delivery,
 			createdAt: delivery.createdAt.toISOString()
@@ -67,6 +91,10 @@ function isMissingAiTableError(err: unknown): boolean {
 		message.includes('saved_insight') ||
 		message.includes('insight_summary') ||
 		message.includes('insight_email_delivery') ||
+		message.includes('source_document') ||
+		message.includes('source_chunk') ||
+		message.includes('saved_insight_source_match') ||
+		message.includes('insight_summary_source') ||
 		(message.includes('relation') && message.includes('does not exist'))
 	);
 }

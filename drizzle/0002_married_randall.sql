@@ -1,0 +1,1 @@
+ALTER TABLE "insight_summary" ADD COLUMN "insight_ids" jsonb DEFAULT '[]'::jsonb NOT NULL;

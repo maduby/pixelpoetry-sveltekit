@@ -11,27 +11,45 @@ Pixel Poetry now has a logged-in saved-takeaways layer for explainer essays. The
 3. On mobile, the action bar presents as a mini bottom sheet with safe-area padding.
 4. Logged-in readers tap it to save the marked text immediately, with a short packed animation.
 5. `/account` lists the reader's saved takeaways and any notes.
-6. The reader can generate a private recap from saved takeaways.
-7. The reader can email that recap to their own account email through Resend.
+6. The reader can search saved takeaways, select one/many/all, and generate a private recap from only that selected set.
+7. The recap links back to Pixel Poetry, the relevant explainer, and each saved passage used to generate it.
+8. The recap includes links back to Pixel Poetry, the relevant explainer, the saved passages used, and any retrieved editorial sources that support the recap.
+9. The reader can email that recap to their own account email through Resend, including the same recapped-piece and source links.
 
 Logged-out readers are routed to login before saving.
 
 ## Provider Setup
 
-V1 uses Vercel AI Gateway through the AI SDK.
+V1 supports two server-side provider paths through the AI SDK:
+
+- `AI_PROVIDER=minimax`: direct MiniMax API using MiniMax's OpenAI-compatible endpoint.
+- `AI_PROVIDER=gateway`: Vercel AI Gateway using the Gateway model string.
+
+Direct MiniMax:
 
 ```env
+AI_PROVIDER=minimax
+MINIMAX_API_KEY=...
+MINIMAX_MODEL=MiniMax-M2.7
+MINIMAX_BASE_URL=https://api.minimax.io/v1
+```
+
+Vercel AI Gateway:
+
+```env
+AI_PROVIDER=gateway
 AI_GATEWAY_API_KEY=...
 AI_GATEWAY_MODEL=minimax/minimax-m2.7
 ```
 
-Default model: `minimax/minimax-m2.7`.
+Default direct MiniMax model: `MiniMax-M2.7`.
+Default Gateway model: `minimax/minimax-m2.7`.
 
 Why this path:
 
-- MiniMax M2.7 is available directly through Vercel AI Gateway.
-- AI SDK usage stays clean: pass the Gateway model string to `generateText`.
-- Gateway gives Vercel-side observability, cost tracking, retries, and model swapping.
+- MiniMax M2.7 is available directly through MiniMax and through Vercel AI Gateway.
+- AI SDK usage stays clean: use an OpenAI-compatible provider for MiniMax, or pass the Gateway model string to `generateText`.
+- Gateway gives Vercel-side observability, cost tracking, retries, and model swapping when we want that path.
 - The young direct MiniMax provider package was deliberately avoided for v1.
 
 Future option: OpenRouter also exposes MiniMax M2.7 at `openrouter.ai/minimax/minimax-m2.7/api`. If Gateway pricing, availability, or BYOK needs change, add an OpenRouter provider behind `$lib/server/ai/provider.ts` without changing the UI or persistence layer.
@@ -56,9 +74,30 @@ Tables added:
 
 - `saved_insight`: selected passage, optional note, explainer/chapter/step metadata, hashes.
 - `insight_summary`: structured private AI recap JSON, provider/model/prompt metadata.
+- `insight_summary.insight_ids`: saved takeaway IDs used to generate the recap, stored so the UI and email can link back to the recapped passages.
 - `insight_email_delivery`: email-to-self delivery status.
+- `source_document`: canonical explainer source records.
+- `source_chunk`: meaningful source/reference chunks with optional `vector(1536)` embeddings.
+- `saved_insight_source_match`: private source matches for each saved takeaway.
+- `insight_summary_source`: source chunks attached to a generated recap.
 
-Migration: `drizzle/0001_red_madame_masque.sql`.
+Migrations:
+
+- `drizzle/0001_red_madame_masque.sql` — saved takeaways, summaries, email deliveries.
+- `drizzle/0002_married_randall.sql` — selected insight IDs on summaries.
+- `drizzle/0003_bouncy_james_howlett.sql` — source grounding tables and pgvector extension.
+
+## Source Grounding
+
+See `docs/ai/source-grounding.md`.
+
+Current behavior:
+
+- Existing Longevity and Ultra-Processed sources are ingested through `src/lib/explainers/registry.ts`.
+- `pnpm sources:ingest` upserts canonical source documents and source chunks.
+- Embeddings are optional. With embeddings disabled, retrieval uses explainer/chapter/step context plus lexical overlap.
+- Recap prompts receive only selected takeaways and retrieved source snippets as `allowedSources`.
+- Recaps may include a `sources` array, but the model is instructed to cite only supplied source IDs.
 
 ## PostHog Events
 
@@ -80,6 +119,6 @@ Never send selected text, notes, summaries, prompt text, or email addresses to P
 
 ## Prompt Version
 
-Current prompt version: `saved-takeaways-summary-v1`.
+Current prompt version: `saved-takeaways-summary-v2-grounded`.
 
-The prompt instructs the model to use only saved passages and reader notes, avoid inventing facts or citations, and write in a warm concise editorial voice.
+The prompt instructs the model to use only saved passages, reader notes, and retrieved source snippets, avoid inventing facts or citations, and write in a warm concise editorial voice.

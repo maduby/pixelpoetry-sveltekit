@@ -3,6 +3,7 @@ import { and, desc, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { db, schema } from '$lib/server/db';
 import { hashText } from '$lib/server/ai/insight-summary';
+import { matchAndStoreSourcesForInsight } from '$lib/server/sources/source-retrieval';
 import type { RequestHandler } from './$types';
 
 const saveInsightSchema = z.object({
@@ -88,6 +89,11 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 			}
 			throw err;
 		});
+	await matchAndStoreSourcesForInsight(db, saved).catch((err: unknown) => {
+		if (!isMissingAiTableError(err)) {
+			console.warn('Saved takeaway source matching failed', err);
+		}
+	});
 	return json({ insight: saved }, { status: 201 });
 };
 
@@ -97,6 +103,9 @@ function isMissingAiTableError(err: unknown): boolean {
 		message.includes('saved_insight') ||
 		message.includes('insight_summary') ||
 		message.includes('insight_email_delivery') ||
+		message.includes('source_document') ||
+		message.includes('source_chunk') ||
+		message.includes('saved_insight_source_match') ||
 		(message.includes('relation') && message.includes('does not exist'))
 	);
 }

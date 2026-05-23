@@ -5,6 +5,12 @@ export interface InsightSummaryEmailInput {
 	summary: InsightSummaryJson;
 	insightCount: number;
 	explainerSlug: string;
+	siteUrl: string;
+	sourceLinks?: Array<{
+		label: string;
+		href: string;
+		excerpt: string;
+	}>;
 }
 
 function escapeHtml(value: string): string {
@@ -18,6 +24,34 @@ function escapeHtml(value: string): string {
 
 function list(items: string[]): string {
 	return items.map((item) => `<li>${escapeHtml(item)}</li>`).join('');
+}
+
+function linkList(items: NonNullable<InsightSummaryEmailInput['sourceLinks']>): string {
+	return items
+		.map(
+			(item) => `<li style="margin:0 0 12px;">
+				<a href="${escapeHtml(item.href)}" style="color:#0a0a0a;font-weight:700;text-decoration:underline;">${escapeHtml(
+					item.label
+				)}</a>
+				<div style="margin-top:4px;color:#666;">${escapeHtml(item.excerpt)}</div>
+			</li>`
+		)
+		.join('');
+}
+
+function sourceList(items: NonNullable<InsightSummaryJson['sources']>): string {
+	return items
+		.map((item) => {
+			const title = item.url
+				? `<a href="${escapeHtml(item.url)}" style="color:#0a0a0a;font-weight:700;text-decoration:underline;">${escapeHtml(
+						item.short
+					)}</a>`
+				: `<strong>${escapeHtml(item.short)}</strong>`;
+			return `<li style="margin:0 0 12px;">${title}<div style="margin-top:4px;color:#666;">${escapeHtml(
+				item.support
+			)}</div></li>`;
+		})
+		.join('');
 }
 
 export function renderInsightSummaryEmail(input: InsightSummaryEmailInput): {
@@ -41,11 +75,14 @@ export function renderInsightSummaryEmail(input: InsightSummaryEmailInput): {
 	<body style="margin:0;background:#fef9ef;color:#0a0a0a;font-family:Arial,sans-serif;">
 		<div style="display:none;max-height:0;overflow:hidden;">${escapeHtml(preheader)}</div>
 		<main style="max-width:680px;margin:0 auto;padding:32px 20px;">
-			<p style="margin:0 0 12px;text-transform:uppercase;letter-spacing:.12em;font-size:12px;font-weight:700;color:#8a5a00;">Pixel Poetry</p>
-			<h1 style="margin:0 0 18px;font-size:34px;line-height:1.08;font-family:Georgia,serif;">${escapeHtml(
-				title
-			)}</h1>
-			<p style="font-size:17px;line-height:1.65;margin:0 0 24px;">Hi ${escapeHtml(input.name)},</p>
+				<p style="margin:0 0 12px;text-transform:uppercase;letter-spacing:.12em;font-size:12px;font-weight:700;color:#8a5a00;">Pixel Poetry</p>
+				<h1 style="margin:0 0 18px;font-size:34px;line-height:1.08;font-family:Georgia,serif;">${escapeHtml(
+					title
+				)}</h1>
+				<p style="font-size:15px;line-height:1.6;margin:0 0 24px;"><a href="${escapeHtml(
+					input.siteUrl
+				)}" style="color:#0a0a0a;font-weight:700;text-decoration:underline;">Open Pixel Poetry</a></p>
+				<p style="font-size:17px;line-height:1.65;margin:0 0 24px;">Hi ${escapeHtml(input.name)},</p>
 			<p style="font-size:17px;line-height:1.65;margin:0 0 24px;">${escapeHtml(
 				input.summary.overview
 			)}</p>
@@ -54,16 +91,28 @@ export function renderInsightSummaryEmail(input: InsightSummaryEmailInput): {
 			<h2 style="font-size:20px;margin:30px 0 12px;font-family:Georgia,serif;">Memory hooks</h2>
 			<ul style="font-size:16px;line-height:1.6;padding-left:22px;">${list(input.summary.memoryHooks)}</ul>
 			<h2 style="font-size:20px;margin:30px 0 12px;font-family:Georgia,serif;">Shareable summary</h2>
-			<p style="font-size:16px;line-height:1.65;margin:0 0 24px;">${escapeHtml(
-				input.summary.shareableSummary
-			)}</p>
-			${
-				input.summary.suggestedNextRead
-					? `<p style="font-size:15px;line-height:1.6;margin:28px 0 0;color:#444;"><strong>Next:</strong> ${escapeHtml(
-							input.summary.suggestedNextRead
-						)}</p>`
-					: ''
-			}
+				<p style="font-size:16px;line-height:1.65;margin:0 0 24px;">${escapeHtml(
+					input.summary.shareableSummary
+				)}</p>
+				${
+					input.summary.sources?.length
+						? `<h2 style="font-size:20px;margin:30px 0 12px;font-family:Georgia,serif;">Sources behind this recap</h2>
+				<ul style="font-size:15px;line-height:1.55;padding-left:22px;">${sourceList(input.summary.sources)}</ul>`
+						: ''
+				}
+				${
+					input.sourceLinks?.length
+						? `<h2 style="font-size:20px;margin:30px 0 12px;font-family:Georgia,serif;">Recapped pieces</h2>
+				<ul style="font-size:15px;line-height:1.55;padding-left:22px;">${linkList(input.sourceLinks)}</ul>`
+						: ''
+				}
+				${
+					input.summary.suggestedNextRead
+						? `<p style="font-size:15px;line-height:1.6;margin:28px 0 0;color:#444;"><strong>Next:</strong> ${escapeHtml(
+								input.summary.suggestedNextRead
+							)}</p>`
+						: ''
+				}
 			<p style="font-size:13px;line-height:1.6;margin:34px 0 0;color:#666;">This private email was sent to you because you requested a recap from your Pixel Poetry account.</p>
 		</main>
 	</body>
@@ -71,6 +120,7 @@ export function renderInsightSummaryEmail(input: InsightSummaryEmailInput): {
 
 	const text = [
 		`Pixel Poetry: ${title}`,
+		input.siteUrl,
 		`Hi ${input.name},`,
 		input.summary.overview,
 		'Key takeaways:',
@@ -79,6 +129,20 @@ export function renderInsightSummaryEmail(input: InsightSummaryEmailInput): {
 		...input.summary.memoryHooks.map((item) => `- ${item}`),
 		'Shareable summary:',
 		input.summary.shareableSummary,
+		input.summary.sources?.length
+			? [
+					'Sources behind this recap:',
+					...input.summary.sources.map(
+						(item) => `- ${item.short}${item.url ? ` (${item.url})` : ''}: ${item.support}`
+					)
+				].join('\n')
+			: '',
+		input.sourceLinks?.length
+			? [
+					'Recapped pieces:',
+					...input.sourceLinks.map((item) => `- ${item.label}: ${item.href}`)
+				].join('\n')
+			: '',
 		input.summary.suggestedNextRead ? `Next: ${input.summary.suggestedNextRead}` : '',
 		'This private email was sent to you because you requested a recap from your Pixel Poetry account.'
 	]

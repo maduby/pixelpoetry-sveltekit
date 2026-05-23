@@ -1,5 +1,16 @@
 import { relations } from 'drizzle-orm';
-import { index, integer, jsonb, pgTable, text, timestamp, boolean } from 'drizzle-orm/pg-core';
+import {
+	boolean,
+	index,
+	integer,
+	jsonb,
+	pgTable,
+	real,
+	text,
+	timestamp,
+	uniqueIndex,
+	vector
+} from 'drizzle-orm/pg-core';
 
 export const user = pgTable('user', {
 	id: text('id').primaryKey(),
@@ -72,6 +83,13 @@ export type InsightSummaryJson = {
 	memoryHooks: string[];
 	shareableSummary: string;
 	suggestedNextRead?: string;
+	sources?: Array<{
+		sourceId: string;
+		short: string;
+		url?: string;
+		support: string;
+		insightIds: string[];
+	}>;
 };
 
 export const savedInsight = pgTable(
@@ -102,6 +120,89 @@ export const savedInsight = pgTable(
 	]
 );
 
+export const sourceDocument = pgTable(
+	'source_document',
+	{
+		id: text('id').primaryKey(),
+		sourceId: text('source_id').notNull(),
+		explainerSlug: text('explainer_slug').notNull(),
+		short: text('short').notNull(),
+		full: text('full').notNull(),
+		url: text('url'),
+		year: integer('year').notNull(),
+		contentHash: text('content_hash').notNull(),
+		createdAt: timestamp('created_at')
+			.$defaultFn(() => new Date())
+			.notNull(),
+		updatedAt: timestamp('updated_at')
+			.$defaultFn(() => new Date())
+			.notNull()
+	},
+	(table) => [
+		uniqueIndex('source_document_explainer_source_uidx').on(table.explainerSlug, table.sourceId),
+		index('source_document_explainer_idx').on(table.explainerSlug)
+	]
+);
+
+export const sourceChunk = pgTable(
+	'source_chunk',
+	{
+		id: text('id').primaryKey(),
+		sourceDocumentId: text('source_document_id')
+			.notNull()
+			.references(() => sourceDocument.id, { onDelete: 'cascade' }),
+		sourceId: text('source_id').notNull(),
+		explainerSlug: text('explainer_slug').notNull(),
+		chapterId: text('chapter_id'),
+		stepId: text('step_id'),
+		chunkKind: text('chunk_kind').notNull(),
+		chunkText: text('chunk_text').notNull(),
+		url: text('url'),
+		contentHash: text('content_hash').notNull(),
+		embedding: vector('embedding', { dimensions: 1536 }),
+		embeddingModel: text('embedding_model'),
+		embeddedAt: timestamp('embedded_at'),
+		createdAt: timestamp('created_at')
+			.$defaultFn(() => new Date())
+			.notNull(),
+		updatedAt: timestamp('updated_at')
+			.$defaultFn(() => new Date())
+			.notNull()
+	},
+	(table) => [
+		uniqueIndex('source_chunk_content_hash_uidx').on(table.contentHash),
+		index('source_chunk_explainer_idx').on(table.explainerSlug),
+		index('source_chunk_source_document_idx').on(table.sourceDocumentId),
+		index('source_chunk_context_idx').on(table.explainerSlug, table.chapterId, table.stepId)
+	]
+);
+
+export const savedInsightSourceMatch = pgTable(
+	'saved_insight_source_match',
+	{
+		id: text('id').primaryKey(),
+		savedInsightId: text('saved_insight_id')
+			.notNull()
+			.references(() => savedInsight.id, { onDelete: 'cascade' }),
+		sourceChunkId: text('source_chunk_id')
+			.notNull()
+			.references(() => sourceChunk.id, { onDelete: 'cascade' }),
+		sourceDocumentId: text('source_document_id')
+			.notNull()
+			.references(() => sourceDocument.id, { onDelete: 'cascade' }),
+		score: real('score').notNull(),
+		matchReason: text('match_reason').notNull(),
+		createdAt: timestamp('created_at')
+			.$defaultFn(() => new Date())
+			.notNull()
+	},
+	(table) => [
+		uniqueIndex('saved_insight_source_match_uidx').on(table.savedInsightId, table.sourceChunkId),
+		index('saved_insight_source_match_insight_idx').on(table.savedInsightId),
+		index('saved_insight_source_match_source_idx').on(table.sourceDocumentId)
+	]
+);
+
 export const insightSummary = pgTable(
 	'insight_summary',
 	{
@@ -116,6 +217,7 @@ export const insightSummary = pgTable(
 		promptVersion: text('prompt_version').notNull(),
 		inputHash: text('input_hash').notNull(),
 		insightCount: integer('insight_count').notNull(),
+		insightIds: jsonb('insight_ids').$type<string[]>().notNull().default([]),
 		createdAt: timestamp('created_at')
 			.$defaultFn(() => new Date())
 			.notNull()
@@ -123,6 +225,31 @@ export const insightSummary = pgTable(
 	(table) => [
 		index('insight_summary_user_created_idx').on(table.userId, table.createdAt),
 		index('insight_summary_user_explainer_idx').on(table.userId, table.explainerSlug)
+	]
+);
+
+export const insightSummarySource = pgTable(
+	'insight_summary_source',
+	{
+		id: text('id').primaryKey(),
+		summaryId: text('summary_id')
+			.notNull()
+			.references(() => insightSummary.id, { onDelete: 'cascade' }),
+		sourceChunkId: text('source_chunk_id')
+			.notNull()
+			.references(() => sourceChunk.id, { onDelete: 'cascade' }),
+		sourceDocumentId: text('source_document_id')
+			.notNull()
+			.references(() => sourceDocument.id, { onDelete: 'cascade' }),
+		score: real('score').notNull(),
+		createdAt: timestamp('created_at')
+			.$defaultFn(() => new Date())
+			.notNull()
+	},
+	(table) => [
+		uniqueIndex('insight_summary_source_uidx').on(table.summaryId, table.sourceChunkId),
+		index('insight_summary_source_summary_idx').on(table.summaryId),
+		index('insight_summary_source_source_idx').on(table.sourceDocumentId)
 	]
 );
 
@@ -169,11 +296,12 @@ export const accountRelations = relations(account, ({ one }) => ({
 	})
 }));
 
-export const savedInsightRelations = relations(savedInsight, ({ one }) => ({
+export const savedInsightRelations = relations(savedInsight, ({ one, many }) => ({
 	user: one(user, {
 		fields: [savedInsight.userId],
 		references: [user.id]
-	})
+	}),
+	sourceMatches: many(savedInsightSourceMatch)
 }));
 
 export const insightSummaryRelations = relations(insightSummary, ({ one, many }) => ({
@@ -181,7 +309,53 @@ export const insightSummaryRelations = relations(insightSummary, ({ one, many })
 		fields: [insightSummary.userId],
 		references: [user.id]
 	}),
-	emailDeliveries: many(insightEmailDelivery)
+	emailDeliveries: many(insightEmailDelivery),
+	sources: many(insightSummarySource)
+}));
+
+export const sourceDocumentRelations = relations(sourceDocument, ({ many }) => ({
+	chunks: many(sourceChunk),
+	savedInsightMatches: many(savedInsightSourceMatch),
+	summarySources: many(insightSummarySource)
+}));
+
+export const sourceChunkRelations = relations(sourceChunk, ({ one, many }) => ({
+	document: one(sourceDocument, {
+		fields: [sourceChunk.sourceDocumentId],
+		references: [sourceDocument.id]
+	}),
+	savedInsightMatches: many(savedInsightSourceMatch),
+	summarySources: many(insightSummarySource)
+}));
+
+export const savedInsightSourceMatchRelations = relations(savedInsightSourceMatch, ({ one }) => ({
+	insight: one(savedInsight, {
+		fields: [savedInsightSourceMatch.savedInsightId],
+		references: [savedInsight.id]
+	}),
+	chunk: one(sourceChunk, {
+		fields: [savedInsightSourceMatch.sourceChunkId],
+		references: [sourceChunk.id]
+	}),
+	document: one(sourceDocument, {
+		fields: [savedInsightSourceMatch.sourceDocumentId],
+		references: [sourceDocument.id]
+	})
+}));
+
+export const insightSummarySourceRelations = relations(insightSummarySource, ({ one }) => ({
+	summary: one(insightSummary, {
+		fields: [insightSummarySource.summaryId],
+		references: [insightSummary.id]
+	}),
+	chunk: one(sourceChunk, {
+		fields: [insightSummarySource.sourceChunkId],
+		references: [sourceChunk.id]
+	}),
+	document: one(sourceDocument, {
+		fields: [insightSummarySource.sourceDocumentId],
+		references: [sourceDocument.id]
+	})
 }));
 
 export const insightEmailDeliveryRelations = relations(insightEmailDelivery, ({ one }) => ({
