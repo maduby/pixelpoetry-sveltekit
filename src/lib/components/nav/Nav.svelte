@@ -8,26 +8,44 @@
 	 * every screen size — it replaces the old inline mobile dropdown.
 	 */
 	import { site } from '$lib/data/site';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import { getExplainerHolder } from '$lib/context/explainer.svelte';
 	import { getTheme } from '$lib/utils/explainer-theme';
 	import { posthog } from '$lib/analytics/posthog';
+	import { authClient } from '$lib/auth-client';
 	import Menu from 'lucide-svelte/icons/menu';
+	import LogIn from 'lucide-svelte/icons/log-in';
+	import UserCircle from 'lucide-svelte/icons/user-circle';
 	import AutoBookmarkStatus from '$lib/components/nav/AutoBookmarkStatus.svelte';
 	import ShareMenu from '$lib/components/nav/ShareMenu.svelte';
 	import NavDrawer from '$lib/components/nav/NavDrawer.svelte';
 	import ResumeReadingControl from '$lib/components/nav/ResumeReadingControl.svelte';
 
+	type UserSummary = {
+		id: string;
+		name: string;
+		email: string;
+		image?: string | null;
+	};
+
 	const explainerHolder = getExplainerHolder();
 	const explainer = $derived(explainerHolder?.current ?? null);
 	const theme = $derived(getTheme(explainer?.meta.accent));
 	const currentPath = $derived(page.url.pathname);
+	const user = $derived(page.data.user as UserSummary | null | undefined);
 
 	let drawerOpen = $state(false);
 
 	function openDrawer() {
 		posthog.capture('nav_drawer_opened', { page: explainer?.meta.slug ?? 'landing' });
 		drawerOpen = true;
+	}
+
+	async function signOut() {
+		await authClient.signOut();
+		await invalidateAll();
+		await goto('/');
 	}
 </script>
 
@@ -96,6 +114,31 @@
 
 		<!-- Right rail -->
 		<div class="ml-auto flex shrink-0 items-center gap-2">
+			{#if user}
+				<a
+					href="/account"
+					aria-label={`Account for ${user.name}`}
+					class="hidden min-h-10 items-center gap-2 rounded-full px-2 text-sm font-semibold text-ink/65 transition-colors hover:bg-ink/8 hover:text-ink sm:inline-flex lg:px-3"
+				>
+					<UserCircle size={19} aria-hidden="true" />
+					<span class="hidden lg:inline">{user.name}</span>
+				</a>
+				<button
+					type="button"
+					onclick={signOut}
+					class="hidden cursor-pointer rounded-full px-3 py-2 text-sm font-semibold text-ink/50 transition-colors hover:bg-ink/8 hover:text-ink lg:block"
+				>
+					Sign out
+				</button>
+			{:else}
+				<a
+					href="/login"
+					class="hidden min-h-10 items-center gap-2 rounded-full px-2 text-sm font-semibold text-ink/65 transition-colors hover:bg-ink/8 hover:text-ink sm:inline-flex lg:px-3"
+				>
+					<LogIn size={18} aria-hidden="true" />
+					<span class="hidden lg:inline">Log in</span>
+				</a>
+			{/if}
 			{#if explainer}
 				<!-- Essay pages: Share + Sources pill -->
 				<div class="sm:hidden">

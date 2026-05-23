@@ -24,6 +24,8 @@ Canonical list lives in [`src/lib/data/explainers.ts`](src/lib/data/explainers.t
 - **GSAP 3 + ScrollTrigger** via Svelte 5 `@attach` factories
 - **Observable Plot** + d3 for editorial charts
 - **PostHog** — cookie-free analytics
+- **Better Auth** — email/password + Google OAuth login
+- **Neon Postgres** + **Drizzle ORM** — auth database and future member data
 - **`@fontsource/arvo` + `@fontsource/lato`** — self-hosted fonts
 - **Vercel** hosting via `@sveltejs/adapter-vercel`
 
@@ -40,6 +42,147 @@ pnpm preview       # preview production build
 ```
 
 Copy `.env.example` to `.env` and paste your PostHog project key. Production env vars are set in the Vercel dashboard.
+
+## Auth + database
+
+Pixel Poetry uses Better Auth with email/password and Google OAuth. Auth data lives in Neon Postgres via Drizzle.
+
+### Local env vars
+
+Copy `.env.example` to `.env.local` and fill:
+
+```bash
+DATABASE_URL=...            # Neon pooled connection string, host contains -pooler
+DATABASE_URL_UNPOOLED=...   # Neon direct connection string, no -pooler; used by migrations
+BETTER_AUTH_SECRET=...      # generate with: openssl rand -base64 32
+BETTER_AUTH_URL=http://localhost:5173
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+```
+
+Keep the existing PostHog vars as-is. In production, set the same private env vars in Vercel and use:
+
+```bash
+BETTER_AUTH_URL=https://pixelpoetry.dev
+```
+
+### Neon
+
+The Neon project is `PixelPoetry` (`quiet-unit-67188191`) with three long-lived branches:
+
+| App environment | Git / runtime | Neon branch | Purpose |
+|-----------------|---------------|-------------|---------|
+| Local dev | `pnpm dev` + `.env.local` | `local` | Local testing without touching deployed data. |
+| Staging | Vercel Preview for `origin/staging` | `staging` | Preview deployments and pre-production auth tests. |
+| Production | Vercel Production for `origin/main` | `production` | Live `pixelpoetry.dev` users. |
+
+Each environment needs two Neon URLs from the matching branch:
+
+1. Turn connection pooling on and use that value for `DATABASE_URL`.
+2. Turn connection pooling off and use that value for `DATABASE_URL_UNPOOLED`.
+
+The pooled URL should contain `-pooler` in the hostname. The unpooled URL should not.
+
+For local development, `.env.local` should point at the `local` Neon branch:
+
+```bash
+DATABASE_URL=postgresql://...@ep-autumn-lake-alejsod3-pooler.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+DATABASE_URL_UNPOOLED=postgresql://...@ep-autumn-lake-alejsod3.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+BETTER_AUTH_URL=http://localhost:5173
+```
+
+Run migrations against the current `.env.local` branch with:
+
+```bash
+pnpm db:generate
+pnpm db:migrate
+```
+
+To list branches and fetch connection strings from the CLI:
+
+```bash
+neon branches list --project-id quiet-unit-67188191
+neon connection-string local --project-id quiet-unit-67188191 --pooled
+neon connection-string local --project-id quiet-unit-67188191
+neon connection-string staging --project-id quiet-unit-67188191 --pooled
+neon connection-string production --project-id quiet-unit-67188191 --pooled
+```
+
+Do not commit real connection strings; keep them in `.env.local` or Vercel.
+
+### Vercel environment variables
+
+Set Vercel env vars from the project dashboard or CLI. Scope them carefully:
+
+| Vercel scope | Git branch | Neon branch | `BETTER_AUTH_URL` |
+|--------------|------------|-------------|-------------------|
+| Production | `main` | `production` | `https://pixelpoetry.dev` |
+| Preview + branch override | `staging` | `staging` | stable staging URL, preferably `https://staging.pixelpoetry.dev` |
+
+Recommended staging setup:
+
+1. Add a stable Vercel Preview domain for the `staging` branch, preferably `staging.pixelpoetry.dev`.
+2. Add that domain to Google OAuth authorized origins and redirect URIs.
+3. Scope all staging database variables to Preview + `staging`, not all Preview deployments.
+
+CLI examples. Prefer piping Neon URLs into Vercel so database passwords do not land in shell history:
+
+```bash
+# Production / main / production Neon branch
+neon connection-string production --project-id quiet-unit-67188191 --pooled \
+  | vercel env add DATABASE_URL production --sensitive --yes --force
+neon connection-string production --project-id quiet-unit-67188191 \
+  | vercel env add DATABASE_URL_UNPOOLED production --sensitive --yes --force
+vercel env add BETTER_AUTH_SECRET production --sensitive --value "$(openssl rand -base64 32)" --yes --force
+vercel env add BETTER_AUTH_URL production --value "https://pixelpoetry.dev" --yes --force
+vercel env add GOOGLE_CLIENT_ID production --sensitive --value "..." --yes --force
+vercel env add GOOGLE_CLIENT_SECRET production --sensitive --value "..." --yes --force
+
+# Staging / origin/staging / staging Neon branch
+neon connection-string staging --project-id quiet-unit-67188191 --pooled \
+  | vercel env add DATABASE_URL preview staging --sensitive --yes --force
+neon connection-string staging --project-id quiet-unit-67188191 \
+  | vercel env add DATABASE_URL_UNPOOLED preview staging --sensitive --yes --force
+vercel env add BETTER_AUTH_SECRET preview staging --sensitive --value "$(openssl rand -base64 32)" --yes --force
+vercel env add BETTER_AUTH_URL preview staging --value "https://staging.pixelpoetry.dev" --yes --force
+vercel env add GOOGLE_CLIENT_ID preview staging --sensitive --value "..." --yes --force
+vercel env add GOOGLE_CLIENT_SECRET preview staging --sensitive --value "..." --yes --force
+```
+
+If the variable already exists with a broader Preview scope, remove or override it so `staging` does not accidentally point at production:
+
+```bash
+vercel env list preview
+vercel env remove DATABASE_URL preview
+```
+
+### Google OAuth
+
+Create a Google OAuth web client and add these authorized redirect URIs:
+
+```text
+http://localhost:5173/api/auth/callback/google
+https://staging.pixelpoetry.dev/api/auth/callback/google
+https://pixelpoetry.dev/api/auth/callback/google
+```
+
+Authorized JavaScript origins:
+
+```text
+http://localhost:5173
+https://staging.pixelpoetry.dev
+https://pixelpoetry.dev
+```
+
+Then paste the client ID and secret into `.env.local` and Vercel. A single Google OAuth client can cover local, staging, and production if all origins and redirects above are listed.
+
+### Auth scripts
+
+```bash
+pnpm auth:generate  # regenerate Better Auth's Drizzle schema after auth config changes
+pnpm db:generate    # create Drizzle migrations
+pnpm db:migrate     # apply migrations to Neon
+```
 
 ## Repo layout
 

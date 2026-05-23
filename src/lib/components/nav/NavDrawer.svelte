@@ -7,23 +7,36 @@
 	 * when an explainer is active, and footer links.
 	 */
 	import { page } from '$app/state';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { site } from '$lib/data/site';
 	import { explainers } from '$lib/data/explainers';
 	import { getExplainerHolder } from '$lib/context/explainer.svelte';
 	import { posthog } from '$lib/analytics/posthog';
+	import { authClient } from '$lib/auth-client';
 	import X from 'lucide-svelte/icons/x';
 	import BookOpen from 'lucide-svelte/icons/book-open';
 	import Home from 'lucide-svelte/icons/home';
 	import Info from 'lucide-svelte/icons/info';
+	import LogIn from 'lucide-svelte/icons/log-in';
+	import LogOut from 'lucide-svelte/icons/log-out';
+	import UserCircle from 'lucide-svelte/icons/user-circle';
 
 	interface Props {
 		open?: boolean;
 	}
+	type UserSummary = {
+		id: string;
+		name: string;
+		email: string;
+		image?: string | null;
+	};
+
 	let { open = $bindable(false) }: Props = $props();
 
 	const explainerHolder = getExplainerHolder();
 	const explainer = $derived(explainerHolder?.current ?? null);
 	const currentPath = $derived(page.url.pathname);
+	const user = $derived(page.data.user as UserSummary | null | undefined);
 
 	let dialogEl = $state<HTMLDialogElement | undefined>(undefined);
 	let panelEl = $state<HTMLDivElement | undefined>(undefined);
@@ -65,6 +78,13 @@
 
 	function isActive(href: string) {
 		return currentPath === href || (href !== '/' && currentPath.startsWith(href));
+	}
+
+	async function signOut() {
+		close();
+		await authClient.signOut();
+		await invalidateAll();
+		await goto('/');
 	}
 
 	const accentColors: Record<string, string> = {
@@ -117,6 +137,38 @@
 
 		<!-- Scrollable body -->
 		<div class="flex-1 overflow-y-auto py-4">
+			<div class="px-3 pb-4">
+				{#if user}
+					<a
+						href="/account"
+						onclick={close}
+						class="flex items-center gap-3 rounded-xl border border-ink/10 bg-paper px-3 py-3 transition-colors hover:bg-cream-soft"
+					>
+						<UserCircle size={22} aria-hidden="true" class="shrink-0 text-brand-red" />
+						<span class="min-w-0 flex-1">
+							<span class="block truncate text-sm font-black text-ink">{user.name}</span>
+							<span class="block truncate text-xs text-ink/45">{user.email}</span>
+						</span>
+					</a>
+					<button
+						type="button"
+						onclick={signOut}
+						class="mt-2 flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-ink/55 transition-colors hover:bg-ink/5 hover:text-ink"
+					>
+						<LogOut size={16} aria-hidden="true" class="shrink-0 opacity-60" />
+						Sign out
+					</button>
+				{:else}
+					<a
+						href="/login"
+						onclick={close}
+						class="flex items-center gap-3 rounded-xl border border-ink/10 bg-paper px-3 py-3 text-sm font-black text-ink transition-colors hover:bg-cream-soft"
+					>
+						<LogIn size={18} aria-hidden="true" class="shrink-0 text-brand-red" />
+						Log in
+					</a>
+				{/if}
+			</div>
 
 			<!-- Main nav links -->
 			<nav aria-label="Site navigation">
