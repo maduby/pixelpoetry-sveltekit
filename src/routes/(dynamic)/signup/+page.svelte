@@ -46,7 +46,7 @@
 	async function signUpWithGoogle() {
 		errorMessage = '';
 		googleLoading = true;
-		const { error } = await authClient.signIn.social({
+		const { data, error } = await authClient.signIn.social({
 			provider: 'google',
 			callbackURL: redirectTo,
 			newUserCallbackURL: redirectTo,
@@ -56,6 +56,11 @@
 
 		if (error) {
 			errorMessage = error.message || 'Google sign-up is not configured yet.';
+			return;
+		}
+
+		if (data?.url) {
+			window.location.href = data.url;
 		}
 	}
 </script>
