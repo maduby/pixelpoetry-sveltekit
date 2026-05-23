@@ -43,6 +43,24 @@
 
 ---
 
+## 2026-05-23 — Recap shelf UX
+
+**Goal:** Make multiple AI recaps feel intentional, compact, and manageable.
+
+**What got done**
+
+- Capped saved recap history to the 5 most recent recaps per user after new recap generation.
+- Replaced the always-expanded latest recap panel with a compact `My recaps` shelf on the account page.
+- Added recap open, email, delete, and edit actions.
+- Moved full recap reading into the shared native bottom sheet so it works as a bottom sheet on mobile and a large focused panel on desktop.
+- Added a small authenticated PATCH/DELETE API for editing recap title/overview/shareable text and deleting private recaps.
+
+**Verification**
+
+- Pending final `pnpm check` and `pnpm build`.
+
+---
+
 ## 2026-05-23 — Saved insights AI layer
 
 **Goal:** Implement the logged-in saved-insights MVP with AI recaps and Resend email-to-self.

@@ -10,7 +10,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	}
 
 	let migrationPending = false;
-	const [insights, summaries, deliveries] = await Promise.all([
+	const [insights, summaries] = await Promise.all([
 		db
 			.select()
 			.from(schema.savedInsight)
@@ -22,35 +22,56 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			.from(schema.insightSummary)
 			.where(eq(schema.insightSummary.userId, locals.user.id))
 			.orderBy(desc(schema.insightSummary.createdAt))
-			.limit(5),
-		db
-			.select()
-			.from(schema.insightEmailDelivery)
-			.where(eq(schema.insightEmailDelivery.userId, locals.user.id))
-			.orderBy(desc(schema.insightEmailDelivery.createdAt))
 			.limit(5)
 	]).catch((err: unknown) => {
 		if (isMissingAiTableError(err)) {
 			migrationPending = true;
-			return [[], [], []] as const;
+			return [[], []] as const;
 		}
 		throw err;
 	});
-	const latestSummaryInsightIds = summaries[0]?.insightIds ?? [];
-	const latestSummaryInsights =
-		latestSummaryInsightIds.length && !migrationPending
+	const summaryIds = summaries.map((summary) => summary.id);
+	const deliveries =
+		summaryIds.length && !migrationPending
+			? await db
+					.select()
+					.from(schema.insightEmailDelivery)
+					.where(
+						and(
+							eq(schema.insightEmailDelivery.userId, locals.user.id),
+							inArray(schema.insightEmailDelivery.summaryId, summaryIds)
+						)
+					)
+					.orderBy(desc(schema.insightEmailDelivery.createdAt))
+			: [];
+	const summaryInsightIds = Array.from(
+		new Set(summaries.flatMap((summary) => summary.insightIds ?? []))
+	);
+	const summaryInsights =
+		summaryInsightIds.length && !migrationPending
 			? await db
 					.select()
 					.from(schema.savedInsight)
 					.where(
 						and(
 							eq(schema.savedInsight.userId, locals.user.id),
-							inArray(schema.savedInsight.id, latestSummaryInsightIds)
+							inArray(schema.savedInsight.id, summaryInsightIds)
 						)
 					)
 			: [];
-	const latestSummaryInsightById = new Map(
-		latestSummaryInsights.map((insight) => [insight.id, insight])
+	const summaryInsightById = new Map(summaryInsights.map((insight) => [insight.id, insight]));
+	const summaryInsightsBySummaryId = Object.fromEntries(
+		summaries.map((summary) => [
+			summary.id,
+			(summary.insightIds ?? [])
+				.map((id) => summaryInsightById.get(id))
+				.filter((insight) => insight != null)
+				.map((insight) => ({
+					...insight,
+					createdAt: insight.createdAt.toISOString(),
+					updatedAt: insight.updatedAt.toISOString()
+				}))
+		])
 	);
 
 	return {
@@ -70,14 +91,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			...summary,
 			createdAt: summary.createdAt.toISOString()
 		})),
-		latestSummaryInsights: latestSummaryInsightIds
-			.map((id) => latestSummaryInsightById.get(id))
-			.filter((insight) => insight != null)
-			.map((insight) => ({
-				...insight,
-				createdAt: insight.createdAt.toISOString(),
-				updatedAt: insight.updatedAt.toISOString()
-			})),
+		summaryInsightsBySummaryId,
 		deliveries: deliveries.map((delivery) => ({
 			...delivery,
 			createdAt: delivery.createdAt.toISOString()

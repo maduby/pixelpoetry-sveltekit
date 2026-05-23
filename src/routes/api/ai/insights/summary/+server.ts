@@ -14,6 +14,8 @@ const summaryRequestSchema = z.object({
 	insightIds: z.array(z.string().min(1).max(120)).min(1).max(100).optional()
 });
 
+const MAX_RECAPS_PER_USER = 5;
+
 export const POST: RequestHandler = async ({ locals, request }) => {
 	if (!locals.user) error(401, 'Log in to generate saved-insight summaries.');
 
@@ -72,6 +74,9 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 	await attachSourcesToSummary(db, saved.id, sourceMatches).catch((err: unknown) => {
 		console.warn('Saved takeaways summary-source attachment failed', err);
 	});
+	await pruneOldSummaries(locals.user.id).catch((err: unknown) => {
+		console.warn('Saved takeaways summary pruning failed', err);
+	});
 
 	return json({
 		summary: saved,
@@ -80,3 +85,25 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 		promptVersion: generated.promptVersion
 	});
 };
+
+async function pruneOldSummaries(userId: string): Promise<void> {
+	const oldSummaries = await db
+		.select({ id: schema.insightSummary.id })
+		.from(schema.insightSummary)
+		.where(eq(schema.insightSummary.userId, userId))
+		.orderBy(desc(schema.insightSummary.createdAt))
+		.limit(100)
+		.offset(MAX_RECAPS_PER_USER);
+
+	if (oldSummaries.length === 0) return;
+
+	await db.delete(schema.insightSummary).where(
+		and(
+			eq(schema.insightSummary.userId, userId),
+			inArray(
+				schema.insightSummary.id,
+				oldSummaries.map((summary) => summary.id)
+			)
+		)
+	);
+}

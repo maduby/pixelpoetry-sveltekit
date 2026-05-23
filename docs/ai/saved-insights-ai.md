@@ -12,9 +12,10 @@ Pixel Poetry now has a logged-in saved-takeaways layer for explainer essays. The
 4. Logged-in readers tap it to save the marked text immediately, with a short packed animation.
 5. `/account` lists the reader's saved takeaways and any notes.
 6. The reader can search saved takeaways, select one/many/all, and generate a private recap from only that selected set.
-7. The recap links back to Pixel Poetry, the relevant explainer, and each saved passage used to generate it.
-8. The recap includes links back to Pixel Poetry, the relevant explainer, the saved passages used, and any retrieved editorial sources that support the recap.
-9. The reader can email that recap to their own account email through Resend, including the same recapped-piece and source links.
+7. The account page keeps a compact shelf of the reader's 5 most recent recaps.
+8. Opening a recap uses the shared bottom-sheet/full-screen pattern with edit, email, delete, and source navigation actions.
+9. The recap includes links back to Pixel Poetry, the relevant explainer, the saved passages used, and any retrieved editorial sources that support the recap.
+10. The reader can email that recap to their own account email through Resend, including the same recapped-piece and source links.
 
 Logged-out readers are routed to login before saving.
 
@@ -75,6 +76,7 @@ Tables added:
 - `saved_insight`: selected passage, optional note, explainer/chapter/step metadata, hashes.
 - `insight_summary`: structured private AI recap JSON, provider/model/prompt metadata.
 - `insight_summary.insight_ids`: saved takeaway IDs used to generate the recap, stored so the UI and email can link back to the recapped passages.
+- Recap retention: v1 keeps the 5 most recent recaps per user and prunes older ones after a new recap is generated.
 - `insight_email_delivery`: email-to-self delivery status.
 - `source_document`: canonical explainer source records.
 - `source_chunk`: meaningful source/reference chunks with optional `vector(1536)` embeddings.
@@ -111,6 +113,9 @@ Track behavior only:
 - `insight_summary_requested`
 - `insight_summary_completed`
 - `insight_summary_failed`
+- `insight_summary_opened`
+- `insight_summary_edited`
+- `insight_summary_deleted`
 - `insight_email_requested`
 - `insight_email_sent`
 - `insight_email_failed`
