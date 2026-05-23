@@ -321,6 +321,10 @@
 			-->
 			{#key vizKey}
 				<div
+					data-insight-source={explainer?.meta.slug && chapter.id && step?.id ? 'true' : undefined}
+					data-insight-explainer={explainer?.meta.slug}
+					data-insight-chapter={chapter.id}
+					data-insight-step={step?.id}
 					class="animate-fade-in mx-auto flex w-full min-w-0 flex-col items-center justify-center"
 				>
 					{@render stepViz(step, !sharesAdjacentViz(activeStep))}
@@ -330,7 +334,13 @@
 
 		{#snippet steps({ activeStep })}
 			{#each visibleSteps as step, i (step.id)}
-				<Step id={readerPositionElementId(chapter.id, step.id)} isActive={i === activeStep}>
+				<Step
+					id={readerPositionElementId(chapter.id, step.id)}
+					isActive={i === activeStep}
+					insightExplainerSlug={explainer?.meta.slug}
+					insightChapterId={chapter.id}
+					insightStepId={step.id}
+				>
 					{#if step.accentLetter}
 						<p
 							class="mb-3 font-display text-[clamp(5rem,14vw,11rem)] leading-none font-black select-none {accentText}"
@@ -366,6 +376,10 @@
 				{#if hasStepViz(step) && !repeatsPreviousViz(i)}
 					<div
 						data-scrolly-mobile-viz
+						data-insight-source={explainer?.meta.slug && chapter.id && step.id ? 'true' : undefined}
+						data-insight-explainer={explainer?.meta.slug}
+						data-insight-chapter={chapter.id}
+						data-insight-step={step.id}
 						class="flex w-full min-w-0 items-center justify-center py-10 lg:hidden"
 					>
 						<div class="flex w-full min-w-0 flex-col items-center justify-center">
@@ -385,10 +399,23 @@
 		<div class="mx-auto w-full max-w-(--container-wide) px-6 pb-10 lg:px-8 lg:pb-24 xl:pb-32">
 			{#each closingSteps as step (step.id)}
 				{#if step.quote}
-					<QuoteBlock quote={step.quote} variant="closing" accent={chapter.accent} />
+					<div
+						data-insight-source={explainer?.meta.slug && chapter.id && step.id ? 'true' : undefined}
+						data-insight-explainer={explainer?.meta.slug}
+						data-insight-chapter={chapter.id}
+						data-insight-step={step.id}
+					>
+						<QuoteBlock quote={step.quote} variant="closing" accent={chapter.accent} />
+					</div>
 				{:else}
 					{@const closingText = step.richText ?? step.text}
-					<div class="w-full border-t border-ink/8 py-14 lg:py-18">
+					<div
+						data-insight-source={explainer?.meta.slug && chapter.id && step.id ? 'true' : undefined}
+						data-insight-explainer={explainer?.meta.slug}
+						data-insight-chapter={chapter.id}
+						data-insight-step={step.id}
+						class="w-full border-t border-ink/8 py-14 lg:py-18"
+					>
 						<p
 							class="mx-auto max-w-4xl px-6 text-center font-display text-[clamp(1.55rem,2.15vw,2.3rem)] leading-[1.18] font-black text-pretty text-ink lg:px-8 [&_strong]:text-brand-pink"
 						>

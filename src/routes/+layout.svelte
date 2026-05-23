@@ -7,6 +7,7 @@
 	import ResumeReadingToast from '$lib/components/nav/ResumeReadingToast.svelte';
 	import Footer from '$lib/components/footer/Footer.svelte';
 	import SourceSheet from '$lib/components/ui/SourceSheet.svelte';
+	import SavedInsightLayer from '$lib/components/insights/SavedInsightLayer.svelte';
 	import { Toaster } from 'svelte-sonner';
 	import { initPostHog, capturePageView } from '$lib/analytics/posthog';
 	import { provideExplainerHolder, type ActiveExplainer } from '$lib/context/explainer.svelte';
@@ -65,6 +66,7 @@
 <Footer />
 
 <SourceSheet />
+<SavedInsightLayer />
 <Toaster position="top-center" offset="5rem" visibleToasts={1} />
 
 <style>

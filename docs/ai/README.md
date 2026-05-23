@@ -4,17 +4,19 @@
 
 ## What lives where
 
-| File | Purpose | Update cadence |
-|------|---------|----------------|
-| `README.md` | This index. Start here. | When workflow changes |
-| `project-brief.md` | The "what & why" — one-page product brief. | When goals shift |
-| `architecture.md` | Tech stack, conventions, folder structure, dependencies. | When stack changes |
-| `roadmap.md` | Prioritised backlog: backlog → now → next → done. The single source of truth for "what to work on". | Daily |
-| `daily-log.md` | Append-only journal: what was done, why, what's next. New entry per working day. | Every session |
-| `decisions.md` | ADR-style record. Every meaningful technical or design choice gets a one-paragraph entry. | When a decision is made |
-| `prompts.md` | Reusable prompts: "make a new chapter", "add a stat card", etc. Most are now skills under `.cursor/skills/`. | When a useful pattern emerges |
-| `glossary.md` | Domain terms (NOVA, GRAS, BMJ umbrella review, hazard ratio…) so any agent gets the vocabulary right. | When new terms surface |
-| `open-questions.md` | Unresolved design/product questions. Move them to `decisions.md` once answered. | Whenever blocked |
+| File                         | Purpose                                                                                                      | Update cadence                  |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------- |
+| `README.md`                  | This index. Start here.                                                                                      | When workflow changes           |
+| `project-brief.md`           | The "what & why" — one-page product brief.                                                                   | When goals shift                |
+| `architecture.md`            | Tech stack, conventions, folder structure, dependencies.                                                     | When stack changes              |
+| `roadmap.md`                 | Prioritised backlog: backlog → now → next → done. The single source of truth for "what to work on".          | Daily                           |
+| `daily-log.md`               | Append-only journal: what was done, why, what's next. New entry per working day.                             | Every session                   |
+| `decisions.md`               | ADR-style record. Every meaningful technical or design choice gets a one-paragraph entry.                    | When a decision is made         |
+| `prompts.md`                 | Reusable prompts: "make a new chapter", "add a stat card", etc. Most are now skills under `.cursor/skills/`. | When a useful pattern emerges   |
+| `glossary.md`                | Domain terms (NOVA, GRAS, BMJ umbrella review, hazard ratio…) so any agent gets the vocabulary right.        | When new terms surface          |
+| `open-questions.md`          | Unresolved design/product questions. Move them to `decisions.md` once answered.                              | Whenever blocked                |
+| `saved-insights-ai.md`       | Saved-insights AI implementation notes: provider, schema, Resend, PostHog events, prompt version.            | When AI feature changes         |
+| `neon-migration-workflow.md` | Safe Neon migration flow: local → staging duplicate → staging → main duplicate → main.                       | When DB release process changes |
 
 ## Operating rules for agents
 

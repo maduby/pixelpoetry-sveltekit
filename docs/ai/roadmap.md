@@ -6,6 +6,7 @@
 
 ## 🔥 Now (current sprint)
 
+- [x] **2026-05-23** — Saved-insights AI MVP: highlight-to-save, optional notes, Vercel AI Gateway recap generation with MiniMax M2.7, account shelf, Resend email-to-self, PostHog behavior events.
 - [ ] **First Vercel deploy** of pixelpoetry.dev pointed at `maduby/pixelpoetry-sveltekit`. Domain `pixelpoetry.dev` mapped.
 - [ ] **New PostHog project** for pixelpoetry.dev. Paste the public key into `.env` locally and into Vercel env vars.
 - [ ] **Drop longevity sources** into `docs/explainers/longevity/sources/` and run the `source-extraction` skill.

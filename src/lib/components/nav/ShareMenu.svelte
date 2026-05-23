@@ -124,7 +124,7 @@
 <div class="relative {className}" use:clickOutside onkeydown={onKeydown}>
 	<button
 		type="button"
-		class="group inline-flex cursor-pointer items-center gap-1.5 rounded-full border-0 px-2 py-2 text-sm font-semibold text-ink/70 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-red lg:border lg:border-ink/20 lg:px-4 lg:hover:border-ink/40"
+		class="group inline-flex size-10 cursor-pointer items-center justify-center gap-1.5 rounded-full border border-transparent text-sm font-semibold text-ink/70 transition-colors hover:bg-ink/8 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-red lg:w-auto lg:border-ink/20 lg:px-4 lg:hover:border-ink/40"
 		aria-label="Share this article"
 		aria-haspopup="true"
 		aria-expanded={open}

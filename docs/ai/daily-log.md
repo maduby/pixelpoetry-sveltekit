@@ -4,11 +4,59 @@
 
 ---
 
+## 2026-05-23 — Saved insights AI layer
+
+**Goal:** Implement the logged-in saved-insights MVP with AI recaps and Resend email-to-self.
+
+**What got done**
+
+- Added AI SDK v6, Zod, and Resend dependencies.
+- Chose Vercel AI Gateway for v1 with `AI_GATEWAY_MODEL=minimax/minimax-m2.7`; avoided the young direct MiniMax provider package.
+- Added Drizzle tables and migration for saved insights, structured AI summaries, and email deliveries.
+- Added authenticated SvelteKit API routes for saving highlights, generating recaps, emailing recaps, and smoke-testing Resend.
+- Added a client highlight-to-save layer for explainer prose only.
+- Refined the selection UX into a bold `🥡 Takeaway` tooltip button that saves immediately with a packed animation.
+- Extended takeaway selection to quote/stat/viz moments as well as prose, while preserving explainer/chapter/step context for AI.
+- Made the takeaway tooltip trigger after pointer/mouse release with a short delayed selection read so it appears reliably once marking ends.
+- Fixed tooltip positioning to use viewport coordinates for the fixed overlay, so it no longer renders off-screen after scrolling.
+- Restyled the takeaway tooltip as a single dark WCAG-AA popover with a same-surface arrow, normal shadow, and no hover movement.
+- Dismissed the floating takeaway tooltip on scroll, wheel, touch move, and resize so it never drifts away from the selected text.
+- Dismissed the floating takeaway tooltip on outside click/tap while preserving clicks on the tooltip itself.
+- Replaced the anchored takeaway tooltip with a fixed bottom action bar that includes selected-text preview, Save/Login action, and dismiss control.
+- Refined the takeaway action into a desktop `min(32rem, viewport)` bottom card and mobile mini bottom sheet with a handle, safe-area spacing, Escape dismissal, and Sonner reserved for feedback.
+- Simplified the takeaway action so it no longer repeats selected text; it is now a compact save/dismiss control.
+- Hardened `SavedInsightLayer` for SSR and selection performance by guarding browser globals, clearing pending timers on teardown, and deduping repeated selection events.
+- Changed saved-takeaway API failures for missing AI tables from raw 500s to an intentional migration-pending response with clearer UI copy.
+- Applied the saved-takeaways Drizzle migration locally, verified on a disposable Neon branch copied from `staging`, then applied and verified on the real Neon `staging` branch.
+- Updated `/account` with saved takeaways, latest recap, email-to-self, and email test controls.
+- Added PostHog events that track behavior without sending selected text, notes, summaries, prompts, or email addresses.
+- Added a safe Neon migration workflow script for local → disposable staging duplicate → staging → disposable main duplicate → main.
+- Updated `/account` so missing AI tables show a migration-pending state instead of a 500.
+
+**Decisions made**
+
+- Saved-insights-first beats generic AI chat for v1 → logged in `decisions.md`.
+- Vercel AI Gateway is the v1 provider path; OpenRouter stays a future option → logged in `decisions.md`.
+- Private email-to-self is the first sharing/export path → logged in `decisions.md`.
+- Neon production migrations must be verified on a disposable branch copied from the target branch first → logged in `decisions.md`.
+- Takeaway recap prompt version is now `saved-takeaways-summary-v1`.
+
+**Open questions logged** → see `open-questions.md`
+
+**Next session — start here**
+
+1. Add `AI_GATEWAY_API_KEY`, `AI_GATEWAY_MODEL`, `RESEND_API_KEY`, and `RESEND_FROM_EMAIL` in Vercel env vars.
+2. Log in locally, save a takeaway, generate a recap, and send the Resend smoke email.
+3. Before production, repeat the disposable-branch verification flow from `main`, then apply with `ALLOW_PRODUCTION_MIGRATION=true`.
+
+---
+
 ## 2026-05-20 — Longevity essay first build
 
 **Goal:** Build the full 10-chapter Longevity scrollytelling essay from the structure doc.
 
 **What got done**
+
 - Created `src/lib/explainers/longevity/sources.ts` — 13 sources including OLP 2026, Landmark Twins Study, UK Biobank, Scott & Ellison $37T paper, Buettner Blue Zones, ONS HLE, WHO GBD, Walker, Muir Gray.
 - Created `src/lib/explainers/longevity/terms.ts` — 9 inline term definitions: healthspan, exposome, fitness-gap, smeds, blue-zones, hallmarks-of-ageing, telomeres, epigenetics, mismatch-disease.
 - Created `src/lib/explainers/longevity/image-manifest.ts` — empty stub (images to be added separately).
@@ -27,16 +75,19 @@
 - Upgraded `src/routes/longevity/explainer/+page.svelte` from coming-soon placeholder to full essay page (hero with forest gradient, chapter loop, closing note, EssayFooter).
 
 **Decisions made**
+
 - Used `obs-timeline` with age (30–100) on x-axis for the fitness gap chart — `year` field maps to age values; subtitle clarifies.
 - NHS spending vs HLE chart uses two series on the same y-scale (both plateau/rise in different value ranges) — subtitle explains the dual-metric nature.
 - Evidence strength chart uses a relative index (0–100) rather than raw effect sizes to make the ranking legible to a general audience.
 - No `image` type viz yet — no photography for longevity yet; all viz is data-driven until images are available.
 
 **Open questions logged**
+
 - When will longevity photography be available for the hero and Blue Zones map?
 - Should the women's health chapter include a specific HRT prescription rate chart once the data is sourced?
 
 **Next session — start here**
+
 1. `pnpm run build` — confirm prerender succeeds with all 10 chapters.
 2. Source photography for `static/explainers/longevity/images/` and run `pnpm build` to generate manifest.
 3. Add cross-link card in UPF EssayFooter → longevity.
@@ -48,6 +99,7 @@
 **Goal:** Port the UPF scrollytelling codebase into a new repo and refactor it into a multi-explainer platform under `pixelpoetry.dev`.
 
 **What got done**
+
 - Mirrored `../upf` into the new workspace (no git history carried over).
 - Extracted shared types to `src/lib/types/explainer.ts`; moved per-essay data into `src/lib/explainers/ultra-processed/`.
 - Namespaced all static assets under `static/explainers/ultra-processed/`; updated image-manifest paths.
@@ -63,6 +115,7 @@
 - Initialised git and pushed to `github.com/maduby/pixelpoetry-sveltekit`.
 
 **Decisions made**
+
 - Static per-explainer route directories beat a dynamic `[slug]` route (essays will diverge in hero/closing, and explicit folders make the diff small).
 - Cleanup via `onDestroy(activateExplainer(...))` — `getContext` only works during init, so `activateExplainer` captures the holder up front and returns a destroy fn.
 - Created a fresh PostHog project for pixelpoetry.dev (separate from UPF analytics) — env vars to fill in locally + Vercel.
@@ -70,6 +123,7 @@
 **Open questions logged** → see open-questions.md (favicons, share image, longevity content arc).
 
 **Next session — start here**
+
 1. `pnpm install && pnpm check && pnpm build` — confirm zero errors and prerender succeeds.
 2. Drop longevity source PDFs into `docs/explainers/longevity/sources/`.
 3. Configure the Vercel project + map `pixelpoetry.dev`.
@@ -81,6 +135,7 @@
 **Goal:** Stand up a working SvelteKit scrollytelling skeleton on Vercel-compatible toolchain.
 
 **What got done**
+
 - Decided stack: SvelteKit 2 + Svelte 5 (runes) + TS + Tailwind v4 + GSAP/ScrollTrigger + Lucide + self-hosted Arvo/Lato.
 - `.nvmrc` pinned to Node 24 LTS; pnpm upgraded to v11.
 - Scaffolded with `sv create` non-interactively (prettier, eslint, tailwind w/ typography + forms, adapter-vercel).
@@ -92,6 +147,7 @@
 - Wrote out the entire AI workflow under `docs/ai/` (this file, roadmap, architecture, brief, decisions, prompts, glossary, open-questions).
 
 **Decisions made** (full text in `decisions.md`)
+
 - Node 24 over 22 (latest LTS).
 - GSAP over `svelte-scrolly` or `@sveltejs/svelte-scroller` (more capable, fully free).
 - Self-hosted fonts over Google Fonts CDN (LCP).
@@ -101,6 +157,7 @@
 **Open questions logged** → see `open-questions.md`.
 
 **Next session — start here**
+
 1. `pnpm run dev` and tour the page.
 2. Pick the top item under `🔥 Now` in `roadmap.md` (Chapter 1 build-out).
 3. Iterate on visual style — bold colour, big type, gradients — once we know the content shape feels right.

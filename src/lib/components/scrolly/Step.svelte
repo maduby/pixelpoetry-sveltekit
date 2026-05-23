@@ -58,17 +58,34 @@
 		 */
 		isActive?: boolean;
 		id?: string;
+		insightExplainerSlug?: string;
+		insightChapterId?: string;
+		insightStepId?: string;
 		children: Snippet;
 		class?: string;
 	}
 
-	let { isActive = false, id, children, class: className }: Props = $props();
+	let {
+		isActive = false,
+		id,
+		insightExplainerSlug,
+		insightChapterId,
+		insightStepId,
+		children,
+		class: className
+	}: Props = $props();
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	{id}
 	data-scrolly-step
+	data-insight-source={insightExplainerSlug && insightChapterId && insightStepId
+		? 'true'
+		: undefined}
+	data-insight-explainer={insightExplainerSlug}
+	data-insight-chapter={insightChapterId}
+	data-insight-step={insightStepId}
 	data-active={isActive ? 'true' : 'false'}
 	onclick={handleInteraction}
 	onkeydown={handleKeydown}

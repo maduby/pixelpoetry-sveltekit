@@ -14,6 +14,8 @@
 		"auth:generate": "pnpm dlx @better-auth/cli generate --config src/lib/server/auth.ts --output src/lib/server/db/schema.ts --yes",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
+		"neon:migrate:verify": "node scripts/neon-migrate.mjs verify",
+		"neon:migrate:apply": "node scripts/neon-migrate.mjs apply",
 		"editorial:touch": "node scripts/update-editorial-timestamps.mjs",
 		"editorial:touch:changed": "node scripts/update-editorial-timestamps.mjs --changed",
 		"lint": "prettier --check . && eslint .",
@@ -61,6 +63,7 @@
 		"@rodneylab/svelte-social-icons": "^0.0.31",
 		"@types/d3": "^7.4.3",
 		"@use-gesture/vanilla": "^10.3.1",
+		"ai": "^6.0.190",
 		"better-auth": "^1.6.11",
 		"bits-ui": "^2.18.1",
 		"clsx": "^2.1.1",
@@ -70,8 +73,10 @@
 		"lottie-web": "^5.13.0",
 		"lucide-svelte": "^1.0.1",
 		"posthog-js": "^1.373.4",
+		"resend": "^6.12.3",
 		"svelte-sonner": "^1.1.1",
 		"tailwind-merge": "^3.6.0",
-		"topojson-client": "^3.1.0"
+		"topojson-client": "^3.1.0",
+		"zod": "^4.4.3"
 	}
 }
