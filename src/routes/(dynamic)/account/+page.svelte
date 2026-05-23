@@ -587,9 +587,9 @@
 										title={deleteConfirmInsightId === insight.id ? 'Sure?' : 'Delete takeaway'}
 									>
 										{#if deletingInsightId === insight.id}
-											<LoaderCircle class="animate-spin" size={15} aria-hidden="true" />
+											<LoaderCircle class="relative z-10 animate-spin" size={15} aria-hidden="true" />
 										{:else}
-											<Trash2 size={15} aria-hidden="true" />
+											<Trash2 class="relative z-10" size={15} aria-hidden="true" />
 										{/if}
 										{#if deleteConfirmInsightId === insight.id}
 											<span
@@ -736,9 +736,9 @@
 											title={deleteConfirmSummaryId === summary.id ? 'Sure?' : 'Delete recap'}
 										>
 											{#if deletingSummaryId === summary.id}
-												<LoaderCircle class="animate-spin" size={16} aria-hidden="true" />
+												<LoaderCircle class="relative z-10 animate-spin" size={16} aria-hidden="true" />
 											{:else}
-												<Trash2 size={16} aria-hidden="true" />
+												<Trash2 class="relative z-10" size={16} aria-hidden="true" />
 											{/if}
 											{#if deleteConfirmSummaryId === summary.id}
 												<span
@@ -807,7 +807,7 @@
 						type="button"
 						onclick={() => emailSummary(activeSummary.id)}
 						disabled={emailingSummaryId === activeSummary.id || data.migrationPending}
-						class="inline-flex size-10 cursor-pointer items-center justify-center rounded-full bg-brand-red-deep text-cream transition-colors hover:bg-brand-red disabled:cursor-not-allowed disabled:opacity-60"
+						class="inline-flex size-10 cursor-pointer items-center justify-center rounded-full text-ink/65 transition-colors hover:bg-ink/5 hover:text-ink disabled:cursor-not-allowed disabled:opacity-60"
 						aria-label="Email recap"
 						title="Email"
 					>
@@ -830,11 +830,11 @@
 						title={deleteConfirmSummaryId === activeSummary.id ? 'Sure?' : 'Delete'}
 					>
 						{#if deletingSummaryId === activeSummary.id}
-							<LoaderCircle class="animate-spin" size={15} aria-hidden="true" />
+							<LoaderCircle class="relative z-10 animate-spin" size={15} aria-hidden="true" />
 						{:else if deleteConfirmSummaryId === activeSummary.id}
-							<Trash2 size={15} aria-hidden="true" />
+							<Trash2 class="relative z-10" size={15} aria-hidden="true" />
 						{:else}
-							<Trash2 size={15} aria-hidden="true" />
+							<Trash2 class="relative z-10" size={15} aria-hidden="true" />
 						{/if}
 						{#if deleteConfirmSummaryId === activeSummary.id}
 							<span
