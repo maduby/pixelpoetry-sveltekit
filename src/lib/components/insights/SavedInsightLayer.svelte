@@ -44,6 +44,58 @@
 		return visibleRects.at(-1) ?? range.getBoundingClientRect();
 	}
 
+	function sourcePayload(source: HTMLElement, selectedText: string): SelectionPayload | null {
+		if (
+			!source.dataset.insightExplainer ||
+			!source.dataset.insightChapter ||
+			!source.dataset.insightStep
+		) {
+			return null;
+		}
+
+		const surroundingText =
+			source.dataset.insightSurroundingText ||
+			source.textContent?.replace(/\s+/g, ' ').trim() ||
+			selectedText;
+
+		return {
+			explainerSlug: source.dataset.insightExplainer,
+			chapterId: source.dataset.insightChapter,
+			stepId: source.dataset.insightStep,
+			selectedText,
+			surroundingText
+		};
+	}
+
+	function visualTextFromRange(range: Range): string[] {
+		return Array.from(document.querySelectorAll<HTMLElement>('[data-insight-visual-text]'))
+			.filter((element) => {
+				try {
+					return range.intersectsNode(element);
+				} catch {
+					return false;
+				}
+			})
+			.map((element) => element.dataset.insightVisualText?.trim() ?? '')
+			.filter(Boolean);
+	}
+
+	function setPayload(next: SelectionPayload) {
+		const selectionKey = [next.explainerSlug, next.chapterId, next.stepId, next.selectedText].join(
+			'\n'
+		);
+		if (selectionKey === lastSelectionKey) return;
+		lastSelectionKey = selectionKey;
+		payload = next;
+		saved = false;
+		posthog.capture('insight_selection_started', {
+			explainer_slug: next.explainerSlug,
+			chapter_id: next.chapterId,
+			step_id: next.stepId,
+			selection_length: next.selectedText.length
+		});
+	}
+
 	function readSelection(): SelectionPayload | null {
 		if (!browser) return null;
 
@@ -68,13 +120,11 @@
 		const rect = selectionAnchorRect(range);
 		if (rect.width === 0 && rect.height === 0) return null;
 
-		return {
-			explainerSlug: source.dataset.insightExplainer,
-			chapterId: source.dataset.insightChapter,
-			stepId: source.dataset.insightStep,
-			selectedText,
-			surroundingText: source.textContent?.replace(/\s+/g, ' ').trim() ?? selectedText
-		};
+		const visualTexts = visualTextFromRange(range);
+		const combinedText = Array.from(new Set([selectedText, ...visualTexts]))
+			.filter(Boolean)
+			.join('\n\n');
+		return sourcePayload(source, combinedText);
 	}
 
 	function updateSelection() {
@@ -83,19 +133,25 @@
 		const next = readSelection();
 		if (!next) return;
 		if (saving) return;
-		const selectionKey = [next.explainerSlug, next.chapterId, next.stepId, next.selectedText].join(
-			'\n'
-		);
-		if (selectionKey === lastSelectionKey) return;
-		lastSelectionKey = selectionKey;
-		payload = next;
-		saved = false;
-		posthog.capture('insight_selection_started', {
-			explainer_slug: next.explainerSlug,
-			chapter_id: next.chapterId,
-			step_id: next.stepId,
-			selection_length: next.selectedText.length
-		});
+		setPayload(next);
+	}
+
+	function handleContextMenu(event: MouseEvent) {
+		if (!browser) return;
+		const target = event.target as HTMLElement | null;
+		if (target?.closest('a, button, input, textarea, select, [data-takeaway-action="true"]')) return;
+
+		const visual = target?.closest('[data-insight-visual-text]') as HTMLElement | null;
+		const visualText = visual?.dataset.insightVisualText?.trim();
+		if (!visual || !visualText) return;
+
+		const next = sourcePayload(visual, visualText);
+		if (!next) return;
+
+		event.preventDefault();
+		document.getSelection()?.removeAllRanges();
+		if (saving) return;
+		setPayload(next);
 	}
 
 	function scheduleSelectionUpdate() {
@@ -221,6 +277,7 @@
 	onmouseup={scheduleSelectionUpdate}
 	onkeyup={scheduleSelectionUpdate}
 	onselectionchange={scheduleSelectionChange}
+	oncontextmenu={handleContextMenu}
 	onpointerdown={hideFloatingTakeawayOnOutsidePointer}
 	onscroll={hideFloatingTakeaway}
 	onwheel={hideFloatingTakeaway}

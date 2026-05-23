@@ -97,6 +97,28 @@
 		return !!step?.viz || !!step?.stat;
 	}
 
+	function visualTakeawayText(step: ChapterData['steps'][number] | undefined): string {
+		if (!step) return '';
+		if (step.stat) {
+			return [step.stat.value + (step.stat.unit ?? ''), step.stat.label, step.stat.context]
+				.filter(Boolean)
+				.join(' — ');
+		}
+		if (step.quote) {
+			return [`"${step.quote.text}"`, step.quote.attribution].filter(Boolean).join(' — ');
+		}
+		const viz = step.viz;
+		if (!viz) return '';
+		if (viz.type === 'image') {
+			return [viz.caption, viz.alt, viz.credit].filter(Boolean).join(' — ');
+		}
+		if ('title' in viz || 'subtitle' in viz) {
+			const titledViz = viz as { title?: string; subtitle?: string; unit?: string };
+			return [titledViz.title, titledViz.subtitle, titledViz.unit].filter(Boolean).join(' — ');
+		}
+		return step.text;
+	}
+
 	function repeatsPreviousViz(stepIndex: number): boolean {
 		const step = visibleSteps[stepIndex];
 		const previousStep = visibleSteps[stepIndex - 1];
@@ -325,6 +347,11 @@
 					data-insight-explainer={explainer?.meta.slug}
 					data-insight-chapter={chapter.id}
 					data-insight-step={step?.id}
+					data-insight-visual={hasStepViz(step) ? 'true' : undefined}
+					data-insight-visual-text={visualTakeawayText(step)}
+					data-insight-surrounding-text={[step?.text, visualTakeawayText(step)]
+						.filter(Boolean)
+						.join(' ')}
 					class="animate-fade-in mx-auto flex w-full min-w-0 flex-col items-center justify-center"
 				>
 					{@render stepViz(step, !sharesAdjacentViz(activeStep))}
@@ -380,6 +407,11 @@
 						data-insight-explainer={explainer?.meta.slug}
 						data-insight-chapter={chapter.id}
 						data-insight-step={step.id}
+						data-insight-visual="true"
+						data-insight-visual-text={visualTakeawayText(step)}
+						data-insight-surrounding-text={[step.text, visualTakeawayText(step)]
+							.filter(Boolean)
+							.join(' ')}
 						class="flex w-full min-w-0 items-center justify-center py-10 lg:hidden"
 					>
 						<div class="flex w-full min-w-0 flex-col items-center justify-center">
