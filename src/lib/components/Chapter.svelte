@@ -20,7 +20,7 @@
 	 * No inline stats/quotes — they've been hoisted into the viz column
 	 * so the prose stays a clean, scannable column of reading text.
 	 */
-	import type { Chapter as ChapterData } from '$lib/types/explainer';
+	import type { Chapter as ChapterData, VizConfig } from '$lib/types/explainer';
 	import Scrolly from '$lib/components/scrolly/Scrolly.svelte';
 	import Step from '$lib/components/scrolly/Step.svelte';
 	import StatCard from '$lib/components/ui/StatCard.svelte';
@@ -97,6 +97,68 @@
 		return !!step?.viz || !!step?.stat;
 	}
 
+	function sourceIdsForStep(step: ChapterData['steps'][number] | undefined): string[] {
+		const ids = new Set<string>();
+		if (step?.stat?.sourceId) ids.add(step.stat.sourceId);
+		if (step?.quote?.sourceId) ids.add(step.quote.sourceId);
+		if (step?.viz && 'sourceId' in step.viz && typeof step.viz.sourceId === 'string') {
+			ids.add(step.viz.sourceId);
+		}
+		return Array.from(ids);
+	}
+
+	function escapeCsvCell(value: unknown): string {
+		if (value == null) return '';
+		const text = typeof value === 'object' ? JSON.stringify(value) : String(value);
+		return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+	}
+
+	function csvFromRows(rows: Array<Record<string, unknown>>): string | undefined {
+		if (rows.length === 0) return undefined;
+		const headers = Array.from(new Set(rows.flatMap((row) => Object.keys(row))));
+		return [
+			headers.map(escapeCsvCell).join(','),
+			...rows.map((row) => headers.map((header) => escapeCsvCell(row[header])).join(','))
+		].join('\n');
+	}
+
+	function recordFromObject(value: object): Record<string, unknown> {
+		return Object.fromEntries(Object.entries(value));
+	}
+
+	function rowsFromViz(viz: VizConfig | undefined): Array<Record<string, unknown>> {
+		if (!viz) return [];
+		switch (viz.type) {
+			case 'bar':
+			case 'bubble':
+			case 'donut':
+			case 'obs-bar':
+				return viz.data.map(recordFromObject);
+			case 'line':
+				return viz.data.flatMap((series) =>
+					series.data.map((point) => ({ series: series.name, ...recordFromObject(point) }))
+				);
+			case 'obs-timeline':
+				return viz.series.flatMap((series) =>
+					series.points.map((point) => ({ series: series.label, ...recordFromObject(point) }))
+				);
+			case 'era-timeline':
+				return viz.eras.map(recordFromObject);
+			default:
+				return [];
+		}
+	}
+
+	function visualTakeawayKind(
+		step: ChapterData['steps'][number] | undefined
+	): 'text' | 'image' | 'chart' | 'stat' | 'quote' | 'source' | 'dataset' {
+		if (step?.stat) return 'stat';
+		if (step?.quote) return 'quote';
+		if (step?.viz?.type === 'image') return 'image';
+		if (step?.viz) return rowsFromViz(step.viz).length ? 'dataset' : 'chart';
+		return 'text';
+	}
+
 	function visualTakeawayText(step: ChapterData['steps'][number] | undefined): string {
 		if (!step) return '';
 		if (step.stat) {
@@ -117,6 +179,35 @@
 			return [titledViz.title, titledViz.subtitle, titledViz.unit].filter(Boolean).join(' — ');
 		}
 		return step.text;
+	}
+
+	function visualTakeawayContentJson(step: ChapterData['steps'][number] | undefined): string {
+		if (!step) return '{}';
+		const sourceIds = sourceIdsForStep(step);
+		const kind = visualTakeawayKind(step);
+		const viz = step.viz;
+		const rows = rowsFromViz(viz);
+		const csv = csvFromRows(rows);
+		const json = {
+			label:
+				step.stat?.label ||
+				step.quote?.attribution ||
+				(viz && 'title' in viz ? viz.title : undefined) ||
+				(viz?.type === 'image' ? viz.caption || viz.alt : undefined),
+			description: visualTakeawayText(step),
+			sourceIds,
+			sourceId: sourceIds[0],
+			imageName: viz?.type === 'image' ? viz.name : undefined,
+			alt: viz?.type === 'image' ? viz.alt : undefined,
+			caption: viz?.type === 'image' ? viz.caption : undefined,
+			credit: viz?.type === 'image' ? viz.credit : undefined,
+			chartType: viz?.type,
+			unit: viz && 'unit' in viz ? viz.unit : step.stat?.unit,
+			csv,
+			data: rows.length ? rows : undefined,
+			kind
+		};
+		return JSON.stringify(json);
 	}
 
 	function repeatsPreviousViz(stepIndex: number): boolean {
@@ -348,6 +439,8 @@
 					data-insight-chapter={chapter.id}
 					data-insight-step={step?.id}
 					data-insight-visual={hasStepViz(step) ? 'true' : undefined}
+					data-insight-content-kind={visualTakeawayKind(step)}
+					data-insight-content-json={visualTakeawayContentJson(step)}
 					data-insight-visual-text={visualTakeawayText(step)}
 					data-insight-surrounding-text={[step?.text, visualTakeawayText(step)]
 						.filter(Boolean)
@@ -408,6 +501,8 @@
 						data-insight-chapter={chapter.id}
 						data-insight-step={step.id}
 						data-insight-visual="true"
+						data-insight-content-kind={visualTakeawayKind(step)}
+						data-insight-content-json={visualTakeawayContentJson(step)}
 						data-insight-visual-text={visualTakeawayText(step)}
 						data-insight-surrounding-text={[step.text, visualTakeawayText(step)]
 							.filter(Boolean)

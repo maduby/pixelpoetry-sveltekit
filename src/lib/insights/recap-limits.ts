@@ -1,0 +1,4 @@
+export const MAX_RECAP_TAKEAWAYS = 30;
+export const MAX_RECAP_TAKEAWAY_CHARS = 1200;
+export const MAX_RECAP_INPUT_CHARS = 24000;
+export const MAX_RECAP_DATA_ROWS = 5;

@@ -3,11 +3,12 @@
 	import { resolve } from '$app/paths';
 	import type { PageProps } from './$types';
 	import { authClient } from '$lib/auth-client';
+	import SavedInsightVisual from '$lib/components/insights/SavedInsightVisual.svelte';
 	import Sheet from '$lib/components/ui/Sheet.svelte';
-	import BookOpen from 'lucide-svelte/icons/book-open';
-	import Brain from 'lucide-svelte/icons/brain';
+	import { MAX_RECAP_TAKEAWAYS } from '$lib/insights/recap-limits';
+	import { imageManifest as longevityImages } from '$lib/explainers/longevity/image-manifest';
+	import { imageManifest as ultraProcessedImages } from '$lib/explainers/ultra-processed/image-manifest';
 	import Check from 'lucide-svelte/icons/check';
-	import CheckCircle2 from 'lucide-svelte/icons/check-circle-2';
 	import Eye from 'lucide-svelte/icons/eye';
 	import ExternalLink from 'lucide-svelte/icons/external-link';
 	import LoaderCircle from 'lucide-svelte/icons/loader-circle';
@@ -20,11 +21,19 @@
 	import Sparkles from 'lucide-svelte/icons/sparkles';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import { posthog } from '$lib/analytics/posthog';
+	import type { ImageEntry } from '$lib/types/explainer';
+	import { toast } from 'svelte-sonner';
+
+	const IMAGE_MANIFESTS: Record<string, ImageEntry[]> = {
+		longevity: longevityImages,
+		'ultra-processed': ultraProcessedImages
+	};
 
 	let { data }: PageProps = $props();
 	let signingOut = $state(false);
 	let generating = $state(false);
 	let emailingSummaryId = $state('');
+	let resettingWeeklyLimits = $state(false);
 	let deletingInsightId = $state('');
 	let deleteConfirmInsightId = $state('');
 	let deletingSummaryId = $state('');
@@ -32,12 +41,12 @@
 	let editingSummaryId = $state('');
 	let savingSummaryEdit = $state(false);
 	let recapSheetOpen = $state(false);
+	let takeawaySheetOpen = $state(false);
 	let activeSummaryId = $state('');
+	let activeInsightId = $state('');
 	let editTitle = $state('');
 	let editOverview = $state('');
 	let editShareableSummary = $state('');
-	let actionMessage = $state('');
-	let actionError = $state('');
 	let takeawayActionError = $state('');
 	let takeawaySearch = $state('');
 	let selectedInsightIds = $state<string[]>([]);
@@ -47,11 +56,14 @@
 	const activeSummary = $derived(
 		data.summaries.find((summary) => summary.id === activeSummaryId) ?? latestSummary
 	);
+	const activeInsight = $derived(data.insights.find((insight) => insight.id === activeInsightId));
 	const activeSummaryInsights = $derived(
 		activeSummary ? (data.summaryInsightsBySummaryId[activeSummary.id] ?? []) : []
 	);
 	const activeSummaryDeliveries = $derived(
-		activeSummary ? data.deliveries.filter((delivery) => delivery.summaryId === activeSummary.id) : []
+		activeSummary
+			? data.deliveries.filter((delivery) => delivery.summaryId === activeSummary.id)
+			: []
 	);
 	const recapsLeft = $derived(Math.max(0, 5 - data.summaries.length));
 	const filteredInsights = $derived(
@@ -63,6 +75,9 @@
 				insight.chapterId,
 				insight.stepId,
 				insight.selectedText,
+				insight.contentKind,
+				insight.contentJson?.label ?? '',
+				insight.contentJson?.description ?? '',
 				insight.note ?? ''
 			]
 				.join(' ')
@@ -71,11 +86,20 @@
 		})
 	);
 	const selectedInsightCount = $derived(selectedInsightIds.length);
+	const selectedInsightLimitReached = $derived(selectedInsightCount >= MAX_RECAP_TAKEAWAYS);
+	const selectedInsightSlotsLeft = $derived(
+		Math.max(0, MAX_RECAP_TAKEAWAYS - selectedInsightCount)
+	);
+	const weeklyRecapsExhausted = $derived(data.weeklyUsage.recapsLeft <= 0);
+	const weeklyEmailsExhausted = $derived(data.weeklyUsage.emailsLeft <= 0);
 	const filteredSelectedCount = $derived(
 		filteredInsights.filter((insight) => selectedInsightIds.includes(insight.id)).length
 	);
 	const allFilteredSelected = $derived(
 		filteredInsights.length > 0 && filteredSelectedCount === filteredInsights.length
+	);
+	const filteredActionUnselects = $derived(
+		allFilteredSelected || (selectedInsightSlotsLeft === 0 && filteredSelectedCount > 0)
 	);
 	const pixelPoetryHomeHref = $derived(resolve('/'));
 	const activeSummaryExplainerHref = $derived(
@@ -89,7 +113,10 @@
 
 		const currentIdSet = new Set(currentIds);
 		const keptSelection = selectedInsightIds.filter((id) => currentIdSet.has(id));
-		selectedInsightIds = knownInsightIdKey ? keptSelection : currentIds;
+		selectedInsightIds = (knownInsightIdKey ? keptSelection : currentIds).slice(
+			0,
+			MAX_RECAP_TAKEAWAYS
+		);
 		knownInsightIdKey = nextKey;
 	});
 
@@ -97,7 +124,7 @@
 		takeawayActionError = '';
 		deleteConfirmInsightId = '';
 		deleteConfirmSummaryId = '';
-		selectedInsightIds = data.insights.map((insight) => insight.id);
+		selectedInsightIds = data.insights.map((insight) => insight.id).slice(0, MAX_RECAP_TAKEAWAYS);
 	}
 
 	function clearSelectedTakeaways() {
@@ -112,20 +139,33 @@
 		deleteConfirmInsightId = '';
 		deleteConfirmSummaryId = '';
 		const filteredIds = filteredInsights.map((insight) => insight.id);
-		if (allFilteredSelected) {
+		if (filteredActionUnselects) {
 			selectedInsightIds = selectedInsightIds.filter((id) => !filteredIds.includes(id));
 			return;
 		}
-		selectedInsightIds = Array.from(new Set([...selectedInsightIds, ...filteredIds]));
+		const nextIds = [...selectedInsightIds];
+		for (const id of filteredIds) {
+			if (nextIds.length >= MAX_RECAP_TAKEAWAYS) break;
+			if (!nextIds.includes(id)) {
+				nextIds.push(id);
+			}
+		}
+		selectedInsightIds = nextIds;
 	}
 
 	function toggleTakeaway(id: string) {
 		takeawayActionError = '';
 		deleteConfirmInsightId = '';
 		deleteConfirmSummaryId = '';
-		selectedInsightIds = selectedInsightIds.includes(id)
-			? selectedInsightIds.filter((selectedId) => selectedId !== id)
-			: [...selectedInsightIds, id];
+		if (selectedInsightIds.includes(id)) {
+			selectedInsightIds = selectedInsightIds.filter((selectedId) => selectedId !== id);
+			return;
+		}
+		if (selectedInsightLimitReached) {
+			notifyError(`Choose up to ${MAX_RECAP_TAKEAWAYS} takeaways for one recap.`);
+			return;
+		}
+		selectedInsightIds = [...selectedInsightIds, id];
 	}
 
 	function explainerLabel(slug: string): string {
@@ -169,6 +209,128 @@
 		}).format(new Date(date));
 	}
 
+	function contentKindLabel(kind: string | null | undefined): string {
+		if (!kind || kind === 'text') return 'Text';
+		if (kind === 'dataset') return 'Data';
+		return kind.charAt(0).toUpperCase() + kind.slice(1);
+	}
+
+	function csvHref(csv: string): string {
+		return `data:text/csv;charset=utf-8,${encodeURIComponent(csv)}`;
+	}
+
+	function remainingPercent(left: number, limit: number): number {
+		if (limit <= 0) return 0;
+		return Math.max(0, Math.min(100, (left / limit) * 100));
+	}
+
+	function imageEntryForInsight(insight: {
+		explainerSlug: string;
+		contentKind: string;
+		contentJson?: { imageName?: string } | null;
+	}): ImageEntry | undefined {
+		if (insight.contentKind !== 'image') return undefined;
+		const imageName = insight.contentJson?.imageName;
+		if (!imageName) return undefined;
+		return IMAGE_MANIFESTS[insight.explainerSlug]?.find((image) => image.name === imageName);
+	}
+
+	function imageHrefForInsight(insight: {
+		explainerSlug: string;
+		contentKind: string;
+		contentJson?: { imageName?: string } | null;
+	}): string | null {
+		const entry = imageEntryForInsight(insight);
+		const variant =
+			entry?.variants.find((candidate) => candidate.width >= 800) ?? entry?.variants.at(-1);
+		return variant?.src ?? null;
+	}
+
+	function imageLabelForInsight(insight: {
+		explainerSlug: string;
+		contentKind: string;
+		contentJson?: {
+			label?: string;
+			caption?: string;
+			alt?: string;
+			imageName?: string;
+		} | null;
+	}): string {
+		return (
+			insight.contentJson?.label?.trim() ||
+			insight.contentJson?.caption?.trim() ||
+			insight.contentJson?.alt?.trim() ||
+			insight.contentJson?.imageName?.replace(/[-_]+/g, ' ') ||
+			'Saved image'
+		);
+	}
+
+	function imageAltForInsight(insight: {
+		explainerSlug: string;
+		contentKind: string;
+		contentJson?: {
+			alt?: string;
+			caption?: string;
+			label?: string;
+			imageName?: string;
+		} | null;
+	}): string {
+		return (
+			insight.contentJson?.alt?.trim() ||
+			insight.contentJson?.caption?.trim() ||
+			insight.contentJson?.label?.trim() ||
+			imageLabelForInsight(insight)
+		);
+	}
+
+	function showInsightMetadataCard(insight: {
+		contentKind: string;
+		contentJson?: {
+			label?: string;
+			description?: string;
+		} | null;
+	}): boolean {
+		if (!insight.contentJson?.label && !insight.contentJson?.description) return false;
+		return !['stat', 'chart', 'dataset', 'image'].includes(insight.contentKind);
+	}
+
+	const timedToastOptions = {
+		duration: 5200,
+		closeButton: true,
+		class: 'timed-toast'
+	};
+
+	function notifySuccess(message: string) {
+		toast.success(message, timedToastOptions);
+	}
+
+	function notifyError(message: string) {
+		toast.error(message, timedToastOptions);
+	}
+
+	async function errorMessageFromResponse(response: Response): Promise<string> {
+		const body = await response
+			.clone()
+			.json()
+			.catch(() => null);
+		if (body && typeof body === 'object' && 'message' in body && typeof body.message === 'string') {
+			return body.message;
+		}
+		const text = await response.text().catch(() => '');
+		return text.trim();
+	}
+
+	function summaryErrorMessage(reason: string): string {
+		if (
+			reason === 'weekly_limit' ||
+			reason === 'You have used all 5 recap generations for this week.'
+		) {
+			return 'You have used all 5 recap generations for this week.';
+		}
+		if (reason === 'request_failed') return 'Could not generate your summary just now.';
+		return reason;
+	}
+
 	async function signOut() {
 		signingOut = true;
 		await authClient.signOut();
@@ -178,8 +340,18 @@
 
 	async function generateSummary() {
 		if (selectedInsightCount === 0) return;
-		actionMessage = '';
-		actionError = '';
+		if (selectedInsightCount > MAX_RECAP_TAKEAWAYS) {
+			notifyError(`Choose up to ${MAX_RECAP_TAKEAWAYS} takeaways for one recap.`);
+			return;
+		}
+		if (!data.aiRecapConfigured) {
+			notifyError('AI recap generation needs provider credentials before it can run locally.');
+			return;
+		}
+		if (weeklyRecapsExhausted) {
+			notifyError('You have used all 5 recap generations for this week.');
+			return;
+		}
 		deleteConfirmInsightId = '';
 		deleteConfirmSummaryId = '';
 		generating = true;
@@ -196,7 +368,10 @@
 			});
 
 			if (!response.ok) {
-				throw new Error(response.status === 503 ? 'ai_unavailable' : 'request_failed');
+				throw new Error(
+					(await errorMessageFromResponse(response)) ||
+						(response.status === 429 ? 'weekly_limit' : 'request_failed')
+				);
 			}
 			const result = await response.json();
 			posthog.capture('insight_summary_completed', {
@@ -206,16 +381,13 @@
 				saved_insight_count: data.insights.length,
 				selected_insight_count: selectedInsightCount
 			});
-			actionMessage = 'Your selected-takeaways recap is ready.';
+			notifySuccess('Your selected-takeaways recap is ready.');
 			await invalidateAll();
 			activeSummaryId = result.summary.id;
 			recapSheetOpen = true;
 		} catch (err) {
 			const reason = err instanceof Error ? err.message : 'request_failed';
-			actionError =
-				reason === 'ai_unavailable'
-					? 'AI recap generation needs provider credentials before it can run locally.'
-					: 'Could not generate your summary just now.';
+			notifyError(summaryErrorMessage(reason));
 			posthog.capture('insight_summary_failed', {
 				reason,
 				saved_insight_count: data.insights.length,
@@ -233,6 +405,14 @@
 		deleteConfirmSummaryId = '';
 		recapSheetOpen = true;
 		posthog.capture('insight_summary_opened');
+	}
+
+	function openTakeaway(insightId: string) {
+		activeInsightId = insightId;
+		deleteConfirmInsightId = '';
+		deleteConfirmSummaryId = '';
+		takeawaySheetOpen = true;
+		posthog.capture('saved_insight_opened');
 	}
 
 	function startEditingSummary() {
@@ -254,8 +434,6 @@
 
 	async function saveSummaryEdit() {
 		if (!activeSummary) return;
-		actionMessage = '';
-		actionError = '';
 		deleteConfirmInsightId = '';
 		deleteConfirmSummaryId = '';
 		savingSummaryEdit = true;
@@ -276,11 +454,11 @@
 				provider: activeSummary.provider,
 				model: activeSummary.model
 			});
-			actionMessage = 'Recap updated.';
+			notifySuccess('Recap updated.');
 			cancelEditingSummary();
 			await invalidateAll();
 		} catch {
-			actionError = 'Could not update that recap just now.';
+			notifyError('Could not update that recap just now.');
 			posthog.capture('insight_summary_edit_failed', { reason: 'request_failed' });
 		} finally {
 			savingSummaryEdit = false;
@@ -315,7 +493,6 @@
 	}
 
 	function requestDeleteSummary(summaryId: string) {
-		actionError = '';
 		deleteConfirmInsightId = '';
 		if (deleteConfirmSummaryId !== summaryId) {
 			deleteConfirmSummaryId = summaryId;
@@ -336,8 +513,6 @@
 	}
 
 	async function deleteSummary(summaryId: string) {
-		actionMessage = '';
-		actionError = '';
 		deleteConfirmInsightId = '';
 		deletingSummaryId = summaryId;
 
@@ -346,7 +521,7 @@
 			if (!response.ok) throw new Error('request_failed');
 			posthog.capture('insight_summary_deleted');
 			deleteConfirmSummaryId = '';
-			actionMessage = 'Recap deleted.';
+			notifySuccess('Recap deleted.');
 			if (activeSummaryId === summaryId) {
 				recapSheetOpen = false;
 				activeSummaryId = '';
@@ -354,7 +529,7 @@
 			}
 			await invalidateAll();
 		} catch {
-			actionError = 'Could not delete that recap just now.';
+			notifyError('Could not delete that recap just now.');
 			posthog.capture('insight_summary_delete_failed', { reason: 'request_failed' });
 		} finally {
 			deletingSummaryId = '';
@@ -362,8 +537,10 @@
 	}
 
 	async function emailSummary(summaryId: string) {
-		actionMessage = '';
-		actionError = '';
+		if (weeklyEmailsExhausted) {
+			notifyError('You have used all 5 recap emails for this week.');
+			return;
+		}
 		deleteConfirmInsightId = '';
 		deleteConfirmSummaryId = '';
 		emailingSummaryId = summaryId;
@@ -382,22 +559,41 @@
 				body: JSON.stringify({ summaryId })
 			});
 
-			if (!response.ok) throw new Error('Could not send your summary email.');
+			if (!response.ok)
+				throw new Error(response.status === 429 ? 'weekly_limit' : 'request_failed');
 			posthog.capture('insight_email_sent', {
 				prompt_version: summary.promptVersion,
 				provider: summary.provider,
 				model: summary.model
 			});
-			actionMessage = `Sent to ${data.user.email}.`;
+			notifySuccess(`Sent to ${data.user.email}.`);
 			await invalidateAll();
-		} catch {
-			actionError = 'Could not send your email just now.';
-			posthog.capture('insight_email_failed', { reason: 'request_failed' });
+		} catch (err) {
+			const reason = err instanceof Error ? err.message : 'request_failed';
+			notifyError(
+				reason === 'weekly_limit'
+					? 'You have used all 5 recap emails for this week.'
+					: 'Could not send your email just now.'
+			);
+			posthog.capture('insight_email_failed', { reason });
 		} finally {
 			emailingSummaryId = '';
 		}
 	}
 
+	async function resetWeeklyLimits() {
+		resettingWeeklyLimits = true;
+		try {
+			const response = await fetch('/api/ai/insights/limits/reset', { method: 'POST' });
+			if (!response.ok) throw new Error('request_failed');
+			notifySuccess('Weekly limits reset for testing.');
+			await invalidateAll();
+		} catch {
+			notifyError('Could not reset weekly limits just now.');
+		} finally {
+			resettingWeeklyLimits = false;
+		}
+	}
 </script>
 
 <svelte:document onpointerdown={clearDeleteConfirmOnOutsidePointer} />
@@ -437,40 +633,86 @@
 			</button>
 		</div>
 
-		<div class="mt-8 grid gap-4 lg:grid-cols-3">
-			<article class="rounded-lg border border-ink/10 bg-paper p-5">
-				<BookOpen class="text-brand-red" size={26} aria-hidden="true" />
-				<h2 class="mt-4 font-display text-2xl font-black text-ink">Reading profile</h2>
-				<p class="mt-3 text-sm leading-6 text-ink/55">
-					Your account is connected as <span class="font-black text-ink">{data.user.email}</span>.
+		<div class="mt-8 grid gap-4 lg:grid-cols-4">
+			<article class="flex min-h-40 flex-col rounded-lg border border-ink/10 bg-paper p-5">
+				<p class="text-xs font-black tracking-[0.14em] text-ink/40 uppercase">Recaps this week</p>
+				<p class="mt-3 font-display text-4xl font-black text-ink">
+					{data.weeklyUsage.recapsLeft}
+					<span class="font-body text-sm font-black text-ink/45">left</span>
 				</p>
+				<div class="mt-auto pt-5">
+					<div class="h-2 rounded-full bg-ink/8">
+						<div
+							class="h-full rounded-full bg-brand-ocean"
+							style:width={`${remainingPercent(data.weeklyUsage.recapsLeft, data.weeklyUsage.recapLimit)}%`}
+						></div>
+					</div>
+					<p class="mt-3 text-xs font-semibold text-ink/45">
+						{data.weeklyUsage.recapsUsed}/{data.weeklyUsage.recapLimit} used since Monday
+					</p>
+				</div>
 			</article>
 
-			<article class="rounded-lg border border-ink/10 bg-paper p-5">
-				<Brain class="text-brand-ocean" size={26} aria-hidden="true" />
-				<h2 class="mt-4 font-display text-2xl font-black text-ink">AI summaries</h2>
-				<p class="mt-3 text-sm leading-6 text-ink/55">
-					Generate a private recap from the takeaways you chose to pack.
+			<article class="flex min-h-40 flex-col rounded-lg border border-ink/10 bg-paper p-5">
+				<p class="text-xs font-black tracking-[0.14em] text-ink/40 uppercase">Emails this week</p>
+				<p class="mt-3 font-display text-4xl font-black text-ink">
+					{data.weeklyUsage.emailsLeft}
+					<span class="font-body text-sm font-black text-ink/45">left</span>
 				</p>
+				<div class="mt-auto pt-5">
+					<div class="h-2 rounded-full bg-ink/8">
+						<div
+							class="h-full rounded-full bg-brand-forest"
+							style:width={`${remainingPercent(data.weeklyUsage.emailsLeft, data.weeklyUsage.emailLimit)}%`}
+						></div>
+					</div>
+					<p class="mt-3 text-xs font-semibold text-ink/45">
+						{data.weeklyUsage.emailsUsed}/{data.weeklyUsage.emailLimit} sent since Monday
+					</p>
+				</div>
 			</article>
 
-			<article class="rounded-lg border border-ink/10 bg-paper p-5">
-				<CheckCircle2 class="text-brand-forest" size={26} aria-hidden="true" />
-				<h2 class="mt-4 font-display text-2xl font-black text-ink">Saved takeaways</h2>
-				<p class="mt-3 text-sm leading-6 text-ink/55">
-					You have saved <span class="font-black text-ink">{data.insights.length}</span>
-					takeaway{data.insights.length === 1 ? '' : 's'}.
-				</p>
+			<article class="flex min-h-40 flex-col rounded-lg border border-ink/10 bg-paper p-5">
+				<p class="text-xs font-black tracking-[0.14em] text-ink/40 uppercase">Takeaways</p>
+				<p class="mt-3 font-display text-4xl font-black text-ink">{data.insights.length}</p>
+				<div class="mt-auto pt-5">
+					<p class="text-xs font-semibold text-ink/45">
+						{selectedInsightCount} selected for the next recap
+					</p>
+				</div>
+			</article>
+
+			<article class="flex min-h-40 flex-col rounded-lg border border-ink/10 bg-paper p-5">
+				<p class="text-xs font-black tracking-[0.14em] text-ink/40 uppercase">Account</p>
+				<p class="mt-3 truncate text-sm font-black text-ink">{data.user.email}</p>
+				<div class="mt-auto pt-5">
+					<p class="text-xs font-semibold text-ink/45">Weekly limits reset each Monday</p>
+					{#if data.canResetWeeklyLimits}
+						<button
+							type="button"
+							onclick={resetWeeklyLimits}
+							disabled={resettingWeeklyLimits}
+							class="mt-3 inline-flex min-h-9 cursor-pointer items-center justify-center gap-2 rounded-full border border-ink/15 px-4 text-xs font-black text-ink transition-colors hover:border-ink/25 hover:bg-ink/5 disabled:cursor-not-allowed disabled:opacity-45"
+						>
+							{#if resettingWeeklyLimits}
+								<LoaderCircle class="animate-spin" size={14} aria-hidden="true" />
+								Resetting
+							{:else}
+								Reset limits
+							{/if}
+						</button>
+					{/if}
+				</div>
 			</article>
 		</div>
 
-		<div class="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.9fr)]">
+		<div class="mt-10 grid gap-6 lg:grid-cols-2">
 			<section
 				class="rounded-lg border border-ink/10 bg-paper p-5 md:p-6"
 				aria-labelledby="saved-insights-title"
 			>
 				<div
-					class="flex flex-col gap-4 border-b border-ink/10 pb-5 md:flex-row md:items-center md:justify-between"
+					class="flex flex-col gap-4 border-b border-ink/10 pb-5 md:flex-row md:items-start md:justify-between"
 				>
 					<div>
 						<h2 id="saved-insights-title" class="font-display text-3xl font-black text-ink">
@@ -483,12 +725,19 @@
 					<button
 						type="button"
 						onclick={generateSummary}
-						disabled={generating || data.migrationPending || selectedInsightCount === 0}
-						class="inline-flex min-h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full bg-ink px-5 text-sm font-black whitespace-nowrap text-cream transition-colors hover:bg-ink/85 disabled:cursor-not-allowed disabled:opacity-50"
+						disabled={generating ||
+							data.migrationPending ||
+							!data.aiRecapConfigured ||
+							selectedInsightCount === 0 ||
+							selectedInsightCount > MAX_RECAP_TAKEAWAYS ||
+							weeklyRecapsExhausted}
+						class="inline-flex min-h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full bg-ink px-5 text-sm font-black whitespace-nowrap text-cream transition-colors hover:bg-ink/85 disabled:cursor-not-allowed disabled:opacity-50 md:mt-1"
 					>
 						{#if generating}
 							<LoaderCircle class="animate-spin" size={17} aria-hidden="true" />
 							Generating
+						{:else if !data.aiRecapConfigured}
+							AI unavailable
 						{:else}
 							<Plus size={17} aria-hidden="true" />
 							Create recap
@@ -515,7 +764,15 @@
 
 						<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 							<p class="text-sm font-bold text-ink/55">
-								<span class="font-black text-ink">{selectedInsightCount}</span> selected for recap
+								<span class="font-black text-ink">
+									{selectedInsightCount}/{MAX_RECAP_TAKEAWAYS}
+								</span>
+								selected for recap
+								{#if selectedInsightLimitReached}
+									<span class="text-brand-red-deep">/ limit reached</span>
+								{:else if selectedInsightCount > 0}
+									<span class="text-ink/35">/ {selectedInsightSlotsLeft} left</span>
+								{/if}
 								{#if takeawaySearch.trim()}
 									<span class="text-ink/35">
 										/ {filteredInsights.length} result{filteredInsights.length === 1 ? '' : 's'}
@@ -528,15 +785,16 @@
 									onclick={selectAllTakeaways}
 									class="inline-flex min-h-9 cursor-pointer items-center rounded-full border border-ink/15 px-4 text-xs font-black text-ink transition-colors hover:border-ink/25 hover:bg-ink/5"
 								>
-									Select all
+									Select up to {MAX_RECAP_TAKEAWAYS}
 								</button>
 								<button
 									type="button"
 									onclick={toggleFilteredTakeaways}
-									disabled={filteredInsights.length === 0}
+									disabled={filteredInsights.length === 0 ||
+										(!filteredActionUnselects && selectedInsightSlotsLeft === 0)}
 									class="inline-flex min-h-9 cursor-pointer items-center rounded-full border border-ink/15 px-4 text-xs font-black text-ink transition-colors hover:border-ink/25 hover:bg-ink/5 disabled:cursor-not-allowed disabled:opacity-45"
 								>
-									{allFilteredSelected ? 'Unselect results' : 'Select results'}
+									{filteredActionUnselects ? 'Unselect results' : 'Select results'}
 								</button>
 								<button
 									type="button"
@@ -575,6 +833,8 @@
 					<div class="mt-5 grid gap-4">
 						{#each filteredInsights as insight (insight.id)}
 							{@const isSelected = selectedInsightIds.includes(insight.id)}
+							{@const canSelectInsight = isSelected || !selectedInsightLimitReached}
+							{@const imageHref = imageHrefForInsight(insight)}
 							<article
 								class="rounded-md border bg-cream p-4 transition-colors {isSelected
 									? 'border-brand-amber/55'
@@ -584,33 +844,64 @@
 									<div
 										class="flex flex-wrap items-center gap-2 text-xs font-black tracking-[0.14em] text-ink/40 uppercase"
 									>
+										<span>{contentKindLabel(insight.contentKind)}</span>
+										<span aria-hidden="true">/</span>
 										<span>{insight.explainerSlug}</span>
 										<span aria-hidden="true">/</span>
 										<span>{insight.chapterId}</span>
 									</div>
-									<button
-										type="button"
-										data-delete-confirm-control="true"
-										onclick={() => requestDeleteInsight(insight.id)}
-										disabled={deletingInsightId === insight.id || data.migrationPending}
-										class={`group relative inline-flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${
-											deleteConfirmInsightId === insight.id
-												? 'bg-brand-red/10 text-brand-red-deep ring-1 ring-brand-red/25'
-												: 'text-ink/35 hover:bg-brand-red/10 hover:text-brand-red-deep'
-										}`}
-										aria-label={deleteConfirmInsightId === insight.id ? 'Confirm delete takeaway' : 'Delete takeaway'}
+									<div
+										class="flex shrink-0 items-center gap-1 rounded-full border border-ink/10 bg-paper/70 p-1"
+										aria-label="Takeaway actions"
 									>
-										{#if deletingInsightId === insight.id}
-											<LoaderCircle class="relative z-10 animate-spin" size={15} aria-hidden="true" />
-										{:else if deleteConfirmInsightId === insight.id}
-											<Check class="relative z-10" size={16} aria-hidden="true" />
-										{:else}
-											<Trash2 class="relative z-10" size={15} aria-hidden="true" />
-										{/if}
-									</button>
+										<button
+											type="button"
+											onclick={() => openTakeaway(insight.id)}
+											class="inline-flex size-8 cursor-pointer items-center justify-center rounded-full text-ink/45 transition-colors hover:bg-ink/5 hover:text-ink"
+											aria-label="Open takeaway"
+											title="View"
+										>
+											<Eye size={15} aria-hidden="true" />
+										</button>
+										<button
+											type="button"
+											data-delete-confirm-control="true"
+											onclick={() => requestDeleteInsight(insight.id)}
+											disabled={deletingInsightId === insight.id || data.migrationPending}
+											class={`group relative inline-flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${
+												deleteConfirmInsightId === insight.id
+													? 'bg-brand-red/10 text-brand-red-deep ring-1 ring-brand-red/25'
+													: 'text-ink/35 hover:bg-brand-red/10 hover:text-brand-red-deep'
+											}`}
+											aria-label={deleteConfirmInsightId === insight.id
+												? 'Confirm delete takeaway'
+												: 'Delete takeaway'}
+											title="Delete"
+										>
+											{#if deletingInsightId === insight.id}
+												<LoaderCircle
+													class="relative z-10 animate-spin"
+													size={15}
+													aria-hidden="true"
+												/>
+											{:else}
+												{#key deleteConfirmInsightId === insight.id}
+													<span
+														class="delete-confirm-tilt relative z-10 inline-flex size-4 items-center justify-center"
+													>
+														{#if deleteConfirmInsightId === insight.id}
+															<Check size={16} aria-hidden="true" />
+														{:else}
+															<Trash2 size={15} aria-hidden="true" />
+														{/if}
+													</span>
+												{/key}
+											{/if}
+										</button>
+									</div>
 								</div>
 								<blockquote
-									class="mt-3 border-l-4 border-brand-amber pl-4 text-base leading-7 text-ink/80"
+									class="takeaway-preview mt-3 border-l-4 border-brand-amber pl-4 text-base leading-7 text-ink/80"
 								>
 									{insight.selectedText}
 								</blockquote>
@@ -620,16 +911,42 @@
 										{insight.note}
 									</p>
 								{/if}
-								<div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+								{#if insight.contentJson?.csv}
+									<a
+										href={csvHref(insight.contentJson.csv)}
+										download={`${insight.explainerSlug}-${insight.chapterId}-${insight.stepId}.csv`}
+										class="mt-3 inline-flex min-h-8 items-center rounded-full border border-ink/10 px-3 text-xs font-black text-ink/55 transition-colors hover:border-brand-ocean/30 hover:bg-paper hover:text-ink"
+									>
+										Download CSV
+									</a>
+								{/if}
+								{#if imageHref}
+									<a
+										href={imageHref}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="mt-3 inline-flex min-h-8 max-w-full items-center gap-1.5 rounded-full border border-ink/10 px-3 text-xs font-black text-ink/55 transition-colors hover:border-brand-ocean/30 hover:bg-paper hover:text-ink"
+									>
+										<span>Show image</span>
+										<span class="truncate text-ink/40">{imageLabelForInsight(insight)}</span>
+										<ExternalLink size={12} aria-hidden="true" />
+									</a>
+								{/if}
+								<div
+									class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+								>
 									<p class="text-xs font-semibold text-ink/35">
 										{displayDate(insight.createdAt)}
 									</p>
 									<label
-										class="inline-flex w-fit cursor-pointer items-center gap-2 self-end text-xs font-black text-ink"
+										class="inline-flex w-fit items-center gap-2 self-end text-xs font-black text-ink {canSelectInsight
+											? 'cursor-pointer'
+											: 'cursor-not-allowed opacity-45'}"
 									>
 										<input
 											type="checkbox"
 											checked={isSelected}
+											disabled={!canSelectInsight}
 											onchange={() => toggleTakeaway(insight.id)}
 											class="size-4 rounded border-ink/25 text-ink focus:ring-brand-ocean"
 										/>
@@ -672,21 +989,6 @@
 					</span>
 				</div>
 
-				{#if actionMessage}
-					<p
-						class="mt-4 rounded-md bg-brand-forest/10 px-4 py-3 text-sm font-bold text-brand-forest"
-					>
-						{actionMessage}
-					</p>
-				{/if}
-				{#if actionError}
-					<p
-						class="mt-4 rounded-md bg-brand-red/10 px-4 py-3 text-sm font-bold text-brand-red-deep"
-					>
-						{actionError}
-					</p>
-				{/if}
-
 				{#if data.summaries.length}
 					<ul class="mt-5 space-y-3">
 						{#each data.summaries as summary, index (summary.id)}
@@ -710,26 +1012,33 @@
 											takeaway{summary.insightCount === 1 ? '' : 's'}
 										</span>
 									</button>
-									<div class="flex shrink-0 gap-1">
+									<div
+										class="flex shrink-0 items-center gap-1 rounded-full border border-ink/10 bg-paper/70 p-1"
+										aria-label="Recap actions"
+									>
 										<button
 											type="button"
 											onclick={() => openSummary(summary.id)}
-											class="inline-flex min-h-9 min-w-9 cursor-pointer items-center justify-center rounded-full text-ink/55 transition-colors hover:bg-paper hover:text-ink"
+											class="inline-flex size-8 cursor-pointer items-center justify-center rounded-full text-ink/45 transition-colors hover:bg-ink/5 hover:text-ink"
 											aria-label="Open recap"
+											title="View"
 										>
-											<Eye size={16} aria-hidden="true" />
+											<Eye size={15} aria-hidden="true" />
 										</button>
 										<button
 											type="button"
 											onclick={() => emailSummary(summary.id)}
-											disabled={emailingSummaryId === summary.id || data.migrationPending}
-											class="inline-flex min-h-9 min-w-9 cursor-pointer items-center justify-center rounded-full text-ink/55 transition-colors hover:bg-paper hover:text-ink disabled:cursor-not-allowed disabled:opacity-45"
+											disabled={emailingSummaryId === summary.id ||
+												data.migrationPending ||
+												weeklyEmailsExhausted}
+											class="inline-flex size-8 cursor-pointer items-center justify-center rounded-full text-ink/45 transition-colors hover:bg-ink/5 hover:text-ink disabled:cursor-not-allowed disabled:opacity-45"
 											aria-label="Email recap"
+											title="Email"
 										>
 											{#if emailingSummaryId === summary.id}
-												<LoaderCircle class="animate-spin" size={16} aria-hidden="true" />
+												<LoaderCircle class="animate-spin" size={15} aria-hidden="true" />
 											{:else}
-												<Mail size={16} aria-hidden="true" />
+												<Mail size={15} aria-hidden="true" />
 											{/if}
 										</button>
 										<button
@@ -737,19 +1046,34 @@
 											data-delete-confirm-control="true"
 											onclick={() => requestDeleteSummary(summary.id)}
 											disabled={deletingSummaryId === summary.id || data.migrationPending}
-											class={`relative inline-flex min-h-9 min-w-9 cursor-pointer items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${
+											class={`relative inline-flex size-8 cursor-pointer items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${
 												deleteConfirmSummaryId === summary.id
-													? 'bg-brand-red/10 text-brand-red-deep ring-1 ring-brand-red/30'
-													: 'text-ink/45 hover:bg-brand-red/10 hover:text-brand-red-deep'
+													? 'bg-brand-red/10 text-brand-red-deep ring-1 ring-brand-red/25'
+													: 'text-ink/35 hover:bg-brand-red/10 hover:text-brand-red-deep'
 											}`}
-											aria-label={deleteConfirmSummaryId === summary.id ? 'Confirm delete recap' : 'Delete recap'}
+											aria-label={deleteConfirmSummaryId === summary.id
+												? 'Confirm delete recap'
+												: 'Delete recap'}
+											title="Delete"
 										>
 											{#if deletingSummaryId === summary.id}
-												<LoaderCircle class="relative z-10 animate-spin" size={16} aria-hidden="true" />
-											{:else if deleteConfirmSummaryId === summary.id}
-												<Check class="relative z-10" size={17} aria-hidden="true" />
+												<LoaderCircle
+													class="relative z-10 animate-spin"
+													size={15}
+													aria-hidden="true"
+												/>
 											{:else}
-												<Trash2 class="relative z-10" size={16} aria-hidden="true" />
+												{#key deleteConfirmSummaryId === summary.id}
+													<span
+														class="delete-confirm-tilt relative z-10 inline-flex size-4 items-center justify-center"
+													>
+														{#if deleteConfirmSummaryId === summary.id}
+															<Check size={16} aria-hidden="true" />
+														{:else}
+															<Trash2 size={15} aria-hidden="true" />
+														{/if}
+													</span>
+												{/key}
 											{/if}
 										</button>
 									</div>
@@ -765,16 +1089,183 @@
 						compact shelf.
 					</p>
 				{/if}
-
 			</aside>
 		</div>
 	</div>
 </section>
 
-<Sheet bind:open={recapSheetOpen} title="Recap" resetKey={activeSummary?.id}>
+<Sheet
+	bind:open={takeawaySheetOpen}
+	title="Takeaway"
+	resetKey={activeInsight?.id}
+	defaultHeight={90}
+	minHeight={55}
+	maxHeight={96}
+>
+	{#if activeInsight}
+		{@const activeImageHref = imageHrefForInsight(activeInsight)}
+		{@const activeInsightSelected = selectedInsightIds.includes(activeInsight.id)}
+		{@const canSelectActiveInsight = activeInsightSelected || !selectedInsightLimitReached}
+		<div class="mx-auto max-w-5xl">
+			<div
+				class="flex flex-col gap-4 border-b border-ink/10 pb-5 sm:flex-row sm:items-start sm:justify-between"
+			>
+				<div class="min-w-0">
+					<p class="text-xs font-black tracking-[0.14em] text-ink/40 uppercase">
+						{contentKindLabel(activeInsight.contentKind)} / {explainerLabel(
+							activeInsight.explainerSlug
+						)}
+					</p>
+					<h3 class="mt-3 font-display text-3xl font-black text-ink">
+						{chapterLabel(activeInsight.chapterId)}
+					</h3>
+					<p class="mt-2 text-sm font-semibold text-ink/40">
+						{displayDate(activeInsight.createdAt)}
+					</p>
+				</div>
+				<div
+					class="flex w-fit items-center gap-1 rounded-full border border-ink/10 bg-paper/80 p-1"
+				>
+					<a
+						href={insightHref(activeInsight)}
+						class="inline-flex size-10 cursor-pointer items-center justify-center rounded-full text-ink/65 transition-colors hover:bg-ink/5 hover:text-ink"
+						aria-label="Open in explainer"
+						title="Open in explainer"
+					>
+						<ExternalLink size={15} aria-hidden="true" />
+					</a>
+					<button
+						type="button"
+						data-delete-confirm-control="true"
+						onclick={() => requestDeleteInsight(activeInsight.id)}
+						disabled={deletingInsightId === activeInsight.id || data.migrationPending}
+						class={`relative inline-flex size-10 cursor-pointer items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${
+							deleteConfirmInsightId === activeInsight.id
+								? 'bg-brand-red/10 text-brand-red-deep ring-1 ring-brand-red/25'
+								: 'text-brand-red-deep/75 hover:bg-brand-red/10 hover:text-brand-red-deep'
+						}`}
+						aria-label={deleteConfirmInsightId === activeInsight.id
+							? 'Confirm delete takeaway'
+							: 'Delete takeaway'}
+						title="Delete"
+					>
+						{#if deletingInsightId === activeInsight.id}
+							<LoaderCircle class="relative z-10 animate-spin" size={15} aria-hidden="true" />
+						{:else}
+							{#key deleteConfirmInsightId === activeInsight.id}
+								<span
+									class="delete-confirm-tilt relative z-10 inline-flex size-4 items-center justify-center"
+								>
+									{#if deleteConfirmInsightId === activeInsight.id}
+										<Check size={16} aria-hidden="true" />
+									{:else}
+										<Trash2 size={15} aria-hidden="true" />
+									{/if}
+								</span>
+							{/key}
+						{/if}
+					</button>
+				</div>
+			</div>
+
+			{#if activeImageHref}
+				<figure class="mt-6 overflow-hidden rounded-lg border border-ink/10 bg-paper">
+					<a href={activeImageHref} target="_blank" rel="noopener noreferrer" class="block">
+						<img
+							src={activeImageHref}
+							alt={imageAltForInsight(activeInsight)}
+							class="max-h-[56svh] w-full object-contain"
+						/>
+					</a>
+					<figcaption class="border-t border-ink/10 px-4 py-3 text-sm leading-6 text-ink/60">
+						<span class="font-black text-ink">{imageLabelForInsight(activeInsight)}</span>
+						{#if activeInsight.contentJson?.credit}
+							<span class="mt-1 block text-xs text-ink/45">{activeInsight.contentJson.credit}</span>
+						{/if}
+					</figcaption>
+				</figure>
+			{/if}
+
+			<SavedInsightVisual insight={activeInsight} />
+
+			<blockquote class="mt-6 border-l-4 border-brand-amber pl-5 text-lg leading-8 text-ink/80">
+				{activeInsight.selectedText}
+			</blockquote>
+
+			{#if activeInsight.note}
+				<p class="mt-5 rounded-md bg-paper px-4 py-3 text-sm leading-7 text-ink/65">
+					<span class="font-black text-ink">Note:</span>
+					{activeInsight.note}
+				</p>
+			{/if}
+
+			{#if showInsightMetadataCard(activeInsight)}
+				<div class="mt-6 rounded-md border border-ink/10 bg-paper px-4 py-3">
+					{#if activeInsight.contentJson?.label}
+						<p class="text-sm font-black text-ink">{activeInsight.contentJson.label}</p>
+					{/if}
+					{#if activeInsight.contentJson?.description}
+						<p class="mt-2 text-sm leading-7 text-ink/60">
+							{activeInsight.contentJson.description}
+						</p>
+					{/if}
+				</div>
+			{/if}
+
+			<div class="mt-6 flex flex-wrap items-center gap-2">
+				<label
+					class="inline-flex min-h-10 items-center gap-2 rounded-full border border-ink/10 px-4 text-sm font-black text-ink transition-colors hover:bg-ink/5 {canSelectActiveInsight
+						? 'cursor-pointer'
+						: 'cursor-not-allowed opacity-45'}"
+				>
+					<input
+						type="checkbox"
+						checked={activeInsightSelected}
+						disabled={!canSelectActiveInsight}
+						onchange={() => toggleTakeaway(activeInsight.id)}
+						class="size-4 rounded border-ink/25 text-ink focus:ring-brand-ocean"
+					/>
+					<span>Add to recap</span>
+				</label>
+				{#if activeInsight.contentJson?.csv}
+					<a
+						href={csvHref(activeInsight.contentJson.csv)}
+						download={`${activeInsight.explainerSlug}-${activeInsight.chapterId}-${activeInsight.stepId}.csv`}
+						class="inline-flex min-h-10 items-center rounded-full border border-ink/10 px-4 text-sm font-black text-ink/60 transition-colors hover:border-brand-ocean/30 hover:bg-paper hover:text-ink"
+					>
+						Download CSV
+					</a>
+				{/if}
+				{#if activeImageHref}
+					<a
+						href={activeImageHref}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="inline-flex min-h-10 max-w-full items-center gap-2 rounded-full border border-ink/10 px-4 text-sm font-black text-ink/60 transition-colors hover:border-brand-ocean/30 hover:bg-paper hover:text-ink"
+					>
+						<span>Show image</span>
+						<span class="truncate text-ink/40">{imageLabelForInsight(activeInsight)}</span>
+						<ExternalLink size={14} aria-hidden="true" />
+					</a>
+				{/if}
+			</div>
+		</div>
+	{/if}
+</Sheet>
+
+<Sheet
+	bind:open={recapSheetOpen}
+	title="Recap"
+	resetKey={activeSummary?.id}
+	defaultHeight={84}
+	minHeight={48}
+	maxHeight={94}
+>
 	{#if activeSummary}
-		<div class="mx-auto max-w-4xl">
-			<div class="grid gap-5 border-b border-ink/10 pb-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
+		<div class="mx-auto max-w-5xl">
+			<div
+				class="grid gap-5 border-b border-ink/10 pb-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-start"
+			>
 				<div class="min-w-0">
 					<p class="text-xs font-black tracking-[0.14em] text-ink/40 uppercase">
 						{activeSummary.provider} / {activeSummary.model}
@@ -810,7 +1301,9 @@
 					<button
 						type="button"
 						onclick={() => emailSummary(activeSummary.id)}
-						disabled={emailingSummaryId === activeSummary.id || data.migrationPending}
+						disabled={emailingSummaryId === activeSummary.id ||
+							data.migrationPending ||
+							weeklyEmailsExhausted}
 						class="inline-flex size-10 cursor-pointer items-center justify-center rounded-full text-ink/65 transition-colors hover:bg-ink/5 hover:text-ink disabled:cursor-not-allowed disabled:opacity-60"
 						aria-label="Email recap"
 						title="Email"
@@ -831,14 +1324,24 @@
 								? 'bg-brand-red/10 text-brand-red-deep ring-1 ring-brand-red/25'
 								: 'text-brand-red-deep/75 hover:bg-brand-red/10 hover:text-brand-red-deep'
 						}`}
-						aria-label={deleteConfirmSummaryId === activeSummary.id ? 'Confirm delete recap' : 'Delete recap'}
+						aria-label={deleteConfirmSummaryId === activeSummary.id
+							? 'Confirm delete recap'
+							: 'Delete recap'}
 					>
 						{#if deletingSummaryId === activeSummary.id}
 							<LoaderCircle class="relative z-10 animate-spin" size={15} aria-hidden="true" />
-						{:else if deleteConfirmSummaryId === activeSummary.id}
-							<Check class="relative z-10" size={16} aria-hidden="true" />
 						{:else}
-							<Trash2 class="relative z-10" size={15} aria-hidden="true" />
+							{#key deleteConfirmSummaryId === activeSummary.id}
+								<span
+									class="delete-confirm-tilt relative z-10 inline-flex size-4 items-center justify-center"
+								>
+									{#if deleteConfirmSummaryId === activeSummary.id}
+										<Check size={16} aria-hidden="true" />
+									{:else}
+										<Trash2 size={15} aria-hidden="true" />
+									{/if}
+								</span>
+							{/key}
 						{/if}
 					</button>
 				</div>
@@ -1032,3 +1535,36 @@
 		</div>
 	{/if}
 </Sheet>
+
+<style>
+	@keyframes delete-confirm-tilt {
+		0% {
+			opacity: 0.7;
+			transform: rotate(0deg) scale(0.94);
+		}
+		34% {
+			opacity: 1;
+			transform: rotate(5deg) scale(1.03);
+		}
+		68% {
+			transform: rotate(-5deg) scale(1);
+		}
+		100% {
+			opacity: 1;
+			transform: rotate(0deg) scale(1);
+		}
+	}
+
+	.delete-confirm-tilt {
+		transform-origin: 50% 60%;
+		animation: delete-confirm-tilt 280ms cubic-bezier(0.34, 1.56, 0.64, 1);
+	}
+
+	.takeaway-preview {
+		display: -webkit-box;
+		line-clamp: 4;
+		-webkit-line-clamp: 4;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+</style>

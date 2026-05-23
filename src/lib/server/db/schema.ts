@@ -92,6 +92,30 @@ export type InsightSummaryJson = {
 	}>;
 };
 
+export type SavedInsightContentKind =
+	| 'text'
+	| 'image'
+	| 'chart'
+	| 'stat'
+	| 'quote'
+	| 'source'
+	| 'dataset';
+
+export type SavedInsightContentJson = {
+	label?: string;
+	description?: string;
+	sourceId?: string;
+	sourceIds?: string[];
+	imageName?: string;
+	alt?: string;
+	caption?: string;
+	credit?: string;
+	chartType?: string;
+	unit?: string;
+	csv?: string;
+	data?: unknown;
+};
+
 export const savedInsight = pgTable(
 	'saved_insight',
 	{
@@ -104,6 +128,8 @@ export const savedInsight = pgTable(
 		stepId: text('step_id').notNull(),
 		selectedText: text('selected_text').notNull(),
 		surroundingText: text('surrounding_text').notNull(),
+		contentKind: text('content_kind').$type<SavedInsightContentKind>().notNull().default('text'),
+		contentJson: jsonb('content_json').$type<SavedInsightContentJson>(),
 		note: text('note'),
 		selectionHash: text('selection_hash').notNull(),
 		sourceHash: text('source_hash').notNull(),
@@ -274,12 +300,31 @@ export const insightEmailDelivery = pgTable(
 	]
 );
 
+export const aiUsageReset = pgTable(
+	'ai_usage_reset',
+	{
+		id: text('id').primaryKey(),
+		userId: text('user_id')
+			.notNull()
+			.references(() => user.id, { onDelete: 'cascade' }),
+		weekStart: timestamp('week_start').notNull(),
+		resetAt: timestamp('reset_at')
+			.$defaultFn(() => new Date())
+			.notNull()
+	},
+	(table) => [
+		uniqueIndex('ai_usage_reset_user_week_uidx').on(table.userId, table.weekStart),
+		index('ai_usage_reset_user_idx').on(table.userId)
+	]
+);
+
 export const userRelations = relations(user, ({ many }) => ({
 	sessions: many(session),
 	accounts: many(account),
 	savedInsights: many(savedInsight),
 	insightSummaries: many(insightSummary),
-	insightEmailDeliveries: many(insightEmailDelivery)
+	insightEmailDeliveries: many(insightEmailDelivery),
+	aiUsageResets: many(aiUsageReset)
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -311,6 +356,13 @@ export const insightSummaryRelations = relations(insightSummary, ({ one, many })
 	}),
 	emailDeliveries: many(insightEmailDelivery),
 	sources: many(insightSummarySource)
+}));
+
+export const aiUsageResetRelations = relations(aiUsageReset, ({ one }) => ({
+	user: one(user, {
+		fields: [aiUsageReset.userId],
+		references: [user.id]
+	})
 }));
 
 export const sourceDocumentRelations = relations(sourceDocument, ({ many }) => ({

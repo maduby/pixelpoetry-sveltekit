@@ -1,15 +1,26 @@
 import { createHash } from 'node:crypto';
 import { generateText, Output } from 'ai';
 import { z } from 'zod';
+import {
+	MAX_RECAP_DATA_ROWS,
+	MAX_RECAP_INPUT_CHARS,
+	MAX_RECAP_TAKEAWAY_CHARS
+} from '$lib/insights/recap-limits';
 import { getAiModelConfig } from './provider';
-import type { InsightSummaryJson } from '$lib/server/db/schema';
+import type {
+	InsightSummaryJson,
+	SavedInsightContentJson,
+	SavedInsightContentKind
+} from '$lib/server/db/schema';
 import type { GroundingSource } from '$lib/server/sources/source-retrieval';
 
-export const INSIGHT_SUMMARY_PROMPT_VERSION = 'saved-takeaways-summary-v2-grounded';
+export const INSIGHT_SUMMARY_PROMPT_VERSION = 'saved-takeaways-summary-v3-concise-british';
 
 export interface SummaryInputInsight {
 	id: string;
 	selectedText: string;
+	contentKind?: SavedInsightContentKind;
+	contentJson?: SavedInsightContentJson | null;
 	note: string | null;
 	explainerSlug: string;
 	chapterId: string;
@@ -25,24 +36,35 @@ export interface GeneratedInsightSummary {
 	inputHash: string;
 }
 
+function boundedString(min: number, max: number) {
+	return z
+		.string()
+		.transform((value) => {
+			const trimmed = value.trim();
+			if (trimmed.length <= max) return trimmed;
+			return `${trimmed.slice(0, max - 1).trimEnd()}…`;
+		})
+		.pipe(z.string().min(min).max(max));
+}
+
 const summarySchema = z.object({
-	title: z.string().min(3).max(90),
-	overview: z.string().min(20).max(900),
-	keyTakeaways: z.array(z.string().min(8).max(240)).min(3).max(7),
-	memoryHooks: z.array(z.string().min(6).max(180)).min(2).max(6),
-	shareableSummary: z.string().min(20).max(700),
-	suggestedNextRead: z.string().min(3).max(180).optional(),
+	title: boundedString(3, 80),
+	overview: boundedString(20, 520),
+	keyTakeaways: z.array(boundedString(8, 210)).min(3).max(5),
+	memoryHooks: z.array(boundedString(6, 150)).min(2).max(3),
+	shareableSummary: boundedString(20, 360),
+	suggestedNextRead: boundedString(3, 180).optional(),
 	sources: z
 		.array(
 			z.object({
-				sourceId: z.string().min(2).max(120),
-				short: z.string().min(1).max(180),
-				url: z.string().max(600).optional(),
-				support: z.string().min(1).max(260),
-				insightIds: z.array(z.string().min(1).max(120)).min(1).max(12)
+				sourceId: boundedString(2, 120),
+				short: boundedString(1, 180),
+				url: boundedString(1, 600).optional(),
+				support: boundedString(1, 200),
+				insightIds: z.array(boundedString(1, 120)).min(1).max(12)
 			})
 		)
-		.max(8)
+		.max(5)
 		.optional()
 });
 
@@ -94,6 +116,65 @@ function normalizeSummaryShape(value: unknown): unknown {
 	return summary;
 }
 
+function truncateText(value: string, max: number): string {
+	const trimmed = value.trim().replace(/\s+/g, ' ');
+	if (trimmed.length <= max) return trimmed;
+	return `${trimmed.slice(0, max - 1).trimEnd()}…`;
+}
+
+function compactAsset(asset: SavedInsightContentJson | null | undefined) {
+	if (!asset) return undefined;
+
+	const compact: Record<string, unknown> = {};
+	for (const key of [
+		'label',
+		'description',
+		'sourceId',
+		'sourceIds',
+		'imageName',
+		'alt',
+		'caption',
+		'credit',
+		'chartType',
+		'unit',
+		'kind'
+	]) {
+		if (asset[key as keyof SavedInsightContentJson] !== undefined) {
+			compact[key] = asset[key as keyof SavedInsightContentJson];
+		}
+	}
+
+	if (Array.isArray(asset.data)) {
+		compact.dataRowCount = asset.data.length;
+		compact.dataPreview = asset.data.slice(0, MAX_RECAP_DATA_ROWS);
+	}
+	if (asset.csv) compact.csvAvailable = true;
+
+	return compact;
+}
+
+function compactInsightsForPrompt(insights: SummaryInputInsight[]) {
+	const passageBudget = Math.max(
+		200,
+		Math.min(MAX_RECAP_TAKEAWAY_CHARS, Math.floor(MAX_RECAP_INPUT_CHARS / insights.length))
+	);
+
+	return insights.map((insight) => {
+		const passagePreview = truncateText(insight.selectedText, passageBudget);
+		return {
+			insightId: insight.id,
+			contentKind: insight.contentKind ?? 'text',
+			passagePreview,
+			passageWasShortened: passagePreview.length < insight.selectedText.trim().length,
+			asset: compactAsset(insight.contentJson),
+			note: insight.note ? truncateText(insight.note, 500) : null,
+			explainer: insight.explainerSlug,
+			chapter: insight.chapterId,
+			step: insight.stepId
+		};
+	});
+}
+
 export function hashInsightInput(value: unknown): string {
 	return createHash('sha256').update(JSON.stringify(value)).digest('hex');
 }
@@ -111,15 +192,10 @@ export async function generateInsightSummary(
 	}
 
 	const modelConfig = getAiModelConfig();
+	const compactedInsights = compactInsightsForPrompt(insights);
 	const inputHash = hashInsightInput({
 		promptVersion: INSIGHT_SUMMARY_PROMPT_VERSION,
-		insights: insights.map((insight) => ({
-			selectedText: insight.selectedText,
-			note: insight.note,
-			explainerSlug: insight.explainerSlug,
-			chapterId: insight.chapterId,
-			stepId: insight.stepId
-		})),
+		insights: compactedInsights,
 		sources: groundingSources.map((source) => ({
 			sourceChunkId: source.sourceChunkId,
 			sourceId: source.sourceId,
@@ -133,13 +209,21 @@ export async function generateInsightSummary(
 		'Use only the saved takeaway passages and reader notes provided.',
 		'Use only the allowed source snippets when grounding or citing evidence.',
 		'Do not invent facts, citations, source IDs, URLs, or claims beyond the provided text.',
-		'Write in a warm, concise editorial voice.',
+		'Write in warm, concise British English.',
+		'Use British spelling and phrasing where it matters, for example ageing, behaviour, programme, sceptical.',
 		'The output is private to the logged-in reader.'
 	].join(' ');
 	const allowedSources = summarizeGroundingSources(groundingSources);
 	const prompt = [
 		'Create a personalised recap from these saved takeaways.',
-		'Prioritise what the reader appears to care about based on both selected text and notes.',
+		'Each passagePreview may be shortened from the full private saved takeaway. Use asset metadata and notes to preserve intent when text is clipped.',
+		'Takeaways may be text, images, charts, stats, quotes, datasets, or sources. Treat visual/data takeaways as first-class reader interests, not as captions only.',
+		'Use contentKind and contentJson to understand whether a takeaway came from prose, an image, a chart, source evidence, or downloadable data.',
+		'Prioritise what the reader appears to care about based on selected text, visual/data context, and notes.',
+		'Be concise: overview 2-3 sentences; keyTakeaways 3-5 bullets; memoryHooks 2-3 short hooks; shareableSummary 2 sentences maximum.',
+		'Avoid duplication across sections. If an idea appears in the overview, do not repeat it in the same wording in the key takeaways or memory hooks.',
+		'Merge repeated saved takeaways into one point. Do not list the same image, quote, statistic, or headline twice.',
+		'Ignore obvious clipped fragments unless contentJson supplies enough context to repair them. Do not quote broken text fragments.',
 		'When a source is useful, cite it only by including it in the `sources` array.',
 		'Only use source IDs from allowedSources. If no source snippet supports a point, leave sources empty rather than guessing.',
 		'Do not mention analytics, prompts, models, or implementation details.',
@@ -151,18 +235,7 @@ export async function generateInsightSummary(
 		JSON.stringify(allowedSources, null, 2),
 		'',
 		'savedTakeaways:',
-		JSON.stringify(
-			insights.map((insight) => ({
-				insightId: insight.id,
-				passage: insight.selectedText,
-				note: insight.note,
-				explainer: insight.explainerSlug,
-				chapter: insight.chapterId,
-				step: insight.stepId
-			})),
-			null,
-			2
-		)
+		JSON.stringify(compactedInsights, null, 2)
 	].join('\n');
 
 	const summary =

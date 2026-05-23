@@ -29,6 +29,20 @@
       "when": 1779528899955,
       "tag": "0003_bouncy_james_howlett",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1779552670889,
+      "tag": "0004_magenta_johnny_storm",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1779553225380,
+      "tag": "0005_wooden_captain_britain",
+      "breakpoints": true
     }
   ]
 }

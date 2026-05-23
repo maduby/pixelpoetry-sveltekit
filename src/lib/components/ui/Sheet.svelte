@@ -20,6 +20,9 @@
 		open?: boolean;
 		title?: string;
 		resetKey?: string | number | null;
+		defaultHeight?: number;
+		minHeight?: number;
+		maxHeight?: number;
 		children: Snippet;
 		class?: string;
 	}
@@ -28,6 +31,9 @@
 		open = $bindable(false),
 		title,
 		resetKey = null,
+		defaultHeight = 60,
+		minHeight = 25,
+		maxHeight = 92,
 		children,
 		class: className
 	}: Props = $props();
@@ -40,12 +46,9 @@
 	// so close() isn't called until after the slide-out animation finishes.
 	let isVisible = $state(false);
 
-	const defaultHeight = 60; // initial height (vh)
-	const minHeight = 25;
-	const maxHeight = 92;
 	const closeThreshold = 18; // drag below this to dismiss
 
-	let panelHeight = $state(defaultHeight);
+	let panelHeight = $state(0);
 	let isDragging = $state(false);
 	let dragStartY = 0;
 	let dragStartHeight = 0;

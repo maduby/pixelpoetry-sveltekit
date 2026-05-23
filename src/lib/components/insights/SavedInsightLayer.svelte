@@ -23,15 +23,23 @@
 		stepId: string;
 		selectedText: string;
 		surroundingText: string;
+		contentKind?: 'text' | 'image' | 'chart' | 'stat' | 'quote' | 'source' | 'dataset';
+		contentJson?: Record<string, unknown> | null;
 	}
 
 	const user = $derived(page.data.user as UserSummary | null | undefined);
 
 	let payload = $state<SelectionPayload | null>(null);
+	let takeawayAnchor = $state<{ x: number; y: number } | null>(null);
 	let saving = $state(false);
 	let saved = $state(false);
 	let selectionTimer: number | undefined;
 	let lastSelectionKey = '';
+	const timedToastOptions = {
+		duration: 5200,
+		closeButton: true,
+		class: 'timed-toast'
+	};
 
 	onDestroy(() => {
 		if (browser) window.clearTimeout(selectionTimer);
@@ -42,6 +50,19 @@
 			(rect) => rect.width > 0 && rect.height > 0
 		);
 		return visibleRects.at(-1) ?? range.getBoundingClientRect();
+	}
+
+	function parseContentJson(source: HTMLElement): Record<string, unknown> | null {
+		const raw = source.dataset.insightContentJson;
+		if (!raw) return null;
+		try {
+			const parsed = JSON.parse(raw);
+			return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+				? (parsed as Record<string, unknown>)
+				: null;
+		} catch {
+			return null;
+		}
 	}
 
 	function sourcePayload(source: HTMLElement, selectedText: string): SelectionPayload | null {
@@ -63,7 +84,9 @@
 			chapterId: source.dataset.insightChapter,
 			stepId: source.dataset.insightStep,
 			selectedText,
-			surroundingText
+			surroundingText,
+			contentKind: (source.dataset.insightContentKind as SelectionPayload['contentKind']) ?? 'text',
+			contentJson: parseContentJson(source)
 		};
 	}
 
@@ -109,12 +132,13 @@
 		return Array.from(sources);
 	}
 
-	function setPayload(next: SelectionPayload) {
+	function setPayload(next: SelectionPayload, anchor: { x: number; y: number } | null = null) {
 		const selectionKey = [next.explainerSlug, next.chapterId, next.stepId, next.selectedText].join(
 			'\n'
 		);
-		if (selectionKey === lastSelectionKey) return;
+		if (selectionKey === lastSelectionKey && anchor === takeawayAnchor) return;
 		lastSelectionKey = selectionKey;
+		takeawayAnchor = anchor;
 		payload = next;
 		saved = false;
 		posthog.capture('insight_selection_started', {
@@ -189,7 +213,9 @@
 		event.preventDefault();
 		document.getSelection()?.removeAllRanges();
 		if (saving) return;
-		setPayload(next);
+		const x = Math.min(Math.max(event.clientX, 12), window.innerWidth - 220);
+		const y = Math.min(Math.max(event.clientY, 12), window.innerHeight - 84);
+		setPayload(next, { x, y });
 	}
 
 	function scheduleSelectionUpdate() {
@@ -202,6 +228,7 @@
 		if (!browser) return;
 		if (!document.getSelection()?.toString().trim() && !saving && !saved) {
 			payload = null;
+			takeawayAnchor = null;
 			lastSelectionKey = '';
 		}
 	}
@@ -225,6 +252,7 @@
 			return;
 		}
 		payload = null;
+		takeawayAnchor = null;
 		lastSelectionKey = '';
 	}
 
@@ -271,6 +299,8 @@
 					stepId: payload.stepId,
 					selectedText: payload.selectedText,
 					surroundingText: payload.surroundingText,
+					contentKind: payload.contentKind ?? 'text',
+					contentJson: payload.contentJson ?? null,
 					note: null
 				})
 			});
@@ -287,10 +317,11 @@
 				step_id: payload.stepId,
 				selection_length: payload.selectedText.length
 			});
-			toast.success('Packed into your takeaways');
+			toast.success('Packed into your takeaways', timedToastOptions);
 			saved = true;
 			window.setTimeout(() => {
 				payload = null;
+				takeawayAnchor = null;
 				saved = false;
 				lastSelectionKey = '';
 				document.getSelection()?.removeAllRanges();
@@ -301,10 +332,12 @@
 			toast.error(
 				reason === 'migration_pending'
 					? 'Saved takeaways need the database migration first'
-					: 'Could not pack that takeaway'
+					: 'Could not pack that takeaway',
+				timedToastOptions
 			);
 			if (reason === 'migration_pending') {
 				payload = null;
+				takeawayAnchor = null;
 				lastSelectionKey = '';
 				document.getSelection()?.removeAllRanges();
 			}
@@ -331,9 +364,13 @@
 {#if payload}
 	<div
 		data-takeaway-action="true"
-		class="takeaway-bar fixed inset-x-0 bottom-0 z-[100] mx-auto w-full sm:inset-x-4 sm:bottom-4 sm:max-w-max"
+		class="takeaway-bar fixed z-[100] w-full {takeawayAnchor
+			? 'takeaway-context max-w-max'
+			: 'inset-x-0 bottom-0 mx-auto sm:inset-x-4 sm:bottom-4 sm:max-w-max'}"
 		class:takeaway-saving={saving}
 		class:takeaway-saved={saved}
+		style:left={takeawayAnchor ? `${takeawayAnchor.x}px` : undefined}
+		style:top={takeawayAnchor ? `${takeawayAnchor.y}px` : undefined}
 		role="dialog"
 		aria-modal="false"
 		aria-label="Selected text takeaway action"
@@ -394,8 +431,28 @@
 	.takeaway-bar {
 		--takeaway-bg: var(--color-ink);
 		--takeaway-fg: var(--color-cream);
+		--takeaway-transform: translateY(0);
 		padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+		transform: var(--takeaway-transform);
 		animation: takeaway-pop 180ms cubic-bezier(0.22, 1, 0.36, 1);
+	}
+
+	.takeaway-context {
+		--takeaway-transform: translate(0.5rem, -50%);
+		padding-bottom: 0;
+	}
+
+	.takeaway-context .takeaway-panel {
+		border-radius: 9999px;
+		padding: 0;
+	}
+
+	.takeaway-context .takeaway-panel > div:first-child {
+		display: none;
+	}
+
+	.takeaway-context .takeaway-panel > div:last-child {
+		padding-top: 0;
 	}
 
 	.takeaway-button {
@@ -456,23 +513,23 @@
 	@keyframes takeaway-pop {
 		from {
 			opacity: 0;
-			transform: translateY(0.75rem) scale(0.98);
+			transform: var(--takeaway-transform) translateY(0.25rem) scale(0.98);
 		}
 		to {
 			opacity: 1;
-			transform: translateY(0) scale(1);
+			transform: var(--takeaway-transform) translateY(0) scale(1);
 		}
 	}
 
 	@keyframes takeaway-packed {
 		0% {
-			transform: scale(1);
+			transform: var(--takeaway-transform) scale(1);
 		}
 		45% {
-			transform: scale(1.02);
+			transform: var(--takeaway-transform) scale(1.02);
 		}
 		100% {
-			transform: scale(1);
+			transform: var(--takeaway-transform) scale(1);
 		}
 	}
 

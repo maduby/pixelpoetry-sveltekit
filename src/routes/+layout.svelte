@@ -89,4 +89,37 @@
 		margin-inline: auto !important;
 		transform: none !important;
 	}
+
+	:global([data-sonner-toast].timed-toast) {
+		overflow: hidden;
+	}
+
+	:global([data-sonner-toast].timed-toast::after) {
+		position: absolute;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		height: 0.18rem;
+		background: color-mix(in oklab, var(--color-ink) 72%, var(--color-brand-ocean));
+		content: '';
+		transform-origin: left center;
+		animation: toast-countdown 5200ms linear forwards;
+	}
+
+	:global([data-sonner-toast][data-type='success'].timed-toast::after) {
+		background: var(--color-brand-forest);
+	}
+
+	:global([data-sonner-toast][data-type='error'].timed-toast::after) {
+		background: var(--color-brand-red);
+	}
+
+	@keyframes toast-countdown {
+		from {
+			transform: scaleX(1);
+		}
+		to {
+			transform: scaleX(0);
+		}
+	}
 </style>

@@ -1,8 +1,11 @@
 import { json, error } from '@sveltejs/kit';
 import { and, desc, eq, inArray } from 'drizzle-orm';
 import { z } from 'zod';
+import { MAX_RECAP_TAKEAWAYS } from '$lib/insights/recap-limits';
 import { db, schema } from '$lib/server/db';
 import { generateInsightSummary } from '$lib/server/ai/insight-summary';
+import { isAiProviderConfigured } from '$lib/server/ai/provider';
+import { getWeeklyUsageForUser, WEEKLY_RECAP_LIMIT } from '$lib/server/ai/weekly-limits';
 import {
 	attachSourcesToSummary,
 	ensureSourceMatchesForInsights
@@ -11,15 +14,34 @@ import type { RequestHandler } from './$types';
 
 const summaryRequestSchema = z.object({
 	explainerSlug: z.string().min(1).max(80).optional(),
-	insightIds: z.array(z.string().min(1).max(120)).min(1).max(100).optional()
+	insightIds: z.array(z.string().min(1).max(120)).min(1).max(MAX_RECAP_TAKEAWAYS).optional()
 });
 
 const MAX_RECAPS_PER_USER = 5;
 
 export const POST: RequestHandler = async ({ locals, request }) => {
 	if (!locals.user) error(401, 'Log in to generate saved-insight summaries.');
+	if (!isAiProviderConfigured()) {
+		error(503, 'AI recap generation needs provider credentials before it can run locally.');
+	}
 
-	const parsed = summaryRequestSchema.safeParse(await request.json().catch(() => ({})));
+	const weeklyUsage = await getWeeklyUsageForUser(locals.user.id);
+	if (weeklyUsage.recapsUsed >= WEEKLY_RECAP_LIMIT) {
+		error(429, 'You have used all 5 recap generations for this week.');
+	}
+
+	const requestBody = await request.json().catch(() => ({}));
+	if (
+		requestBody &&
+		typeof requestBody === 'object' &&
+		'insightIds' in requestBody &&
+		Array.isArray(requestBody.insightIds) &&
+		requestBody.insightIds.length > MAX_RECAP_TAKEAWAYS
+	) {
+		error(400, `Choose up to ${MAX_RECAP_TAKEAWAYS} takeaways for one recap.`);
+	}
+
+	const parsed = summaryRequestSchema.safeParse(requestBody);
 	if (!parsed.success) error(400, 'Invalid summary request.');
 
 	const insights = await db
@@ -40,6 +62,9 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 	if (parsed.data.insightIds && insights.length !== new Set(parsed.data.insightIds).size) {
 		error(400, 'One or more selected takeaways could not be found.');
 	}
+	if (insights.length > MAX_RECAP_TAKEAWAYS) {
+		error(400, `Choose up to ${MAX_RECAP_TAKEAWAYS} takeaways for one recap.`);
+	}
 
 	const sourceMatches = await ensureSourceMatchesForInsights(db, insights).catch((err: unknown) => {
 		console.warn('Saved takeaways source grounding failed; generating recap without sources.', err);
@@ -48,7 +73,7 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 
 	const generated = await generateInsightSummary(insights, sourceMatches).catch((err: unknown) => {
 		console.error('Saved takeaways summary generation failed', err);
-		error(503, 'AI recap generation is not configured or temporarily unavailable.');
+		error(503, 'The AI provider did not complete the recap. Try again in a moment.');
 	});
 	const explainerSlug =
 		parsed.data.explainerSlug ??

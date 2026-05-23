@@ -1,6 +1,8 @@
 import { redirect } from '@sveltejs/kit';
 import { and, desc, eq, inArray } from 'drizzle-orm';
 import { db, schema } from '$lib/server/db';
+import { isAiProviderConfigured } from '$lib/server/ai/provider';
+import { canResetWeeklyLimits, getWeeklyUsageForUser } from '$lib/server/ai/weekly-limits';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
@@ -10,7 +12,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	}
 
 	let migrationPending = false;
-	const [insights, summaries] = await Promise.all([
+	const [insights, summaries, weeklyUsage] = await Promise.all([
 		db
 			.select()
 			.from(schema.savedInsight)
@@ -22,11 +24,26 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			.from(schema.insightSummary)
 			.where(eq(schema.insightSummary.userId, locals.user.id))
 			.orderBy(desc(schema.insightSummary.createdAt))
-			.limit(5)
+			.limit(5),
+		getWeeklyUsageForUser(locals.user.id)
 	]).catch((err: unknown) => {
 		if (isMissingAiTableError(err)) {
 			migrationPending = true;
-			return [[], []] as const;
+			return [
+				[],
+				[],
+				{
+					weekStart: new Date(),
+					nextWeekStart: new Date(),
+					recapLimit: 5,
+					emailLimit: 5,
+					recapsUsed: 0,
+					emailsUsed: 0,
+					recapsLeft: 0,
+					emailsLeft: 0,
+					resetAt: null
+				}
+			] as const;
 		}
 		throw err;
 	});
@@ -82,6 +99,14 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			image: locals.user.image
 		},
 		migrationPending,
+		aiRecapConfigured: isAiProviderConfigured(),
+		weeklyUsage: {
+			...weeklyUsage,
+			weekStart: weeklyUsage.weekStart.toISOString(),
+			nextWeekStart: weeklyUsage.nextWeekStart.toISOString(),
+			resetAt: weeklyUsage.resetAt?.toISOString() ?? null
+		},
+		canResetWeeklyLimits: canResetWeeklyLimits(locals.user.email),
 		insights: insights.map((insight) => ({
 			...insight,
 			createdAt: insight.createdAt.toISOString(),
@@ -109,6 +134,7 @@ function isMissingAiTableError(err: unknown): boolean {
 		message.includes('source_chunk') ||
 		message.includes('saved_insight_source_match') ||
 		message.includes('insight_summary_source') ||
+		message.includes('ai_usage_reset') ||
 		(message.includes('relation') && message.includes('does not exist'))
 	);
 }

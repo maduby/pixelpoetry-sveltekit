@@ -12,6 +12,10 @@ const saveInsightSchema = z.object({
 	stepId: z.string().min(1).max(120),
 	selectedText: z.string().min(3).max(4000),
 	surroundingText: z.string().min(3).max(12000),
+	contentKind: z
+		.enum(['text', 'image', 'chart', 'stat', 'quote', 'source', 'dataset'])
+		.default('text'),
+	contentJson: z.record(z.string(), z.unknown()).optional().nullable(),
 	note: z.string().max(2000).optional().nullable()
 });
 
@@ -60,6 +64,8 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 		stepId: parsed.data.stepId,
 		selectedText,
 		surroundingText,
+		contentKind: parsed.data.contentKind,
+		contentJson: parsed.data.contentJson ?? null,
 		note,
 		selectionHash: hashText(
 			[
