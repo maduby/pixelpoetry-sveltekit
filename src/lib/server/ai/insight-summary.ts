@@ -227,6 +227,7 @@ export async function generateInsightSummary(
 		'When a source is useful, cite it only by including it in the `sources` array.',
 		'Only use source IDs from allowedSources. If no source snippet supports a point, leave sources empty rather than guessing.',
 		'Do not mention analytics, prompts, models, or implementation details.',
+		'Return valid JSON only. Do not wrap it in Markdown, prose, or code fences.',
 		'Return only a JSON object with this shape:',
 		'{"title":"string","overview":"string","keyTakeaways":["string"],"memoryHooks":["string"],"shareableSummary":"string","suggestedNextRead":"string","sources":[{"sourceId":"string","short":"string","url":"string","support":"string","insightIds":["string"]}]}',
 		'Both keyTakeaways and memoryHooks must be JSON arrays of strings, never a single string.',
@@ -238,31 +239,39 @@ export async function generateInsightSummary(
 		JSON.stringify(compactedInsights, null, 2)
 	].join('\n');
 
+	const generateStructuredSummary = async () =>
+		(
+			await generateText({
+				model: modelConfig.modelRef,
+				output: Output.object({ schema: summarySchema }),
+				system,
+				prompt,
+				maxOutputTokens: 1800
+			})
+		).output;
+
 	const summary =
 		modelConfig.provider === 'minimax'
-			? summarySchema.parse(
-					normalizeSummaryShape(
-						extractJsonObject(
-							(
-								await generateText({
-									model: modelConfig.modelRef,
-									system,
-									prompt,
-									maxOutputTokens: 1800,
-									providerOptions: { minimax: { reasoning_split: true } }
-								})
-							).text
-						)
-					)
-				)
-			: (
-					await generateText({
+			? await (async () => {
+					const response = await generateText({
 						model: modelConfig.modelRef,
-						output: Output.object({ schema: summarySchema }),
 						system,
-						prompt
-					})
-				).output;
+						prompt,
+						maxOutputTokens: 1800,
+						providerOptions: { minimax: { reasoning_split: true } }
+					});
+
+					try {
+						return summarySchema.parse(normalizeSummaryShape(extractJsonObject(response.text)));
+					} catch (err) {
+						console.warn(
+							'MiniMax returned malformed recap JSON; retrying with structured output.',
+							err
+						);
+						return generateStructuredSummary();
+					}
+				})()
+			: await generateStructuredSummary();
 
 	return {
 		summary,
