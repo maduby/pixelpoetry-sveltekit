@@ -321,6 +321,9 @@
 	}
 
 	function summaryErrorMessage(reason: string): string {
+		if (reason === 'Failed to fetch' || reason === 'fetch_failed') {
+			return 'Could not reach the recap service. Refresh and try again.';
+		}
 		if (
 			reason === 'weekly_limit' ||
 			reason === 'You have used all 5 recap generations for this week.'
@@ -585,11 +588,18 @@
 		resettingWeeklyLimits = true;
 		try {
 			const response = await fetch('/api/ai/insights/limits/reset', { method: 'POST' });
-			if (!response.ok) throw new Error('request_failed');
+			if (!response.ok) throw new Error(await errorMessageFromResponse(response));
 			notifySuccess('Weekly limits reset for testing.');
-			await invalidateAll();
-		} catch {
-			notifyError('Could not reset weekly limits just now.');
+			await invalidateAll().catch(() => {
+				notifyError('Weekly limits were reset, but the account view did not refresh.');
+			});
+		} catch (err) {
+			const reason = err instanceof Error ? err.message : 'request_failed';
+			notifyError(
+				reason === 'Failed to fetch'
+					? 'Could not reach the weekly-limit reset service. Refresh and try again.'
+					: reason || 'Could not reset weekly limits just now.'
+			);
 		} finally {
 			resettingWeeklyLimits = false;
 		}
