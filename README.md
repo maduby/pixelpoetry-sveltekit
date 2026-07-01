@@ -3,18 +3,40 @@
 > Evidence-led scrollytelling essays on the things that quietly shape modern life.
 > Live at [pixelpoetry.dev](https://pixelpoetry.dev).
 
-A growing library of immersive, chapter-by-chapter web essays. Each essay ("explainer") lives at `/explainers/<slug>` and is backed by peer-reviewed sources, original data visualisations, and progressive, motion-respectful animations.
+Pixel Poetry is a public-interest editorial platform for immersive, evidence-led web essays. It combines long-form writing, structured source material, data visualisation, responsive interfaces, and motion-respectful scrollytelling in a reusable SvelteKit application.
 
-The platform was ported from the standalone [Ultra-Processed](https://ultra-processed.vercel.app) project and refactored into a multi-essay shell so future stories can be added with a single new route folder and a single new data folder.
+The project is designed as a maintainable publishing system, not a one-off page. Each essay lives in its own typed data module, with chapters, sources, terms, images, visualisations, metadata, and route wiring kept explicit and repeatable.
 
-## Published / planned
+## Why this project matters
+
+Pixel Poetry demonstrates the kind of product engineering I enjoy most:
+
+- **Public-interest knowledge work** - explaining complex topics clearly for broad audiences.
+- **Reusable content architecture** - one shared application shell for multiple evidence-led essays.
+- **Accessible interactive storytelling** - responsive layouts, reduced-motion awareness, readable typography, and progressive enhancement.
+- **Data and source discipline** - structured sources, editorial notes, charts, and research material kept close to the content.
+- **Modern frontend engineering** - SvelteKit, TypeScript, Tailwind, GSAP, Observable Plot, d3, Vercel, and cookie-free analytics.
+
+For a quick review, start with the live site, then inspect the explainer data model under `src/lib/explainers/` and the site-wide index in `src/lib/data/explainers.ts`.
+
+## Published essays
 
 | Slug | Status | One-liner |
 |------|--------|-----------|
-| `ultra-processed` | Published | The food that isn't food — and what it's doing to us. |
-| `longevity` | Planned | What actually moves the needle on a longer, healthier life. |
+| `ultra-processed` | Published | The food that isn't food - and what it's doing to us. |
+| `longevity` | Published | What actually moves the needle on a longer, healthier life. |
 
 Canonical list lives in [`src/lib/data/explainers.ts`](src/lib/data/explainers.ts).
+
+## Engineering highlights
+
+- Multi-essay architecture: add a new essay with one route folder, one data folder, and one index entry.
+- Typed editorial model for chapters, steps, statistics, quotes, terms, sources, and visualisations.
+- Shared explainer context so navigation, progress, source sheets, charts, share UI, and footer read from the active essay.
+- Cookie-free PostHog analytics wrapper for privacy-conscious product insight.
+- Better Auth, Neon Postgres, and Drizzle support account/member experiments without coupling editorial content to auth state.
+- Self-hosted fonts and generated image manifests for predictable rendering and performance.
+- Agent-facing project memory and skills under `docs/ai/` and `.cursor/skills/` to keep repeated editorial workflows consistent.
 
 ## Stack
 
@@ -258,8 +280,7 @@ This project is editorial. Every quoted statistic cites a peer-reviewed paper, a
 
 ## Licence
 
-Code: MIT (see [`LICENSE`](LICENSE) — to be added).
-Editorial content & images: all rights reserved.
+No explicit open-source licence is granted until a `LICENSE` file is added. Editorial content and images are all rights reserved.
 
 ## Maintainer
 
